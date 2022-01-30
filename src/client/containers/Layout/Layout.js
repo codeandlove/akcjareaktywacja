@@ -26,7 +26,7 @@ import {
     RESET,
     SETTINGS, STATIC,
     USER
-} from "../../routers/routers";
+} from "../../routers";
 import {isLoaded} from "react-redux-firebase";
 import {Dimmer, Loader} from "semantic-ui-react";
 

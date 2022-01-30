@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { PropTypes } from "prop-types";
+import PropTypes from "prop-types";
 import Dropzone from '../../components/Dropzone/Dropzone';
 
 import { connect } from "react-redux";

@@ -89,3 +89,6 @@ export const notifyToSlackChannel = (webHookURL, message, channel, userName, bot
     }
 }
 
+export const getIPInfoApiUrl = () => {
+    return `https://ipinfo.io/json?token=${process.env.REACT_APP_IPINFO_TOKEN}`;
+}

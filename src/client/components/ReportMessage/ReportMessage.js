@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Confirm, Icon, Popup, Comment} from "semantic-ui-react";
-import {PropTypes} from "prop-types";
+import PropTypes from "prop-types";
 import {compose} from "redux";
 import {firebaseConnect, isEmpty, isLoaded} from "react-redux-firebase";
 import {connect} from "react-redux";

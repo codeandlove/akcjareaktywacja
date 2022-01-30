@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { PropTypes } from "prop-types";
+import PropTypes from "prop-types";
 
 import { firebaseConnect} from "react-redux-firebase";
 import { compose } from "redux";
@@ -12,7 +12,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import "./Reset.scss";
 
 import { Container, Header, Segment, Message, Form, Input, Button, Icon } from "semantic-ui-react";
-import {EVENTS_LIST, LOGIN} from "../../routers/routers";
+import {EVENTS_LIST, LOGIN} from "../../routers";
 
 class Reset extends Component {
     constructor(props) {

@@ -1,4 +1,4 @@
-import {CLIENT_SET_DATA} from '../actions/client';
+import { CLIENT_SET_DATA } from '../actions/client';
 
 export function client(state={}, action) {
     switch(action.type) {

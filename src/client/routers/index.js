@@ -9,3 +9,17 @@ export const USER = `uzytkownik`
 export const ACTION = `akcja`
 export const STATIC = `strona`
 export const PREVIEW = `podglad`
+
+export default {
+    EVENTS_LIST,
+    CHAT,
+    SETTINGS,
+    EVENT_FORM,
+    LOGIN,
+    REGISTER,
+    RESET,
+    USER,
+    ACTION,
+    STATIC,
+    PREVIEW
+}

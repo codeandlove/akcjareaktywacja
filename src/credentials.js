@@ -1,9 +1,5 @@
-const {decrypt} = require('./../utils');
-
-const apiKey = decrypt(process.env.REACT_APP_FIREBASEAPI_KEY, process.env);
-
 export const dev = {
-    apiKey: apiKey,
+    apiKey: process.env.REACT_APP_FIREBASEAPI_KEY,
     authDomain: "akcjareaktywacja-dev.firebaseapp.com",
     databaseURL: "https://akcjareaktywacja-dev-default-rtdb.firebaseio.com",
     projectId: "akcjareaktywacja-dev",
@@ -14,7 +10,7 @@ export const dev = {
 }
 
 export const prod = {
-    apiKey: apiKey,
+    apiKey: process.env.REACT_APP_FIREBASEAPI_KEY,
     authDomain: "akcjareaktywacja-39acb.firebaseapp.com",
     databaseURL: "https://akcjareaktywacja-39acb.firebaseio.com",
     projectId: "akcjareaktywacja-39acb",

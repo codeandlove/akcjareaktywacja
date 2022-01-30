@@ -1,4 +1,4 @@
-import {MAP} from '../actions/map';
+import { MAP } from '../actions/map';
 
 export function map(state={}, action) {
     switch(action.type) {

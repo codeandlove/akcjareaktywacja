@@ -8,7 +8,7 @@ import moment from "moment";
 
 import './MarkerWithInfo.scss';
 import {icon} from "leaflet";
-import {ACTION} from "../../routers/routers";
+import {ACTION} from "../../routers";
 import {isInPastDate} from "../../utils";
 
 const MarkerWithInfo = (props) => {

@@ -3,7 +3,7 @@ import './GDPRModal.scss';
 import {Button, Container, Segment} from "semantic-ui-react";
 import { useCookies } from 'react-cookie';
 import {Link} from "react-router-dom";
-import {STATIC} from "../../routers/routers";
+import {STATIC} from "../../routers";
 
 const GDPRModal = () => {
     const [accept, setAccept] = useState(false);

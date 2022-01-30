@@ -10,9 +10,9 @@ import Join from "./../Join/Join";
 
 import {Container, Segment, Header, Button, Icon, Table, Dimmer, Loader} from "semantic-ui-react";
 import {Helmet} from "react-helmet";
-import {PropTypes} from "prop-types";
+import PropTypes from "prop-types";
 import Countdown from "../../components/Countrdown/Countdown";
-import {EVENT_FORM} from "../../routers/routers";
+import {EVENT_FORM} from "../../routers";
 import {analytics} from "../../../firebase";
 
 class EventPage extends Component {

@@ -21,7 +21,7 @@ if(process.env.NODE_ENV === 'production') {
 
         // Optional argument. If true, the SDK automatically refreshes App Check
         // tokens as needed.
-        true
+        false
     );
 
     appCheck.setTokenAutoRefreshEnabled(true);

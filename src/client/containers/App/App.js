@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import { PropTypes } from "prop-types";
+import PropTypes from "prop-types";
 
 import { connect } from "react-redux";
-import { compose } from "recompose";
-import {firebaseConnect, isEmpty, isLoaded, populate} from "react-redux-firebase";
+import { compose } from "redux";
+import { firebaseConnect, isEmpty, isLoaded, populate } from "react-redux-firebase";
 import { Link } from "react-router-dom";
 
 import moment from "moment";
@@ -13,19 +13,19 @@ import picture from "./../../../assets/picture.webp";
 
 import Layout from "./../Layout/Layout";
 import Map from "./../Map/Map";
-import Chat, {CHAT_LATEST_KEY_COOKIE_NAME} from "./../Chat/Chat";
+import {CHAT_LATEST_KEY_COOKIE_NAME} from "../Chat/Chat";
 
-import {Sidebar, Menu, Icon, Popup, Rail, Dropdown, Dimmer, Loader} from "semantic-ui-react";
+import {Sidebar, Menu, Icon, Popup, Dropdown, Dimmer, Loader} from "semantic-ui-react";
 
 import "./App.scss";
 import ChatSnipped from "../ChatSnipped/ChatSnipped";
 import SecureLS from "secure-ls";
 
-import {generateClientDeviceUUID, notifyToSlackChannel} from "../../utils";
+import {generateClientDeviceUUID, getIPInfoApiUrl, notifyToSlackChannel} from "../../utils";
 
 import {bindActionCreators} from "redux";
 import * as actionCreators from "../../actions";
-import {CHAT, EVENT_FORM, EVENTS_LIST, SETTINGS, USER} from "../../routers/routers";
+import {CHAT, EVENT_FORM, EVENTS_LIST, SETTINGS, USER} from "../../routers";
 import Avatar from "../../components/Avatar/Avatar";
 import DotCounter from "../../components/DotCounter/DotCounter";
 import {withCookies} from "react-cookie";
@@ -76,7 +76,7 @@ class App extends Component {
                 return;
             }
 
-            await fetch("https://ipinfo.io/json?token=82a85779b07e64").then((response) => response.json()).then((jsonResponse) => {
+            await fetch(getIPInfoApiUrl()).then((response) => response.json()).then((jsonResponse) => {
                 const {loc} = jsonResponse;
                 let defaultCoordinates = null;
                 let clientData = jsonResponse;

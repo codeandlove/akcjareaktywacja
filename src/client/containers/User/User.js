@@ -27,10 +27,9 @@ import {
     Loader
 } from "semantic-ui-react";
 import Avatar from "../../components/Avatar/Avatar";
-import {PropTypes} from "prop-types";
+import PropTypes from "prop-types";
 
 class User extends Component {
-
     constructor(props) {
         super(props);
 

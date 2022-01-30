@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import "./Login.scss";
 
 import { Container, Header, Segment, Message, Form, Input, Button, Icon, Divider } from "semantic-ui-react";
-import {REGISTER, RESET, USER} from "../../routers/routers";
+import {REGISTER, RESET, USER} from "../../routers";
 
 class Login extends Component {
 

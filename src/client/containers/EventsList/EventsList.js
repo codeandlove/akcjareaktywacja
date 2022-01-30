@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { PropTypes } from "prop-types";
+import PropTypes from "prop-types";
 
 import { Link } from "react-router-dom";
 
@@ -17,7 +17,7 @@ import "./EventsList.scss";
 
 import { Container, Header, Segment, Item, Button, Transition, Dimmer, Loader } from "semantic-ui-react";
 import ShowOnMap from "../../components/ShowOnMap/ShowOnMap";
-import {ACTION, EVENT_FORM, SETTINGS} from "../../routers/routers";
+import {ACTION, EVENT_FORM, SETTINGS} from "../../routers";
 import Countdown from "../../components/Countrdown/Countdown";
 import Recent from "../Recent/Recent";
 

@@ -7,7 +7,7 @@ import moment from "moment";
 
 import { routerMiddleware } from "react-router-redux";
 
-import {createBrowserHistory} from "history";
+import { createBrowserHistory } from "history";
 
 // import the root reducer
 import rootReducer from "./../reducers";

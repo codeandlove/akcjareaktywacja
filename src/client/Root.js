@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
-import {Helmet} from "react-helmet";
+import { Helmet } from "react-helmet";
 import App from './containers/App/App';
 import GDPRModal from "./containers/GDPRModal/GDPRModal";
 

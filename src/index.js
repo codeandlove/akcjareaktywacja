@@ -7,7 +7,7 @@ import { Root } from './client/Root';
 
 import './index.scss';
 
-import {store, history} from './client/store/store';
+import { store, history } from './client/store/store';
 
 ReactDOM.render(
     <GoogleReCaptchaProvider
@@ -17,7 +17,7 @@ ReactDOM.render(
         scriptProps={{
             async: true, // optional, default to false,
             defer: false, // optional, default to false
-            appendTo: 'head', // optional, default to "head", can be "head" or "body",
+            appendTo: 'body', // optional, default to "head", can be "head" or "body",
             nonce: undefined // optional, default undefined
         }}
     >

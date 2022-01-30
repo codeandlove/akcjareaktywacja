@@ -1,4 +1,4 @@
-import {ADD_EVENT, EDIT_EVENT, UPDATE_EVENT_DRAFT, REMOVE_EVENT} from '../actions/event';
+import { UPDATE_EVENT_DRAFT, REMOVE_EVENT } from '../actions/event';
 
 export function draft(state= {}, action) {
     switch(action.type) {
