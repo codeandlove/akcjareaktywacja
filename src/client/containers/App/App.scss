@@ -1,0 +1,97 @@
+@import "./../../../vars";
+
+#root {
+  .app {
+    > .menu {
+      background-color: $header-background;
+      border-radius: 0;
+      margin: 0;
+      height: $header-height;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1;
+    }
+
+    .pushable {
+      > .menu.vertical {
+        padding-top: $header-height;
+      }
+    }
+  }
+
+  .logo-item {
+    height: $header-height;
+
+    @include media('<tablet') {
+      flex: 1;
+      padding: 0;
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+
+    .logo {
+      height: calc(100% - 10px);
+      width: 100%;
+      max-width: 300px;
+      z-index: 1;
+
+      @include media('<tablet') {
+        height: auto;
+        max-height: calc(100% - 20px);
+      }
+    }
+  }
+
+  .picture-logo {
+    height: $header-height;
+    padding: 2px 0;
+
+    @include media('<desktop') {
+      padding: 4px 0;
+      max-width: 100%;
+    }
+
+    @include media('<tablet') {
+      position: absolute;
+      opacity: .15;
+      right: 0;
+      z-index: 0;
+    }
+
+    .picture-img {
+      height: 100%;
+      width: auto !important;
+      margin-right: 20px;
+      max-width: 100%;
+    }
+  }
+
+  .add-event-item,
+  .login-item {
+    @include media('<mobile') {
+      span {
+        display: none;
+      }
+    }
+  }
+
+  .logout-item {
+    .ui.avatar.image {
+      width: 21px;
+      height: 21px;
+      margin: 0em 0.35714286em 0em 0em
+    }
+  }
+}
+
+.red-dot{
+  transform: translateX(5px) !important;
+}
+
+.have-dot {
+  position: relative;
+}

@@ -1,0 +1,11 @@
+@import 'include-media.scss';
+
+$breakpoints: (
+  'mobile': 768px,
+  'tablet': 1024px,
+  'desktop': 1200px
+);
+
+$gutter: 20px;
+$header-height: 74px;
+$header-background: #fafafa;

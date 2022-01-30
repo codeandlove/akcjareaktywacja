@@ -1,0 +1,64 @@
+$font-url: 'https://fonts.googleapis.com/css?family=Raleway:300,400,600,700&subset=latin-ext&display=swap' !default;
+$font-name: 'Raleway' !default;
+$font-family: $font-name, Arial, Helvetica, sans-serif !default;
+
+@import "~semantic-ui-sass/semantic-ui";
+@import "~leaflet/dist/leaflet";
+@import '~react-leaflet-markercluster/dist/styles.min';
+@import "~react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+@import "~react-datepicker/dist/react-datepicker.css";
+
+@import "vars";
+
+html, body, #root, .app, .pushable, .pusher, .col-wrapper, .map-wrapper, .page-wrapper {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  -webkit-overflow-scrolling: touch;
+}
+
+#root {
+  width: 100%;
+
+  a {
+    transition: background-color .3s ease 0s;
+  }
+
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  .modal {
+    &.transition {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      opacity: 0;
+      margin: 0;
+      transform: translate(-50%, -50%);
+      transition: all .15s ease 0s;
+
+      &.active {
+        opacity: 1;
+      }
+    }
+  }
+
+  .sticky {
+    > .segment {
+      background-color: white;
+    }
+  }
+}
+
+.grecaptcha-badge { visibility: hidden; }

@@ -1,0 +1,67 @@
+@import "./../../../vars";
+
+#root {
+
+  .dropdown-custom-center {
+    left: -117.5px;
+  }
+
+  .dropdown-custom-right {
+    left: auto;
+    right: 5px;
+  }
+
+  .rdw-editor-toolbar {
+    border-color: transparent;
+    padding: 5px 0;
+    margin: 0 -5px;
+  }
+
+  .rdw-editor-main {
+    min-height: 240px;
+    border: 1px solid rgba(34, 36, 38, .15);
+    border-radius: .28571429rem;
+    padding: 0 12px;
+  }
+
+  .react-datepicker-wrapper {
+    width: 100%;
+
+    .react-datepicker__input-container {
+      width: 100%;
+    }
+  }
+
+  .react-datepicker-popper {
+    z-index: 99;
+  }
+
+  .button-event-form-expand {
+    @include media('<desktop') {
+      visibility: hidden;
+    }
+  }
+
+  .rdw-embedded-modal-size {
+    > span {
+      flex: 1;
+      display: flex;
+    }
+  }
+
+  .rdw-embedded-modal-link-input-wrapper {
+    align-items: flex-start;
+  }
+
+  .rdw-embedded-modal-header-option {
+    align-items: flex-start;
+  }
+
+  .rdw-image-modal-header-option {
+    align-items: flex-start;
+  }
+
+  .rdw-image-modal-url-section {
+    align-items: flex-start;
+  }
+}

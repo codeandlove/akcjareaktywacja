@@ -1,0 +1,105 @@
+@import "./../../../vars";
+
+main {
+    width: 100vw;
+    padding-top: $header-height !important;
+    height: 100%;
+    position: relative;
+
+    .map-wrapper {
+        position: absolute;
+        width: 100vw;
+        top: 0;
+        left: 0;
+        transition: all .5s ease 0s;
+    }
+
+    .col-wrapper {
+        position: relative;
+        background: white;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        overflow: auto;
+        left: -33vw;
+        width: 33vw;
+        transition: all .5s ease 0s;
+
+        @include media('<tablet') {
+            left: -40vw;
+            width: 40vw;
+        }
+
+        @include media('<mobile') {
+            left: -100vw;
+            width: 100vw;
+        }
+    }
+
+    .page-wrapper {
+        background-color: white;
+        position: absolute;
+        padding-top: $header-height !important;
+        z-index: 9;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        left: 50%;
+        top: 50%;
+        transform: translate(100%, -50%);
+        transition: all .5s ease 0s;
+    }
+
+    &.col-open {
+        .map-wrapper {
+            left: 33%;
+            width: 77vw;
+
+            @include media('<tablet') {
+                left: 40%;
+                width: 60vw;
+            }
+
+            @include media('<mobile') {
+                left: 100%;
+                width: 100vw;
+            }
+        }
+
+        .col-wrapper {
+            left: 0;
+        }
+
+        &.col-expand{
+            .map-wrapper {
+                left: 100%;
+                width: 0;
+            }
+
+            .col-wrapper {
+                left: 0;
+                width: 100vw;
+
+                @include media('<mobile') {
+                    position: fixed;
+                    left: 0;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                }
+            }
+        }
+    }
+
+    &.page-open {
+        .page-wrapper {
+            transform: translate(-50%, -50%);
+        }
+
+        .map-wrapper,
+        .col-wrapper {
+            transform: translate(-50%, 0);
+        }
+    }
+
+}

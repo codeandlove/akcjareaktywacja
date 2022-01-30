@@ -1,0 +1,30 @@
+@import "./../../../vars";
+
+#root {
+  .events-list {
+    .items {
+      .item {
+        .header {
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+
+          > a {
+            max-width: 80%;
+            display: block;
+            float: left;
+            text-overflow: ellipsis;
+            overflow: hidden;
+          }
+        }
+
+        .description {
+          word-break: break-all;
+        }
+        .extra {
+          margin-top: 20px;
+        }
+      }
+    }
+  }
+}

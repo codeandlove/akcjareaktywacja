@@ -1,0 +1,10 @@
+@import "./../../../vars";
+
+.drop-zone-file {
+  text-align: center;
+  cursor: pointer;
+  padding: 20px;
+  color: gray;
+  border: 2px dashed lightgray;
+  margin: 20px auto;
+}

@@ -1,0 +1,39 @@
+@import "./../../../vars";
+
+.snipped-chat {
+  position: fixed;
+  z-index: 430;
+  right: 0;
+  bottom: 15px;
+  width: 100%;
+  max-width: 340px;
+  margin: 0;
+
+  @include media('<tablet') {
+    max-width: 300px;
+    bottom: 0;
+  }
+
+  &.col-open {
+    @include media('<tablet') {
+      display: none;
+    }
+  }
+
+  .comment {
+    .author {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: calc(100% - 42px);
+      display: block;
+    }
+    .text {
+      &.short {
+        height: 18px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
+  }
+}
