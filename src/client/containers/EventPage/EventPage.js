@@ -18,7 +18,6 @@ import {analytics} from "../../../firebase";
 class EventPage extends Component {
     componentDidMount() {
         this.props.open();
-
         analytics.logEvent('User opened a event page');
     }
 
@@ -28,10 +27,6 @@ class EventPage extends Component {
 
         router.history.push(`${isDraft ? `/${EVENT_FORM}` : `/`}`);
         this.props.close();
-    }
-
-    componentWillUnmount() {
-        this.closeEventPage();
     }
 
     renderPage = (data) => {
@@ -50,7 +45,7 @@ class EventPage extends Component {
                 ) : null}
 
                 <Segment clearing basic>
-                    <Button basic onClick={this.closeEventPage} floated="right" icon="x" />
+                    <Button basic onClick={() => this.closeEventPage()} floated="right" icon="x" />
                     <Header as="h1" floated="left" size="large">
                         {title}
                         <Header.Subheader>
@@ -92,7 +87,7 @@ class EventPage extends Component {
                             <Join eventKey={eventKey} event={data} />
                         ): null
                     }
-                    <Button floated="left" onClick={this.closeEventPage} >
+                    <Button floated="left" onClick={() => this.closeEventPage()} >
                         <Icon name="arrow left" /> Wróć
                     </Button>
                 </Segment>
