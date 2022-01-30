@@ -3,19 +3,11 @@ const {
     addExternalBabelPlugins,
     removeModuleScopePlugin
 } = require("customize-cra");
-
-const {encrypt} = require('./utils');
-
 const rewireWebpackBundleAnalyzer = require('react-app-rewire-webpack-bundle-analyzer')
-
 const rewireImageminPlugin = require('react-app-rewire-imagemin-plugin')
-
 const rewireCompressionPlugin = require('react-app-rewire-compression-plugin');
 
-const { overridePassedProcessEnv, overrideProcessEnv } = require('cra-define-override');
-
 const configuration = function override(config, env) {
-
     if (env === 'production') {
         // Optimize images in the build
         config = rewireImageminPlugin(config, env, {
@@ -40,6 +32,7 @@ const configuration = function override(config, env) {
     if (!config.plugins) {
         config.plugins = [];
     }
+
     removeModuleScopePlugin()(config);
 
     return config;
@@ -47,9 +40,6 @@ const configuration = function override(config, env) {
 
 module.exports = {
     webpack: override(
-        overrideProcessEnv({
-            REACT_APP_FIREBASEAPI_KEY: JSON.stringify(encrypt(process.env.REACT_APP_FIREBASEAPI_KEY, process.env))
-        }),
         configuration,
         ...addExternalBabelPlugins(
             "@babel/plugin-proposal-nullish-coalescing-operator"
