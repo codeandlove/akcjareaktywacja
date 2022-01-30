@@ -11,6 +11,8 @@ import "./Login.scss";
 
 import { Container, Header, Segment, Message, Form, Input, Button, Icon, Divider } from "semantic-ui-react";
 import {REGISTER, RESET, USER} from "../../routers";
+import {verifyCaptcha} from "../../utils";
+import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 
 class Login extends Component {
 
@@ -20,8 +22,7 @@ class Login extends Component {
         this.state = {
             messageType: null,
             login: null,
-            password: null,
-            captcha: false
+            password: null
         }
     }
 
@@ -38,8 +39,7 @@ class Login extends Component {
 
     renderMessage = () => {
         const { messageType } = this.state;
-
-        let result = null;
+        let result;
 
         switch(messageType) {
             case "auth/wrong-password":
@@ -69,31 +69,32 @@ class Login extends Component {
     registerProviderEvent = provider => {
         const { router } = this.context;
 
-        this.props.firebase.login({ provider: provider, type: 'popup' }).then(() => {
-            router.history.push(`/${USER}`);
-        })
+        verifyCaptcha(this.props, 'loginByProvider').then(token => {
+            if(token) {
+                this.props.firebase.login({ provider: provider, type: 'popup' }).then(() => {
+                    router.history.push(`/${USER}`);
+                })
+            }
+        });
     };
 
     loginEvent = () => {
         const { router } = this.context;
-
         const { email, password } = this.state;
 
-        this.props.firebase.login({
-            email: email,
-            password: password
-        }).then(() => {
-            router.history.push(`/${USER}`);
-        }).catch(error => {
-            this.setState({
-                messageType: error.code
-            });
-        })
-    };
-
-    captchaVerifyHandler = () => {
-        this.setState({
-            captcha: true
+        verifyCaptcha(this.props, 'loginForm').then(token => {
+            if(token) {
+                this.props.firebase.login({
+                    email: email,
+                    password: password
+                }).then(() => {
+                    router.history.push(`/${USER}`);
+                }).catch(error => {
+                    this.setState({
+                        messageType: error.code
+                    });
+                })
+            }
         })
     };
 
@@ -150,4 +151,4 @@ Login.contextTypes = {
 export default compose(
     firebaseConnect(),
     connect(({ firebase: { auth, profile } }) => ({ auth, profile }))
-)(Login);
+)(withGoogleReCaptcha(Login));

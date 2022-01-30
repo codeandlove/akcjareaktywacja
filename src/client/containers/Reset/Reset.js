@@ -7,12 +7,12 @@ import { connect } from "react-redux";
 
 import { Link } from "react-router-dom";
 
-import ReCAPTCHA from "react-google-recaptcha";
-
 import "./Reset.scss";
 
 import { Container, Header, Segment, Message, Form, Input, Button, Icon } from "semantic-ui-react";
-import {EVENTS_LIST, LOGIN} from "../../routers";
+import { LOGIN } from "../../routers";
+import {verifyCaptcha} from "../../utils";
+import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 
 class Reset extends Component {
     constructor(props) {
@@ -20,8 +20,7 @@ class Reset extends Component {
 
         this.state = {
             messageType: null,
-            email: null,
-            captcha: false
+            email: null
         }
     }
 
@@ -64,12 +63,6 @@ class Reset extends Component {
         return (result) ? <Segment clearing basic>{result}</Segment> : null;
     };
 
-    captchaVerifyHandler = () => {
-        this.setState({
-            captcha: true
-        })
-    };
-
     validateValues = (values) => {
         const result = values.filter(val => {
             return this.state[val] === false || this.state[val] === null || !this.state[val];
@@ -81,24 +74,24 @@ class Reset extends Component {
     resetPassword = () => {
 
         const { email } = this.state;
-
         const { firebase } = this.props;
 
-        if(this.validateValues(["email", "captcha"])) return;
+        if(this.validateValues(["email"])) return;
 
-        firebase.resetPassword(email).then(() => {
-            this.setState({
-                messageType: "auth/confirm-reset-password",
-                capcha: null,
-                email: null
-            });
-
-        }).catch(error => {
-            this.setState({
-                messageType: error.code
-            });
+        verifyCaptcha(this.props, 'resetPassword').then(token => {
+            if(token) {
+                firebase.resetPassword(email).then(() => {
+                    this.setState({
+                        messageType: "auth/confirm-reset-password",
+                        email: null
+                    });
+                }).catch(error => {
+                    this.setState({
+                        messageType: error.code
+                    });
+                });
+            }
         });
-
     };
 
     render() {
@@ -120,17 +113,10 @@ class Reset extends Component {
                             <Input placeholder="Wpisz adres email" type="email" id="email" name="email" onChange={this.handleChange("email")} />
                         </Form.Field>
                         <Form.Field>
-                            <ReCAPTCHA
-                                ref="recaptcha"
-                                sitekey={process.env.REACT_APP_RECAPTCHA_API_V2}
-                                onChange={this.captchaVerifyHandler}
-                            />
-                        </Form.Field>
-                        <Form.Field>
                             <Button as={Link} to={`/${LOGIN}`} floated="left" >
                                 Anuluj
                             </Button>
-                            <Button primary onClick={this.resetPassword} disabled={this.validateValues(["email", "captcha"])} floated="right" >
+                            <Button primary onClick={this.resetPassword} disabled={this.validateValues(["email"])} floated="right" >
                                 <Icon name="check" />
                                 Wyślij
                             </Button>
@@ -149,4 +135,4 @@ Reset.contextTypes = {
 export default compose(
     firebaseConnect(),
     connect(({ firebase: { auth, profile } }) => ({ auth, profile }))
-)(Reset);
+)(withGoogleReCaptcha(Reset));

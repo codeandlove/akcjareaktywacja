@@ -16,7 +16,7 @@ ReactDOM.render(
         useEnterprise={false}
         scriptProps={{
             async: true, // optional, default to false,
-            defer: false, // optional, default to false
+            defer: true, // optional, default to false
             appendTo: 'body', // optional, default to "head", can be "head" or "body",
             nonce: undefined // optional, default undefined
         }}

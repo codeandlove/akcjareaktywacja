@@ -6,8 +6,6 @@ import { connect } from 'react-redux';
 
 import Uploader from './../Uploader/Uploader';
 
-import ReCAPTCHA from "react-google-recaptcha";
-
 import avatarPlaceholder from "./../../../assets/profile_avatar.png";
 
 import "./User.scss";
@@ -28,6 +26,8 @@ import {
 } from "semantic-ui-react";
 import Avatar from "../../components/Avatar/Avatar";
 import PropTypes from "prop-types";
+import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
+import {verifyCaptcha} from "../../utils";
 
 class User extends Component {
     constructor(props) {
@@ -40,7 +40,6 @@ class User extends Component {
             nick: null,
             avatarImage: null,
             updateAvatar: false,
-            captcha: false,
             validated: false
         }
     }
@@ -65,12 +64,6 @@ class User extends Component {
         this.setState({
             [name]: event.target.value
         });
-    };
-
-    captchaVerifyHandler = () => {
-        this.setState({
-            captcha: true
-        })
     };
 
     renderMessage = () => {
@@ -126,32 +119,35 @@ class User extends Component {
         const { auth, firebase } = this.props;
         const { nick, avatarImage } = this.state;
 
-        if(this.validateValues(["nick", "updateAvatar", "captcha"])) return;
+        if(this.validateValues(["nick", "updateAvatar"])) return;
 
-        const usersRef = firebase.database().ref('/users');
+        verifyCaptcha(this.props, 'updateUser').then(token => {
+            if(token) {
+                const usersRef = firebase.database().ref('/users');
 
-        //Check if nick is unique
-        usersRef.orderByChild('displayNick').equalTo(nick).once("value").then(snapshot => {
+                //Check if nick is unique
+                usersRef.orderByChild('displayNick').equalTo(nick).once("value").then(snapshot => {
 
-            const isItMe = auth.uid === Object.keys(snapshot.val())[0];
+                    const isItMe = auth.uid === Object.keys(snapshot.val())[0];
 
-            if(!snapshot.val() || isItMe) {
-                this.props.firebase.update(`users/${auth.uid}`, {
-                    displayNick: nick,
-                    avatarImage: avatarImage
-                }, () => {
-                    this.setState({
-                        messageType: "create/profile-updated",
-                        captcha: false,
-                        validated: false
-                    })
+                    if(!snapshot.val() || isItMe) {
+                        this.props.firebase.update(`users/${auth.uid}`, {
+                            displayNick: nick,
+                            avatarImage: avatarImage
+                        }, () => {
+                            this.setState({
+                                messageType: "create/profile-updated",
+                                validated: false
+                            })
+                        });
+                    } else {
+                        this.setState({
+                            messageType: "create/nick-duplicated"
+                        })
+                    }
                 });
-            } else {
-                this.setState({
-                    messageType: "create/nick-duplicated"
-                })
             }
-        });
+        })
     };
 
     userWelcome = () => {
@@ -187,14 +183,7 @@ class User extends Component {
                         <Input ref={el => this.nick = el} placeholder="Wpisz nick" type="text" id="nick" name="nick" value={nick || profile.displayNick || ""} onChange={this.handleChange("nick")} />
                     </Form.Field>
                     <Form.Field>
-                        <ReCAPTCHA
-                            ref="recaptcha"
-                            sitekey={process.env.REACT_APP_RECAPTCHA_API_V2}
-                            onChange={this.captchaVerifyHandler}
-                        />
-                    </Form.Field>
-                    <Form.Field>
-                        <Button floated="right" color="olive" disabled={this.validateValues(["nick", "captcha"]) || messageType === "nick/nick-exist"} onClick={this.updateProfile}>
+                        <Button floated="right" color="olive" disabled={this.validateValues(["nick"]) || messageType === "nick/nick-exist"} onClick={this.updateProfile}>
                             <Icon name="check" />
                             Zapisz
                         </Button>
@@ -259,4 +248,4 @@ const enhance = compose(
     connect(({firebase: { auth, profile }}) => ({auth, profile}))
 );
 
-export default enhance(User);
+export default enhance(withGoogleReCaptcha(User));

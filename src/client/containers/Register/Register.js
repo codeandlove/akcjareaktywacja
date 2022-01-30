@@ -7,12 +7,12 @@ import { connect } from "react-redux";
 
 import { Link } from "react-router-dom";
 
-import ReCAPTCHA from "react-google-recaptcha";
-
 import "./Register.scss";
 
 import { Container, Header, Segment, Message, Form, Input, Checkbox, Button, Icon } from "semantic-ui-react";
-import {EVENTS_LIST, LOGIN, USER} from "../../routers";
+import {LOGIN, USER} from "../../routers";
+import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
+import {verifyCaptcha} from "../../utils";
 
 class Register extends Component {
     constructor(props) {
@@ -24,7 +24,6 @@ class Register extends Component {
             email: null,
             password: null,
             nick: null,
-            captcha: false,
             success: false
         }
     }
@@ -70,12 +69,6 @@ class Register extends Component {
         })
     };
 
-    captchaVerifyHandler = () => {
-        this.setState({
-            captcha: true
-        })
-    };
-
     validateValues = (values) => {
         const result = values.filter(val => {
             return this.state[val] === false || this.state[val] === null || !this.state[val];
@@ -86,34 +79,36 @@ class Register extends Component {
 
     registerUser = () => {
         const { nick, email, password } = this.state;
-
         const { firebase } = this.props;
 
-        if(this.validateValues(["email", "password", "nick", "terms", "captcha"])) return;
+        if(this.validateValues(["email", "password", "nick", "terms"])) return;
 
-        const usersRef = firebase.database().ref("/users");
+        verifyCaptcha(this.props, 'registerForm').then(token => {
+            if(token) {
+                const usersRef = firebase.database().ref("/users");
 
-        //Check if nick is unique
-        usersRef.orderByChild("displayNick").equalTo(nick).once("value").then(snapshot => {
-            if(!snapshot.val()) {
-                this.props.firebase.createUser({
-                    email: email,
-                    password: password
-                }, {
-                    email: email,
-                    displayNick: nick
-                }).then(() => {
-                    this.setState({
-                        success: true
-                    })
-                })
-            } else {
-                this.setState({
-                    messageType: "create/nick-duplicated"
-                })
+                //Check if nick is unique
+                usersRef.orderByChild("displayNick").equalTo(nick).once("value").then(snapshot => {
+                    if(!snapshot.val()) {
+                        this.props.firebase.createUser({
+                            email: email,
+                            password: password
+                        }, {
+                            email: email,
+                            displayNick: nick
+                        }).then(() => {
+                            this.setState({
+                                success: true
+                            })
+                        })
+                    } else {
+                        this.setState({
+                            messageType: "create/nick-duplicated"
+                        })
+                    }
+                });
             }
         });
-
     };
 
     renderRegisterForm = () => {
@@ -152,17 +147,10 @@ class Register extends Component {
                             onChange={() => this.toggleTerms()}
                         />
                         <Form.Field>
-                            <ReCAPTCHA
-                                ref="recaptcha"
-                                sitekey={process.env.REACT_APP_RECAPTCHA_API_V2}
-                                onChange={this.captchaVerifyHandler}
-                            />
-                        </Form.Field>
-                        <Form.Field>
                             <Button as={Link} to={`/${LOGIN}`} floated="left" >
                                 Anuluj
                             </Button>
-                            <Button primary onClick={this.registerUser} disabled={this.validateValues(["email", "password", "nick", "terms", "captcha"])} floated="right" >
+                            <Button primary onClick={this.registerUser} disabled={this.validateValues(["email", "password", "nick", "terms"])} floated="right" >
                                 <Icon name="check" />
                                 Wyślij
                             </Button>
@@ -209,4 +197,4 @@ Register.contextTypes = {
 export default compose(
     firebaseConnect(),
     connect(({ firebase: { auth, profile } }) => ({ auth, profile }))
-)(Register);
+)(withGoogleReCaptcha(Register));

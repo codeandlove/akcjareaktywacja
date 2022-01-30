@@ -6,12 +6,12 @@ import { firebaseConnect, isEmpty, isLoaded } from "react-redux-firebase";
 
 import moment from 'moment';
 
-import ReCAPTCHA from "react-google-recaptcha";
-
 import { Button, Form, Message, TextArea, Icon, Transition } from "semantic-ui-react";
 
 import "./ChatForm.scss";
 import {analytics} from "../../../firebase";
+import {verifyCaptcha} from "../../utils";
+import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 
 const MIN_TIME_OFFSET = 30000;
 
@@ -23,8 +23,6 @@ class ChatForm extends Component {
             nick: null,
             messageType: null,
             message: null,
-            toggleCaptcha: true,
-            captcha: false,
             expanded: false,
             timestamp: null
         }
@@ -93,59 +91,62 @@ class ChatForm extends Component {
     handleSave = () => {
 
         const { nick, message, timestamp } = this.state;
-
         const { firebase, auth } = this.props;
 
-        if(this.validateValues(["nick", "message", "captcha"])) return;
+        if(this.validateValues(["nick", "message"])) return;
 
-        const messageTimestamp =  moment().valueOf();
+        verifyCaptcha(this.props, 'chatMessage').then(token => {
+            if(token) {
 
-        let preparedData = {
-            nick: nick,
-            message: message,
-            timestamp: messageTimestamp
-        };
+                const messageTimestamp =  moment().valueOf();
 
-        //Check if need to enable Captcha (to short time between save events)
-        let duration = messageTimestamp - timestamp;
+                let preparedData = {
+                    nick: nick,
+                    message: message,
+                    timestamp: messageTimestamp
+                };
 
-        if(!!timestamp && duration < MIN_TIME_OFFSET) {
-            this.setState({
-                messageType: "chat/to-short-time-offset"
-            });
-            return;
-        }
+                //Check if need to enable Captcha (to short time between save events)
+                let duration = messageTimestamp - timestamp;
 
-        if(!isEmpty(auth) && isLoaded(auth)) {
-            preparedData = {...preparedData, user: auth.uid};
-            firebase.push('chat', preparedData, () => {
-                this.clearForm();
-            });
-
-        } else {
-            const usersRef = firebase.database().ref("/users");
-
-            //Check if nick is unique
-            usersRef.orderByChild("displayNick").equalTo(nick).once("value").then(snapshot => {
-                if(!snapshot.val()) {
-                    firebase.auth().signInAnonymously().then(res => {
-                        preparedData = {...preparedData, user: res.user.uid}
-
-                        firebase.push('chat', preparedData, () => {
-                            this.clearForm();
-                        });
-                    });
-                } else {
+                if(!!timestamp && duration < MIN_TIME_OFFSET) {
                     this.setState({
-                        messageType: "nick/nick-exist"
-                    })
+                        messageType: "chat/to-short-time-offset"
+                    });
+                    return;
                 }
-            });
-        }
 
-        this.setDuration();
+                if(!isEmpty(auth) && isLoaded(auth)) {
+                    preparedData = {...preparedData, user: auth.uid};
+                    firebase.push('chat', preparedData, () => {
+                        this.clearForm();
+                    });
 
-        this.toggleCaptcha(true);
+                } else {
+                    const usersRef = firebase.database().ref("/users");
+
+                    //Check if nick is unique
+                    usersRef.orderByChild("displayNick").equalTo(nick).once("value").then(snapshot => {
+                        if(!snapshot.val()) {
+                            firebase.auth().signInAnonymously().then(res => {
+                                preparedData = {...preparedData, user: res.user.uid}
+
+                                firebase.push('chat', preparedData, () => {
+                                    this.clearForm();
+                                });
+                            });
+                        } else {
+                            this.setState({
+                                messageType: "nick/nick-exist"
+                            })
+                        }
+                    });
+                }
+
+                this.setDuration();
+            }
+        })
+
     };
 
     setDuration = () => {
@@ -154,23 +155,8 @@ class ChatForm extends Component {
         })
     };
 
-    toggleCaptcha = toggle => {
-        this.setState({
-            toggleCaptcha: toggle
-        })
-    };
 
     clearForm = () => {
-        const { toggleCaptcha } = this.state;
-
-        if(toggleCaptcha) {
-            this.recapcha.reset();
-
-            this.setState({
-                captcha: false
-            });
-        }
-
         this.message['ref'].current.value = "";
 
         this.setState({
@@ -179,12 +165,6 @@ class ChatForm extends Component {
         });
 
         this.collapseForm();
-    };
-
-    captchaVerifyHandler = () => {
-        this.setState({
-            captcha: true
-        })
     };
 
     expandForm = () => {
@@ -208,7 +188,7 @@ class ChatForm extends Component {
 
     render() {
 
-        const { expanded, messageType, nick, toggleCaptcha } = this.state;
+        const { expanded, messageType, nick } = this.state;
 
         const { profile } = this.props;
 
@@ -237,24 +217,12 @@ class ChatForm extends Component {
 
                         {this.renderMessage()}
 
-                        {
-                            toggleCaptcha ? (
-                                <Form.Field>
-                                    <ReCAPTCHA
-                                        ref={el => this.recapcha = el}
-                                        sitekey={process.env.REACT_APP_RECAPTCHA_API_V2}
-                                        onChange={this.captchaVerifyHandler}
-                                    />
-                                </Form.Field>
-                            ) : null
-                        }
-
                         <Button onClick={this.clearForm} floated="left">
                             <Icon name="x" />
                             Anuluj
                         </Button>
 
-                        <Button disabled={this.validateValues(["nick", "message", "captcha"])} color="olive" floated="right">
+                        <Button disabled={this.validateValues(["nick", "message"])} color="olive" floated="right">
                             <Icon name="check" />
                             Wyślij
                         </Button>
@@ -268,4 +236,4 @@ class ChatForm extends Component {
 export default compose(
     firebaseConnect(),
     connect(({ firebase: { auth, profile } }) => ({ auth, profile }))
-)(ChatForm);
+)(withGoogleReCaptcha(ChatForm));

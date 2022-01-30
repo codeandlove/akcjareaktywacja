@@ -20,6 +20,22 @@ export const generateClientDeviceUUID = () => {
     return btoa(`${data.cpu.architecture}|${data.engine.name}|${data.os.name}-${data.os.version}|${device.model}-${device.type}-${device.vendor}`);
 }
 
+export const verifyCaptcha = async (props, eventName) => {
+    const {googleReCaptchaProps: {executeRecaptcha}} = props;
+
+    if(!executeRecaptcha) {
+        console.log('Recaptcha has not been loaded');
+
+        return false;
+    }
+
+    try {
+        return await executeRecaptcha(eventName);
+    } catch (err) {
+        throw new Error("ReCaptcha Token Error");
+    }
+}
+
 export const resizeImage = (base64Str, maxWidth = 400, maxHeight = 350) => {
     return new Promise((resolve) => {
         let img = new Image()
