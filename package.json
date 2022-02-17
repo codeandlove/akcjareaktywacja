@@ -63,7 +63,6 @@
     "react-datepicker": "^1.8.0",
     "react-draft-wysiwyg": "^1.14.7",
     "react-dropzone": "^11.3.4",
-    "react-google-recaptcha": "^2.1.0",
     "react-helmet": "^6.1.0",
     "react-leaflet": "^3.2.1",
     "react-leaflet-markercluster": "^3.0.0-rc1",
