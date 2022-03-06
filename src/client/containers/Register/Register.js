@@ -140,7 +140,7 @@ class Register extends Component {
                         </Form.Field>
                         <Form.Field
                             control={Checkbox}
-                            label={{ children: "Zgadzam się z ogólnymi warunkami serwisu." }}
+                            label={{ children: `Zgadzam się z ogólnymi warunkami serwisu.` }}
                             required
                             inline
                             defaultChecked={terms}

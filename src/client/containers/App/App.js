@@ -25,7 +25,17 @@ import {generateClientDeviceUUID, getIPInfoApiUrl, notifyToSlackChannel} from ".
 
 import {bindActionCreators} from "redux";
 import * as actionCreators from "../../actions";
-import {CHAT, EVENT_FORM, EVENTS_LIST, SETTINGS, USER} from "../../routers";
+import {
+    CHAT,
+    CONTACT,
+    EVENT_FORM,
+    EVENTS_LIST,
+    GDPR,
+    PRIVACY_POLICY,
+    STATIC,
+    TERMS_OF_USE,
+    USER
+} from "../../routers";
 import Avatar from "../../components/Avatar/Avatar";
 import DotCounter from "../../components/DotCounter/DotCounter";
 import {withCookies} from "react-cookie";
@@ -157,10 +167,10 @@ class App extends Component {
         })
     }
 
-    toggleMenu = () => {
+    toggleMenu = (state) => {
         this.setState(s => {
             return {
-                menuVisible: !s.menuVisible
+                menuVisible: !state ? state : !s.menuVisible
             }
         });
     };
@@ -283,7 +293,8 @@ class App extends Component {
                         header
                         className="logo-item"
                         as={Link}
-                        to="/"
+                        to={`/`}
+                        onClick={() => this.togglePage(false)}
                     >
                         <img src={logo} className="logo" alt="Akcjareaktywacja.pl" title="Akcjareaktywacja.pl" width="176" height="19" />
                     </Menu.Item>
@@ -375,7 +386,7 @@ class App extends Component {
                             to={`/${EVENTS_LIST}`}
                             onClick={() => this.toggleColumn(true)}
                         >
-                            <Icon name="calendar" className="outline" />
+                            <Icon name="calendar" className="alternate outline" />
                             Wydarzenia
                         </Menu.Item>
                         <Menu.Item
@@ -389,18 +400,41 @@ class App extends Component {
                             </Icon>
                             Chat
                         </Menu.Item>
-                        <Menu.Item
-                            name="settings"
-                            as={Link}
-                            to={`/${SETTINGS}`}
-                            onClick={() => this.setState({menuVisible: false})}
-                        >
-                            <Icon name="sliders" />
-                            Ustawienia
-                        </Menu.Item>
+                        <Dropdown item text="Pomoc" pointing="left" icon="help" className="dropdown-menu">
+                            <Dropdown.Menu>
+                                <Dropdown.Item
+                                    as={Link}
+                                    to={`/${STATIC}/${TERMS_OF_USE}`}
+                                    onClick={() => this.toggleColumn(true)}
+                                >
+                                    Regulamin
+                                </Dropdown.Item>
+                                <Dropdown.Item
+                                    as={Link}
+                                    to={`/${STATIC}/${GDPR}`}
+                                    onClick={() => this.toggleColumn(true)}
+                                >
+                                    RODO
+                                </Dropdown.Item>
+                                <Dropdown.Item
+                                    as={Link}
+                                    to={`/${STATIC}/${PRIVACY_POLICY}`}
+                                    onClick={() => this.toggleColumn(true)}
+                                >
+                                    Prywatność
+                                </Dropdown.Item>
+                                <Dropdown.Item
+                                    as={Link}
+                                    to={`/${STATIC}/${CONTACT}`}
+                                    onClick={() => this.toggleColumn(true)}
+                                >
+                                    Kontakt
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </Sidebar>
                     <Sidebar.Pusher>
-                        <Sidebar.Pushable>
+                        <Sidebar.Pushable onClick={() => this.toggleMenu(false)}>
                             <ChatSnipped data={chat} {...this.state} openChat={this.openChat} />
                             <Layout
                                 {...this.state}

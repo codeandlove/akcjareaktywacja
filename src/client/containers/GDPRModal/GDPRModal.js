@@ -3,7 +3,7 @@ import './GDPRModal.scss';
 import {Button, Container, Segment} from "semantic-ui-react";
 import { useCookies } from 'react-cookie';
 import {Link} from "react-router-dom";
-import {STATIC} from "../../routers";
+import {GDPR, PRIVACY_POLICY, STATIC, TERMS_OF_USE} from "../../routers";
 
 const GDPRModal = () => {
     const [accept, setAccept] = useState(false);
@@ -23,7 +23,7 @@ const GDPRModal = () => {
     return !accept ? (
         <Container className="GDPR-modal" fluid>
             <Segment size="mini" compact>
-                <p>W celu świadczenia usług na najwyższym poziomie stosujemy pliki cookies. W każdym momencie mogą Państwo dokonać zmiany ustawień Państwa przeglądarki internetowej i wyłączyć opcję zapisu plików cookies. Ze szczegółowymi informacjami dotyczącymi cookies na tej stronie można się zapoznać tutaj: <Link to={`${process.env.PUBLIC_URL}/${STATIC}/privacy-policy`}>polityka prywatności</Link> oraz <Link to={`${process.env.PUBLIC_URL}/${STATIC}/gdpr`}>infroamcja RODO</Link>. Korzystanie z serwisu oznacza akceptacje <Link to={`${process.env.PUBLIC_URL}/${STATIC}/regulamin`}>Regulaminu</Link>.</p>
+                <p>W celu świadczenia usług na najwyższym poziomie stosujemy pliki cookies. W każdym momencie mogą Państwo dokonać zmiany ustawień Państwa przeglądarki internetowej i wyłączyć opcję zapisu plików cookies. Ze szczegółowymi informacjami dotyczącymi cookies na tej stronie można się zapoznać tutaj: <Link to={`${process.env.PUBLIC_URL}/${STATIC}/${PRIVACY_POLICY}`}>polityka prywatności</Link> oraz <Link to={`${process.env.PUBLIC_URL}/${STATIC}/${GDPR}`}>infroamcja RODO</Link>. Korzystanie z serwisu oznacza akceptacje <Link to={`${process.env.PUBLIC_URL}/${STATIC}/${TERMS_OF_USE}`}>Regulaminu</Link>.</p>
                 <Button color="olive" size="mini" floated="right" onClick={handleAccept}>Akcpetuje</Button>
             </Segment>
         </Container>

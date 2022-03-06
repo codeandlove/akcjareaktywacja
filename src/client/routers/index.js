@@ -9,6 +9,10 @@ export const USER = `uzytkownik`
 export const ACTION = `akcja`
 export const STATIC = `strona`
 export const PREVIEW = `podglad`
+export const TERMS_OF_USE = `regulamin`
+export const GDPR = `rodo`
+export const PRIVACY_POLICY = `polityka-prywatnosci`
+export const CONTACT = `kontakt`
 
 export default {
     EVENTS_LIST,
@@ -21,5 +25,9 @@ export default {
     USER,
     ACTION,
     STATIC,
-    PREVIEW
+    PREVIEW,
+    TERMS_OF_USE,
+    GDPR,
+    PRIVACY_POLICY,
+    CONTACT
 }

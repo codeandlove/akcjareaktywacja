@@ -8,7 +8,7 @@ import credentials from './credentials';
 
 // Initialize Firebase
 const app = firebase.initializeApp(credentials);
-//
+
 const appCheck = firebase.appCheck();
 
 // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this

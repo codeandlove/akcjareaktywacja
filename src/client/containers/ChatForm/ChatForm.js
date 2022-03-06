@@ -59,7 +59,7 @@ class ChatForm extends Component {
                     <Message
                         error
                         header='Błąd formularza'
-                        content='Użytkownik o takim nicku już istnieje. Jeśli to Ty, zaloguj się aby korzystać z Twojego podpisu.'
+                        content='Użytkownik o takim nicku już istnieje. Jeśli to Ty zaloguj się, aby korzystać z Twojego podpisu.'
                     />
                 );
                 break;
@@ -89,7 +89,6 @@ class ChatForm extends Component {
     };
 
     handleSave = () => {
-
         const { nick, message, timestamp } = this.state;
         const { firebase, auth } = this.props;
 
@@ -196,24 +195,22 @@ class ChatForm extends Component {
             <Form onFocus={this.expandForm} error={messageType !== null} onSubmit={this.handleSave}>
                 <Form.Field>
                     <label>Wiadomość</label>
-                    <TextArea autoHeight rows={3} ref={el => this.message = el} placeholder="Wiadomość" name="message" onChange={this.handleChange("message")} />
+                    <TextArea rows={3} ref={el => this.message = el} placeholder="Wiadomość" name="message" onChange={this.handleChange("message")} />
                 </Form.Field>
                 <Transition visible={expanded} animation='fade up' duration={500}>
                     <div>
 
-                        {isEmpty(profile) ?
-                            (
-                                <Form.Field>
-                                    <label>Podpis</label>
-                                    <input ref={el => this.nick = el} label="Podpis" id="nick" name="nick" placeholder="Twój podpis" onChange={this.handleChange("nick")} />
-                                </Form.Field>
-                            ) : (
-                                <Form.Field>
-                                    <label>Podpis</label>
+                        <Form.Field>
+                            <label>Podpis</label>
+                            {isEmpty(profile) ?
+                                (
+                                    <input ref={el => this.nick = el} id="nick" name="nick"
+                                           placeholder="Twój podpis" onChange={this.handleChange("nick")}/>
+                                ) : (
                                     <input value={nick} name="nick" disabled onChange={() => null}/>
-                                </Form.Field>
-                            )
-                        }
+                                )
+                            }
+                        </Form.Field>
 
                         {this.renderMessage()}
 

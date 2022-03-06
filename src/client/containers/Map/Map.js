@@ -13,7 +13,9 @@ import {Button, Dimmer, Loader} from "semantic-ui-react";
 const EventMarkerLocator = (props) => {
     const {event, updateEvent, isMobile, isColOpen} = props
     const [position, setPosition] = useState(null)
+    const [location, setLocation] = useState(null)
     const [prevPosition, setPrevPosition] = useState(null)
+    const [prevLocation, setPrevLocation] = useState(null)
     const [editMode, setEditMode] = useState(false)
     const markerRef = useRef(null)
 
@@ -24,6 +26,10 @@ const EventMarkerLocator = (props) => {
             map.flyTo(event.coordinates, map.getZoom())
         } else {
             setPosition(null)
+        }
+
+        if(event && event.location) {
+            setLocation(event.location);
         }
     }, [event]);
 
@@ -37,6 +43,12 @@ const EventMarkerLocator = (props) => {
         }
 
     }, [position, prevPosition])
+
+    useEffect(() => {
+        if(!prevLocation) {
+            setPrevLocation(location)
+        }
+    }, [location, prevLocation]);
 
     const map = useMapEvents({
         click(e) {
@@ -57,6 +69,7 @@ const EventMarkerLocator = (props) => {
 
         setEditMode(true)
         setPrevPosition(null)
+        setPrevLocation(null)
 
         addEvent({...position})
     }
@@ -106,16 +119,27 @@ const EventMarkerLocator = (props) => {
                 {
                     isPositionChanged ? (
                         <>
-                            <p>Zmieniono pozycję na mapie, zatwierdzić?</p>
-                            <Button onClick={cancelPositionChange}>Anuluj</Button>
-                            <Button onClick={addEvent} color="olive">Ok</Button>
+                            {
+                                location !== prevLocation ? (
+                                    <>
+                                        <p>Ustawiono nowe miejsce na mapie.</p>
+                                        <Button onClick={addEvent} color="olive" size="mini">Zatwierdź</Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p>Ustawiono nowe miejsce na mapie, czy zatwierdzić?</p>
+                                        <Button onClick={cancelPositionChange} size="mini">Anuluj</Button>
+                                        <Button onClick={addEvent} color="olive" size="mini">Zatwierdź</Button>
+                                    </>
+                                )
+                            }
                         </>
                     ) : (
                         <>
-                            <p>Kliknij gdzieś lub przeciągnij pineskę aby zmienić pozycję na mapie.</p>
+                            <p>Kliknij gdzieś lub przeciągnij pineskę, aby zmienić pozycję na mapie.</p>
                             {
                                 (isMobile || !isColOpen) && (
-                                    <Button onClick={addEvent} color="olive">Wróć</Button>
+                                    <Button onClick={addEvent} color="olive" size="mini">Wróć</Button>
                                 )
                             }
                         </>
@@ -125,8 +149,8 @@ const EventMarkerLocator = (props) => {
         ):(
             <>
                 <p>Dodać nowe wydarzenie?</p>
-                <Button onClick={() => cancelEvent()} >Nie</Button>
-                <Button onClick={() => addEvent()} color="olive">Tak</Button>
+                <Button onClick={() => cancelEvent()} size="mini">Nie</Button>
+                <Button onClick={() => addEvent()} color="olive" size="mini">Tak</Button>
             </>
         )
     }

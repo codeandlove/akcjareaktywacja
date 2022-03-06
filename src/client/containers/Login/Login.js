@@ -71,7 +71,7 @@ class Login extends Component {
 
         verifyCaptcha(this.props, 'loginByProvider').then(token => {
             if(token) {
-                this.props.firebase.login({ provider: provider, type: 'popup' }).then(() => {
+                this.props.firebase.login({ provider: provider, type: 'redirect' }).then(() => {
                     router.history.push(`/${USER}`);
                 })
             }

@@ -108,3 +108,17 @@ export const notifyToSlackChannel = (webHookURL, message, channel, userName, bot
 export const getIPInfoApiUrl = () => {
     return `https://ipinfo.io/json?token=${process.env.REACT_APP_IPINFO_TOKEN}`;
 }
+
+export const searchPlaceData = (place, args) => {
+    let customParams = '';
+    if(args) {
+        customParams += '&'+encodeURI(args);
+    }
+
+    return fetch(`https://nominatim.openstreetmap.org/search.php?addressdetails=1&q=${encodeURIComponent(place)}${customParams}&limit=5&format=jsonv2`)
+        .then(response => response.json())
+        .catch(err => {
+            console.log(err);
+            return null;
+        });
+}

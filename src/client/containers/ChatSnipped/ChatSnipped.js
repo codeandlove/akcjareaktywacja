@@ -44,12 +44,12 @@ const ChatSnipped = (props) => {
                         <DotCounter data={data} lastKey={lastKey}/>
                         <Comment>
                             <Button onClick={() => setDisabled(true)} icon="times" floated="right" basic circular />
-                            <Comment.Avatar as='div' src={userAvatar}/>
+                            <Comment.Avatar as='div' src={userAvatar} onClick={openChat}/>
                             <Comment.Content>
-                                <Comment.Author as='strong'>
+                                <Comment.Author as='strong' onClick={openChat}>
                                     {res.nick}
                                 </Comment.Author>
-                                <Comment.Text className="short">
+                                <Comment.Text className="short" onClick={openChat}>
                                     {res.reports && res.reports.length >= MESSAGE_REPORTS_LIMIT ? REPORTED_MESSAGE_PLACEHOLDER : res.message}
                                 </Comment.Text>
                                 <Comment.Actions>

@@ -1,0 +1,19 @@
+@import "./../../../vars";
+
+.leaflet-popup-content {
+  .marker-item-popup {
+    max-width: 240px;
+
+    .header {
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin: 8px 0;
+    }
+
+    .extra {
+      text-align: right;
+    }
+  }
+}

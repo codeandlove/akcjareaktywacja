@@ -1,5 +1,6 @@
-import React, {useMemo} from 'react';
-import { Card } from 'semantic-ui-react'
+import React from 'react';
+import './MarkerWithInfo.scss';
+import {Button, Item} from 'semantic-ui-react'
 import {Marker, Popup} from 'react-leaflet';
 
 import { Link } from "react-router-dom";
@@ -30,27 +31,24 @@ const MarkerWithInfo = (props) => {
     return (
         <Marker position={position} icon={isInPast ? markerIcons.inpast : markerIcons.ongoing}>
             <Popup>
-                <Card>
-                    <Card.Content>
-                        <Card.Header>{data.title}</Card.Header>
-                        <Card.Meta>
-                            <span className='date'>{moment(data.date).format("DD MMMM YYYY, HH:mm")}</span>
-                        </Card.Meta>
-                        <Card.Description>
-                            <p>
-                                <em>{data.owner}</em>
-                            </p>
-                            <p>{data.short}</p>
-                        </Card.Description>
-                    </Card.Content>
-                    <Card.Content extra textAlign="right">
+                <Item className="marker-item-popup">
+                    <Item.Header as="h4">
                         <Link to={`/${ACTION}/${data.slug}`}>
-                            {
-                                isInPast ? `Zobacz ${data.title}` : `Dołącz do ${data.title}`
-                            }
+                            {data.title}
                         </Link>
-                    </Card.Content>
-                </Card>
+                    </Item.Header>
+                    <Item.Meta>
+                        <small><strong>{moment(data.date).format("DD MMMM YYYY, HH:mm")} | {data.owner}</strong></small>
+                    </Item.Meta>
+                    <Item.Description>
+                        <p>{data.short}</p>
+                    </Item.Description>
+                    <Item.Extra>
+                        <Link to={`/${ACTION}/${data.slug}`}>
+                            <Button size="mini" color="olive">Zobacz</Button>
+                        </Link>
+                    </Item.Extra>
+                </Item>
             </Popup>
         </Marker>
     )

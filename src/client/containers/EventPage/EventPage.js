@@ -14,6 +14,7 @@ import PropTypes from "prop-types";
 import Countdown from "../../components/Countrdown/Countdown";
 import {EVENT_FORM} from "../../routers";
 import {analytics} from "../../../firebase";
+import PhoneNumberButton from "../../components/PhoneNumberButton/PhoneNumberButton";
 
 class EventPage extends Component {
     componentDidMount() {
@@ -50,7 +51,7 @@ class EventPage extends Component {
                         {title}
                         <Header.Subheader>
                             <span>Organizator: <strong>{owner}</strong></span><br />
-                            <small>Data: <strong>{moment(date).format("DD MMMM YYYY, HH:mm")}</strong> - pozostało <strong><Countdown toDate={date} /></strong></small>
+                            <small>Data: <strong>{moment(date).format("DD MMMM YYYY, HH:mm")}</strong> - pozostało: <strong><Countdown toDate={date} /></strong></small>
                         </Header.Subheader>
                     </Header>
                 </Segment>
@@ -76,7 +77,9 @@ class EventPage extends Component {
                             </Table.Row>
                             <Table.Row>
                                 <Table.Cell>Kontakt</Table.Cell>
-                                <Table.Cell>{contact}</Table.Cell>
+                                <Table.Cell>
+                                    <PhoneNumberButton text={contact} />
+                                </Table.Cell>
                             </Table.Row>
                         </Table.Body>
                     </Table>
