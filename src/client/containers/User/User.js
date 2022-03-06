@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import {firebaseConnect, isEmpty} from 'react-redux-firebase';
+import {firebaseConnect} from 'react-redux-firebase';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 
@@ -22,7 +22,7 @@ import {
     Image,
     Tab,
     Dimmer,
-    Loader
+    Loader, Checkbox
 } from "semantic-ui-react";
 import Avatar from "../../components/Avatar/Avatar";
 import PropTypes from "prop-types";
@@ -38,6 +38,7 @@ class User extends Component {
             email: null,
             password: null,
             nick: null,
+            subscriptions: false,
             avatarImage: null,
             updateAvatar: false,
             validated: false
@@ -49,13 +50,18 @@ class User extends Component {
         toggleColumn(true);
     }
 
-    componentWillReceiveProps(props) {
-        const { auth, profile } = props;
+    componentWillReceiveProps(nextProps) {
+        const { auth, profile } = nextProps;
+
+        if(this.props.profile === nextProps.profile) {
+            return;
+        }
 
         if(auth.isLoaded && !auth.isEmpty) {
             this.setState({
                 nick: profile.displayNick,
-                avatarImage: profile.avatarImage
+                avatarImage: profile.avatarImage,
+                subscriptions: profile.subscriptions
             })
         }
     }
@@ -65,6 +71,14 @@ class User extends Component {
             [name]: event.target.value
         });
     };
+
+    handleChangeCheckbox = name => {
+        this.setState(s => {
+            return {
+                [name]: !s[name]
+            }
+        });
+    }
 
     renderMessage = () => {
         const { messageType } = this.state;
@@ -117,24 +131,34 @@ class User extends Component {
 
     updateProfile = () => {
         const { auth, firebase } = this.props;
-        const { nick, avatarImage } = this.state;
+        const { nick, subscriptions, avatarImage } = this.state;
 
-        if(this.validateValues(["nick", "updateAvatar"])) return;
+        if(this.validateValues(["nick"])) return;
 
         verifyCaptcha(this.props, 'updateUser').then(token => {
             if(token) {
                 const usersRef = firebase.database().ref('/users');
 
                 //Check if nick is unique
-                usersRef.orderByChild('displayNick').equalTo(nick).once("value").then(snapshot => {
+                usersRef.orderByChild('displayNick').equalTo(nick).once('value').then(snapshot => {
+                    console.log(snapshot.val());
 
-                    const isItMe = auth.uid === Object.keys(snapshot.val())[0];
+                    const isItMe = auth.uid === (snapshot.val() && Object.keys(snapshot.val())[0]);
 
                     if(!snapshot.val() || isItMe) {
-                        this.props.firebase.update(`users/${auth.uid}`, {
+                        let data = {
                             displayNick: nick,
-                            avatarImage: avatarImage
-                        }, () => {
+                            subscriptions: subscriptions
+                        }
+
+                        if(avatarImage) {
+                            data = {
+                                ...data,
+                                avatarImage: avatarImage,
+                            }
+                        }
+
+                        this.props.firebase.update(`users/${auth.uid}`, data, () => {
                             this.setState({
                                 messageType: "create/profile-updated",
                                 validated: false
@@ -166,7 +190,7 @@ class User extends Component {
 
     userSettings = () => {
         const { auth, profile } = this.props;
-        const { nick, avatarImage, uploader, messageType } = this.state;
+        const { nick, subscriptions, avatarImage, uploader, messageType } = this.state;
 
         return (
             <Tab.Pane clearing>
@@ -181,6 +205,10 @@ class User extends Component {
                     <Form.Field>
                         <label>Nick</label>
                         <Input ref={el => this.nick = el} placeholder="Wpisz nick" type="text" id="nick" name="nick" value={nick || profile.displayNick || ""} onChange={this.handleChange("nick")} />
+                    </Form.Field>
+                    <Form.Field>
+                        <label>Powiadomienia</label>
+                        <Checkbox label="Chcę otrzymywać powiadomienia o nowych aktywnościach." onClick={() => this.handleChangeCheckbox("subscriptions")} value={subscriptions} defaultChecked={subscriptions}/>
                     </Form.Field>
                     <Form.Field>
                         <Button floated="right" color="olive" disabled={this.validateValues(["nick"]) || messageType === "nick/nick-exist"} onClick={this.updateProfile}>
