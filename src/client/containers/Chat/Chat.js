@@ -2,10 +2,6 @@ import React, {useEffect, useRef} from "react";
 
 import ChatForm from './../ChatForm/ChatForm';
 
-import moment from 'moment';
-
-import avatarPlaceholder from "./../../../assets/profile_avatar.png";
-
 import { Container, Segment, Header, Button, Comment } from "semantic-ui-react";
 
 import "./Chat.scss";

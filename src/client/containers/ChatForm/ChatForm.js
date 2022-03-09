@@ -10,7 +10,7 @@ import { Button, Form, Message, TextArea, Icon, Transition } from "semantic-ui-r
 
 import "./ChatForm.scss";
 import {analytics} from "../../../firebase";
-import {verifyCaptcha} from "../../utils";
+import {findPhoneNumber, findSwearWord, findUrlString, verifyCaptcha} from "../../utils";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 
 const MIN_TIME_OFFSET = 30000;
@@ -72,6 +72,33 @@ class ChatForm extends Component {
                     />
                 );
                 break;
+            case "found-url-string":
+                result = (
+                    <Message
+                        color="orange"
+                        size="mini"
+                        content="Uwaga na roboty! 🤖 - Treść zawiera adres URL. Zmodyfikuj treść aby opublikować komentarz."
+                    />
+                );
+                break;
+            case "found-phone-string":
+                result = (
+                    <Message
+                        color="orange"
+                        size="mini"
+                        content="Uwaga na roboty 🤖🤖🤖! Nie podawaj numeru telefonu w treści komentarza."
+                    />
+                );
+                break;
+            case "found-swear-word":
+                result = (
+                    <Message
+                        color="orange"
+                        size="mini"
+                        content="Wprowadzona treść zawiera niestosowne słowa. Proszę poprawić treść aby była bardziej przyjazna dla innych użytkowników."
+                    />
+                );
+                break;
             default:
                 result = null;
                 break;
@@ -88,11 +115,49 @@ class ChatForm extends Component {
         return result.length !== 0;
     };
 
+    validateExcludes = (values) => {
+        const result = values.filter(val => {
+            if(this.state[val] && typeof this.state[val] === 'string') {
+                if(findUrlString(this.state[val])) {
+                    this.setState({
+                        messageType: "found-url-string"
+                    });
+
+                    return true;
+                }
+
+                if(val !== "contact" && findPhoneNumber(this.state[val])) {
+                    this.setState({
+                        messageType: "found-phone-string"
+                    });
+
+                    return true;
+                }
+
+                if(findSwearWord(this.state[val])) {
+                    this.setState({
+                        messageType: "found-swear-word"
+                    });
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            return false;
+        });
+
+        return result.length !== 0;
+    }
+
     handleSave = () => {
         const { nick, message, timestamp } = this.state;
         const { firebase, auth } = this.props;
 
         if(this.validateValues(["nick", "message"])) return;
+
+        if(this.validateExcludes(["nick", "message"])) return;
 
         verifyCaptcha(this.props, 'chatMessage').then(token => {
             if(token) {
