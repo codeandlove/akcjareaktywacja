@@ -15,7 +15,7 @@ import {isInPastDate} from "../../utils";
 const MarkerWithInfo = (props) => {
     const { data, position } = props;
 
-    const isInPast = isInPastDate(data.date);
+    const isInPast = isInPastDate(data.date, 0);
 
     const markerIcons = {
         ongoing: icon({

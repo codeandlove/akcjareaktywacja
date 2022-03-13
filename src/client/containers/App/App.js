@@ -501,7 +501,7 @@ const enhance = compose(
         ];
 
         const recentQueryParams = [
-            `endAt=${moment().subtract(1, 'day').startOf('day').valueOf()}`,
+            `endAt=${moment().startOf('day').valueOf()}`,
             "limitToLast=3",
             "orderByChild=date"
         ];

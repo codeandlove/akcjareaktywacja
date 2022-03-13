@@ -90,6 +90,10 @@ const EventMarkerLocator = (props) => {
         inpast: icon({
             iconUrl: "/markers/inpast.png",
             iconSize: [32, 32],
+        }),
+        newone: icon({
+            iconUrl: "/markers/newone.png",
+            iconSize: [32, 32],
         })
     }
 
@@ -156,7 +160,7 @@ const EventMarkerLocator = (props) => {
     }
 
     return position ? (
-        <Marker ref={markerRef} position={position} icon={markerIcons.ongoing} draggable={true} eventHandlers={eventHandlers}>
+        <Marker ref={markerRef} position={position} icon={markerIcons.newone} draggable={true} eventHandlers={eventHandlers}>
             <Popup>
                 {popupContent()}
             </Popup>
@@ -218,9 +222,10 @@ const Map = (props) => {
 
         const data = {...events, ...recent};
 
-        if(!data) return
+        if(!data) return;
+
         const markers = Object.keys(data).map((key) => {
-            const event = data[key]
+            const event = data[key];
             return <MarkerWithInfo key={`marker-${key}`} position={event.coordinates} data={event} viewEvent={() => this.props.viewEvent(key)}/>
         })
 

@@ -80,7 +80,7 @@ const enhance = compose(
     firebaseConnect((props, store) => {
 
         const recentQueryParams = [
-            `endAt=${moment().subtract(1, 'day').startOf('day').valueOf()}`,
+            `endAt=${moment().startOf('day').valueOf()}`,
             "orderByChild=date",
             "limitToLast=3"
         ];
