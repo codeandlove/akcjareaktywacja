@@ -40,6 +40,7 @@ import Avatar from "../../components/Avatar/Avatar";
 import DotCounter from "../../components/DotCounter/DotCounter";
 import {withCookies} from "react-cookie";
 import {askForPermissionToReceiveNotifications} from "../../../firebase";
+import {pushNotification} from "../../notifications";
 
 const populates = [
     { child: "participants", root: "users", keyProp: "uid" }, // replace participants with user object

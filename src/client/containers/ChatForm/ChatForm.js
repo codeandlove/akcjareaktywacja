@@ -12,6 +12,7 @@ import "./ChatForm.scss";
 import {analytics} from "../../../firebase";
 import {findPhoneNumber, findSwearWord, findUrlString, verifyCaptcha} from "../../utils";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
+import {pushNotification} from "../../notifications";
 
 const MIN_TIME_OFFSET = 30000;
 
@@ -183,6 +184,7 @@ class ChatForm extends Component {
                 if(!isEmpty(auth) && isLoaded(auth)) {
                     preparedData = {...preparedData, user: auth.uid};
                     firebase.push('chat', preparedData, () => {
+                        pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
                         this.clearForm();
                     });
 
@@ -196,6 +198,7 @@ class ChatForm extends Component {
                                 preparedData = {...preparedData, user: res.user.uid}
 
                                 firebase.push('chat', preparedData, () => {
+                                    pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
                                     this.clearForm();
                                 });
                             });

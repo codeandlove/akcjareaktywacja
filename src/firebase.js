@@ -30,10 +30,12 @@ const getMessagesToken = () => {
     if(!messaging) return;
 
     messaging.getToken({
-        vapidKey: 'BAE3npwkOAaX-wQs3QsrW0ikBBclhIv3_nKfm8p6VO2YveN8kZjykaIEt63No5LKQL-R2DK3WMaW2MWpS9bCH3E'
+        vapidKey: process.env.REACT_APP_NOTIFICATION_VAPID_KEY
     }).then((currentToken) => {
         if (currentToken) {
-            //console.log(currentToken);
+            // console.log(currentToken);
+            subscribeTokenToTopic(currentToken, 'events');
+            subscribeTokenToTopic(currentToken, 'chat');
             console.log('Token Received.');
         } else {
             // Show permission request.
@@ -46,10 +48,31 @@ const getMessagesToken = () => {
             getMessagesToken()
         }
     });
+
+    const FCM_SERVER_KEY =  process.env.REACT_APP_NOTIFICATION_SERVER_KEY;
+
+    const subscribeTokenToTopic = (token, topic) => {
+        fetch(`https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`, {
+            method: 'POST',
+            headers: new Headers({
+                Authorization: `key=${FCM_SERVER_KEY}`
+            })
+        })
+            .then((response) => {
+                if (response.status < 200 || response.status >= 400) {
+                    console.log(response.status, response);
+                }
+                console.log(`"${topic}" is subscribed`);
+            })
+            .catch((error) => {
+                console.error(error.result);
+            });
+        return true;
+    }
 }
 
 export const askForPermissionToReceiveNotifications = async () => {
-    if(process.env.NODE_ENV === 'production') {
+    if(process.env.NODE_ENV !== 'production') {
         return;
     }
 
@@ -66,7 +89,6 @@ export const askForPermissionToReceiveNotifications = async () => {
                 }
 
                 console.log('Notification permission granted.');
-
                 getMessagesToken();
 
             } else {

@@ -23,10 +23,10 @@ const configuration = function override(config, env) {
             cache: true
         })
 
-        config = rewireWebpackBundleAnalyzer(config, env, {
-            analyzerMode: 'static',
-            reportFilename: 'report.html'
-        })
+        // config = rewireWebpackBundleAnalyzer(config, env, {
+        //     analyzerMode: 'static',
+        //     reportFilename: 'report.html'
+        // })
     }
 
     if (!config.plugins) {
