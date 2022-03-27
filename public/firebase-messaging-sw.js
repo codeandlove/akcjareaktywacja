@@ -24,8 +24,8 @@ messaging.setBackgroundMessageHandler(function(payload) {
         });
     return promiseChain;
 });
-
-self.addEventListener('notificationclick', function(event) {
-    // do what you want
-    // ...
-});
+//
+// self.addEventListener('notificationclick', function(event) {
+//     // do what you want
+//     // ...
+// });

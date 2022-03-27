@@ -130,7 +130,7 @@ class Join extends Component {
             //if event is from past, user can not join anymore
             const isInPast = moment(event.date).isSame(moment().subtract( 1, "days"), "day") || (moment(event.date).diff(moment(), 'days') < 0);
 
-            const floatedAttr = (!!floated)? {
+            const floatedAttr = (!!floated) ? {
                 floated: floated
             } : null;
 

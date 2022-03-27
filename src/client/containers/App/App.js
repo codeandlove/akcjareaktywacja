@@ -21,7 +21,7 @@ import "./App.scss";
 import ChatSnipped from "../ChatSnipped/ChatSnipped";
 import SecureLS from "secure-ls";
 
-import {generateClientDeviceUUID, getIPInfoApiUrl, notifyToSlackChannel} from "../../utils";
+import {formatSlackNotifyMessage, generateClientDeviceUUID, getIPInfoApiUrl, notifyToSlackChannel} from "../../utils";
 
 import {bindActionCreators} from "redux";
 import * as actionCreators from "../../actions";
@@ -39,8 +39,8 @@ import {
 import Avatar from "../../components/Avatar/Avatar";
 import DotCounter from "../../components/DotCounter/DotCounter";
 import {withCookies} from "react-cookie";
-import {askForPermissionToReceiveNotifications} from "../../../firebase";
-import {pushNotification} from "../../notifications";
+import {askForPermissionToReceiveNotifications} from "../../../firebase/messaging";
+import {SLACK_NEW_VISITOR_HOOK} from "../../consts";
 
 const populates = [
     { child: "participants", root: "users", keyProp: "uid" }, // replace participants with user object
@@ -49,8 +49,6 @@ const populates = [
 ];
 
 const ls = new SecureLS();
-
-const SLACK_NEW_VISITOR_HOOK = 'https://hooks.slack.com/services/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';
 
 const toFloatNumber = (str, val) => {
     str = str.toString();
@@ -72,8 +70,17 @@ class App extends Component {
             event: null,
             events: null,
             chat: null,
-            isMobile: false
+            isMobile: false,
+            hasError: false
         }
+    }
+
+    static getDerivedStateFromError(error) {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        console.log(error, errorInfo);
     }
 
     async componentDidMount() {
@@ -82,7 +89,9 @@ class App extends Component {
         this.isMobileDetection();
         window.addEventListener('resize', this.isMobileDetection.bind(this));
 
-        await askForPermissionToReceiveNotifications();
+        setTimeout(async () => {
+            await askForPermissionToReceiveNotifications();
+        }, 30000)
 
         try {
             if(clientData) {
@@ -126,8 +135,6 @@ class App extends Component {
 
                 this.props.setClientData(clientData);
 
-                let slackMessageDetails = JSON.stringify(jsonResponse);
-
                 notifyToSlackChannel(SLACK_NEW_VISITOR_HOOK,
                     {
                         "text": "New Visitor.",
@@ -136,7 +143,7 @@ class App extends Component {
                                 "type": "section",
                                 "text": {
                                     "type": "mrkdwn",
-                                    "text": slackMessageDetails.indexOf('google.com') !== -1 ? 'Google bot' : slackMessageDetails
+                                    "text": `${formatSlackNotifyMessage(jsonResponse)}`
                                 }
                             }
                         ]
@@ -266,7 +273,7 @@ class App extends Component {
     }
 
     render() {
-        const { events, recent, event, chat, menuVisible, auth, isMobile } = this.state;
+        const { events, recent, event, chat, menuVisible, auth, isMobile, hasError} = this.state;
 
         const { profile, cookies } = this.props;
 
@@ -282,6 +289,16 @@ class App extends Component {
         )
 
         const lastKey = cookies.get(CHAT_LATEST_KEY_COOKIE_NAME);
+
+        if (hasError) {
+            return (
+                <div className="bug-container">
+                    <img src={picture} className="picture-img" alt="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." title="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." />
+                    <strong>Przepraszamy, coś poszło nie tak... Wróć do nas za parę minut.</strong>
+                    <p>Jeśli problem się powtarza, daj nam znać na: <a href="mailto:akcjareaktywacjaofficial@gmail.com">akcjareaktywacjaofficial@gmail.com</a></p>
+                </div>
+            )
+        }
 
         return (
             <div className="app">

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-
+import './EventPage.scss';
 import { connect } from "react-redux";
 import { compose } from "redux";
 import {firebaseConnect, isLoaded, isEmpty, populate} from "react-redux-firebase";
@@ -13,8 +13,9 @@ import {Helmet} from "react-helmet";
 import PropTypes from "prop-types";
 import Countdown from "../../components/Countrdown/Countdown";
 import {EVENT_FORM} from "../../routers";
-import {analytics} from "../../../firebase";
+import {analytics} from "../../../firebase/analytics";
 import PhoneNumberButton from "../../components/PhoneNumberButton/PhoneNumberButton";
+import ShareButton from "../../components/ShareButton/ShareButton";
 
 class EventPage extends Component {
     componentDidMount() {
@@ -31,7 +32,7 @@ class EventPage extends Component {
     }
 
     renderPage = (data) => {
-        const {match: {url} , isDraft} = this.props;
+        const {match: {url}, isDraft} = this.props;
         const {owner, title, description, eventKey, short, date, location, contact} = data;
 
         return (
@@ -87,7 +88,10 @@ class EventPage extends Component {
                 <Segment clearing basic>
                     {
                         eventKey ? (
-                            <Join eventKey={eventKey} event={data} />
+                            <>
+                                <Join eventKey={eventKey} event={data} floated="right" />
+                                <ShareButton url={url} />
+                            </>
                         ): null
                     }
                     <Button floated="left" onClick={() => this.closeEventPage()} >

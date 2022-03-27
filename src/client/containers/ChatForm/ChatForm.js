@@ -9,7 +9,7 @@ import moment from 'moment';
 import { Button, Form, Message, TextArea, Icon, Transition } from "semantic-ui-react";
 
 import "./ChatForm.scss";
-import {analytics} from "../../../firebase";
+import {analytics} from "../../../firebase/analytics";
 import {findPhoneNumber, findSwearWord, findUrlString, verifyCaptcha} from "../../utils";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {pushNotification} from "../../notifications";

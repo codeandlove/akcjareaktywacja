@@ -141,7 +141,6 @@ class User extends Component {
 
                 //Check if nick is unique
                 usersRef.orderByChild('displayNick').equalTo(nick).once('value').then(snapshot => {
-                    console.log(snapshot.val());
 
                     const isItMe = auth.uid === (snapshot.val() && Object.keys(snapshot.val())[0]);
 
@@ -206,10 +205,10 @@ class User extends Component {
                         <label>Nick</label>
                         <Input ref={el => this.nick = el} placeholder="Wpisz nick" type="text" id="nick" name="nick" value={nick || profile.displayNick || ""} onChange={this.handleChange("nick")} />
                     </Form.Field>
-                    {/*<Form.Field>*/}
-                    {/*    <label>Powiadomienia</label>*/}
-                    {/*    <Checkbox label="Chcę otrzymywać powiadomienia o nowych aktywnościach." onClick={() => this.handleChangeCheckbox("subscriptions")} value={subscriptions} defaultChecked={subscriptions}/>*/}
-                    {/*</Form.Field>*/}
+                    <Form.Field>
+                        <label>Powiadomienia</label>
+                        <Checkbox label="Chcę otrzymywać powiadomienia o nowych aktywnościach." onClick={() => this.handleChangeCheckbox("subscriptions")} value={subscriptions} defaultChecked={subscriptions}/>
+                    </Form.Field>
                     <Form.Field>
                         <Button floated="right" color="olive" disabled={this.validateValues(["nick"]) || messageType === "nick/nick-exist"} onClick={this.updateProfile}>
                             <Icon name="check" />

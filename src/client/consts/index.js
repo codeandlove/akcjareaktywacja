@@ -1,0 +1,1 @@
+export const SLACK_NEW_VISITOR_HOOK = 'https://hooks.slack.com/services/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';

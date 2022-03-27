@@ -1,1 +1,7 @@
 @import "./../../../vars";
+
+.join-button {
+  @include media('<tablet') {
+    margin-bottom: 15px !important;
+  }
+}

@@ -1,12 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
-import reportWebVitals from './reportWebVitals';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { BrowserRouter } from 'react-router-dom';
 import { Root } from './client/Root';
 import './index.scss';
-import { store, history } from './client/store/store';
 
 ReactDOM.render(
     <GoogleReCaptchaProvider
@@ -15,13 +13,13 @@ ReactDOM.render(
         useEnterprise={false}
         scriptProps={{
             async: true, // optional, default to false,
-            defer: true, // optional, default to false
+            defer: false, // optional, default to false
             appendTo: 'body', // optional, default to "head", can be "head" or "body",
             nonce: undefined // optional, default undefined
         }}
     >
         <BrowserRouter>
-            <Root store={store} history={history} />
+            <Root />
         </BrowserRouter>
     </GoogleReCaptchaProvider>,
     document.getElementById('root')
@@ -32,7 +30,3 @@ ReactDOM.render(
 // Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.register();
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

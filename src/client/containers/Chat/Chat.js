@@ -6,10 +6,10 @@ import { Container, Segment, Header, Button, Comment } from "semantic-ui-react";
 
 import "./Chat.scss";
 
-import {analytics} from "../../../firebase";
+import {analytics} from "../../../firebase/analytics";
 import {withCookies} from "react-cookie";
 import ChatMessage from "../ChatMessage/ChatMessage";
-
+console.log(analytics);
 export const CHAT_LATEST_KEY_COOKIE_NAME = 'lastChatKey';
 
 const Chat = (props) => {
