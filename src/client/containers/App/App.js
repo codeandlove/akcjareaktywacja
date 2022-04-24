@@ -30,7 +30,7 @@ import {
     CONTACT,
     EVENT_FORM,
     EVENTS_LIST,
-    GDPR,
+    GDPR, LOGIN,
     PRIVACY_POLICY,
     STATIC,
     TERMS_OF_USE,
@@ -41,11 +41,13 @@ import DotCounter from "../../components/DotCounter/DotCounter";
 import {withCookies} from "react-cookie";
 import {askForPermissionToReceiveNotifications} from "../../../firebase/messaging";
 import {SLACK_NEW_VISITOR_HOOK} from "../../consts";
+import VisitorsOnlineTracker from "../../components/VisitorsOnlineTracker/VisitorsOnlineTracker";
 
 const populates = [
     { child: "participants", root: "users", keyProp: "uid" }, // replace participants with user object
     { child: "user", root: "users", keyProp: "uid" },
-    { child: "avatarImage", root: "users", keyProp: "avatarImage" }
+    { child: "avatarImage", root: "users", keyProp: "avatarImage" },
+    { child: "status", root: "users", keyProp: "status"}
 ];
 
 const ls = new SecureLS();
@@ -318,6 +320,7 @@ class App extends Component {
                         onClick={() => this.togglePage(false)}
                     >
                         <img src={logo} className="logo" alt="Akcjareaktywacja.pl" title="Akcjareaktywacja.pl" width="176" height="19" />
+                        <VisitorsOnlineTracker />
                     </Menu.Item>
                     <Menu.Menu position="right">
                         {
@@ -357,7 +360,7 @@ class App extends Component {
                                             className="login-item"
                                             name="login"
                                             as={Link}
-                                            to={`/${USER}`}
+                                            to={`/${LOGIN}`}
                                             onClick={() => this.toggleColumn(true)}
                                         >
                                             <Icon name="user circle" size="large" color="olive" />
@@ -528,12 +531,14 @@ const enhance = compose(
             { path: "/events", storeAs: 'recent', queryParams: recentQueryParams, populates },
             { path: "/events", storeAs: 'events', queryParams: eventsQueryParams, populates },
             { path: "/chat", storeAs: 'chat', queryParams: ["orderByChild=date", "limitToLast=10"], populates },
+            { path: "/online", storeAs: 'online' }
         ]
     }),
     connect(({ firebase, settings, client, event, draft }) => ({
         recent: populate(firebase, "recent", populates),
         events: populate(firebase, "events", populates),
         chat: populate(firebase, "chat", populates),
+        online: populate(firebase, "online", populates),
         auth: firebase.auth,
         profile: firebase.profile,
         settings: settings,

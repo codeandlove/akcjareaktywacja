@@ -24,8 +24,6 @@ export const Root = () => {
                     setAppCheck(false);
 
                     fetch(getIPInfoApiUrl()).then((response) => response.json()).then((jsonResponse) => {
-                        let clientData = jsonResponse;
-
                         notifyToSlackChannel(SLACK_NEW_VISITOR_HOOK,
                             {
                                 "text": "App check failed.",
@@ -41,7 +39,7 @@ export const Root = () => {
                                         "type": "section",
                                         "text": {
                                             "type": "mrkdwn",
-                                            "text": `${formatSlackNotifyMessage(clientData)}`
+                                            "text": `${formatSlackNotifyMessage(jsonResponse)}`
                                         }
                                     }
                                 ]

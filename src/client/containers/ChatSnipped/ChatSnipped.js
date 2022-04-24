@@ -10,6 +10,7 @@ import ReportMessage, {
     MESSAGE_REPORTS_LIMIT,
     REPORTED_MESSAGE_PLACEHOLDER
 } from "../../components/ReportMessage/ReportMessage";
+import UserStatusIndicator from "../../components/UserStatusIndicator/UserStatusIndicator";
 
 const ChatSnipped = (props) => {
     const {data, openChat, isColOpen} = props;
@@ -19,10 +20,12 @@ const ChatSnipped = (props) => {
     const key = !!data && Object.keys(data)[Object.keys(data).length - 1];
     const res = !!key && data[key];
     const {user} = res;
-    let userAvatar = avatarPlaceholder;
+    let userAvatar = avatarPlaceholder,
+        userStatus;
 
     if(user) {
         userAvatar = user.avatarImage || user.avatarUrl || avatarPlaceholder;
+        userStatus = user.status;
     }
 
     useEffect(() => {
@@ -44,7 +47,9 @@ const ChatSnipped = (props) => {
                         <DotCounter data={data} lastKey={lastKey}/>
                         <Comment>
                             <Button onClick={() => setDisabled(true)} icon="times" floated="right" basic circular />
-                            <Comment.Avatar as='div' src={userAvatar} onClick={openChat}/>
+                            <UserStatusIndicator asAvatar={true} status={userStatus} onClick={openChat}>
+                                <Comment.Avatar as='div' src={userAvatar} />
+                            </UserStatusIndicator>
                             <Comment.Content>
                                 <Comment.Author as='strong' onClick={openChat}>
                                     {res.nick}

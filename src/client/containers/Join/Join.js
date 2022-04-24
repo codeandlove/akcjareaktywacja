@@ -77,7 +77,6 @@ class Join extends Component {
     };
 
     joinToEvent = () => {
-
         const { eventKey, firebase, auth, client: {ip, duuid} } = this.props;
         const { users, clients_ip } = this.state;
 
@@ -100,6 +99,7 @@ class Join extends Component {
 
     renderParticipants = () => {
         const { users, members } = this.state;
+        const { event: {owner} } = this.props;
 
         const allMembers = members.map((member, index) => {
             const avatar = member.avatarImage || member.avatarUrl || avatarPlaceholder;
@@ -112,12 +112,14 @@ class Join extends Component {
             /></span>)
         });
 
+        const anonimousAmount = users.length - members.length > 1 ? users.length - members.length - 1 : 0;
+
         if(members.length > 0) {
             return (
-                <>{allMembers} oraz {users.length - members.length} anonimów.</>
+                <>{owner}, {anonimousAmount} anonimów oraz {allMembers}</>
             )
         } else {
-            return `${users.length - members.length} anonimów.`;
+            return `${owner} oraz ${anonimousAmount} anonimów.`;
         }
     };
 

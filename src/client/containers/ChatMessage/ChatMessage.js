@@ -6,6 +6,7 @@ import ReportMessage, {
     MESSAGE_REPORTS_LIMIT,
     REPORTED_MESSAGE_PLACEHOLDER
 } from "../../components/ReportMessage/ReportMessage";
+import UserStatusIndicator from "../../components/UserStatusIndicator/UserStatusIndicator";
 
 const ChatMessage = (props) => {
     const {data, messageKey, data:{user, nick, timestamp, message, reports}} = props;
@@ -15,16 +16,20 @@ const ChatMessage = (props) => {
 
     const dateToDisplay = isInPast ? moment(timestamp).format("DD MMMM YYYY, HH:mm:ss") : moment(timestamp).fromNow()
 
-    let userAvatar = avatarPlaceholder;
+    let userAvatar = avatarPlaceholder,
+        userStatus;
 
     if(user) {
         userAvatar = user.avatarImage || user.avatarUrl || avatarPlaceholder;
+        userStatus = user.status;
     }
 
     return (
         <Segment color="olive" >
             <Comment>
-                <Comment.Avatar as='div' src={userAvatar} />
+                <UserStatusIndicator asAvatar={true} status={userStatus} >
+                    <Comment.Avatar as='div' src={userAvatar} />
+                </UserStatusIndicator>
                 <Comment.Content>
                     <Comment.Author as='strong'>{nick}</Comment.Author>
                     <Comment.Metadata>

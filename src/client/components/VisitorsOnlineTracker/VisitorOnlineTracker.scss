@@ -1,0 +1,29 @@
+@import "./../../../vars";
+
+.visitor-tracker {
+    font-size: 11px;
+    padding: 0 15px;
+    display: flex;
+    margin: 0 auto;
+
+    @include media('<mobile') {
+        position: absolute;
+        top: 54px;
+        left: 0;
+        text-align: right;
+        width: 100%;
+        justify-content: flex-end;
+        font-size: 9px;
+        max-width: 310px;
+    }
+
+    > div {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    span {
+        line-height: 1.25;
+        font-weight: normal;
+    }
+}

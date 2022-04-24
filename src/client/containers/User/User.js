@@ -141,7 +141,6 @@ class User extends Component {
 
                 //Check if nick is unique
                 usersRef.orderByChild('displayNick').equalTo(nick).once('value').then(snapshot => {
-
                     const isItMe = auth.uid === (snapshot.val() && Object.keys(snapshot.val())[0]);
 
                     if(!snapshot.val() || isItMe) {

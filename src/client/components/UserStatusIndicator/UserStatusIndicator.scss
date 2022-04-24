@@ -1,0 +1,28 @@
+
+.user-status-indicator {
+    position: relative;
+
+    &:before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 10px;
+        background-color: slategray;
+        display: block;
+        position: absolute;
+        bottom: -5px;
+        right: -5px;
+    }
+
+    &.online {
+        &:before {
+            background-color: #1aa62a;
+        }
+    }
+
+    &.avatar {
+        >.avatar {
+            margin: 0;
+        }
+    }
+}
