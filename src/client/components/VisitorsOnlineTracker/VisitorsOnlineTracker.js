@@ -9,7 +9,6 @@ const VisitorsOnlineTracker = (props) => {
     const {firebase, auth, client: {ip, duuid}, online} = props;
     const [visitorsAmount, setVisitorsAmount] = useState(0);
     const [isWindowVisible, setIsWindowVisible] = useState(true);
-    const [anonymousAuthCreated, setAnonymousAuthCreated] = useState(false);
     const [loggedInVisitorsAmount, setLoggedInVisitorsAmount] = useState(0);
     const onlineRef = firebase.database().ref("/online");
     const client_id = `${ip}.${duuid}`;
@@ -17,19 +16,9 @@ const VisitorsOnlineTracker = (props) => {
 
     useEffect(() => {
         if(isLoaded(auth) && ip && duuid && isWindowVisible) {
-            if(isEmpty(auth) && !anonymousAuthCreated) {
-                firebase.auth().signInAnonymously().then(data => {
-                    setAnonymousAuthCreated(true);
-                }).catch(error => {
-                    console.log(error);
-                })
-            } else  {
-                if(!isEmpty(auth)) {
-                    setTimeout(() => {
-                        setUserOnline();
-                    }, 3000);
-                }
-            }
+            setTimeout(() => {
+                setUserOnline();
+            }, 1000);
         }
     }, [ip, duuid, auth, isWindowVisible])
 
@@ -61,17 +50,27 @@ const VisitorsOnlineTracker = (props) => {
 
     const setUserOnline = () => {
         const {isAnonymous, uid} = auth;
-        const client_data = {
-            id: client_id,
-            isLoggedIn: !isAnonymous,
-            uid: uid
+        let client_data = {
+            id: client_id
+        }
+
+        if (!isEmpty(auth) && !!uid) {
+            client_data = {
+                ...client_data,
+                uid: uid
+            }
+        }
+
+        if (!isEmpty(auth) && !isAnonymous) {
+            client_data = {
+                ...client_data,
+                isLoggedIn: !isAnonymous
+            }
         }
 
         onlineRef.orderByChild("id").equalTo(client_id).once("value").then(async snapshot => {
             if (!snapshot.exists()) {
-                await firebase.push('online', client_data, () => {
-                    setVisitorsAmount(visitorsAmount + 1)
-                })
+                await firebase.push('online', client_data)
             } else {
                 const result = snapshot.val();
                 const key = result && Object.keys(result)[0];

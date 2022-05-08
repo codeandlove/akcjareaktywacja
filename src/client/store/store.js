@@ -26,7 +26,7 @@ const config = {
     online: "online",
     preserveOnLogout: ["events", "chat", "users", "recent", "online"],
     enableLogging: false, // enable/disable Firebase"s database logging,
-    onAuthStateChanged: async (userData, error, completed) => {
+    onAuthStateChanged: async (userData) => {
         if(userData) {
             if(!userData.isAnonymous) {
                 const {uid} = userData;
@@ -42,8 +42,10 @@ const config = {
                         await userRef.onDisconnect().set('offline');
                     }
                 })
-            } else {
-                if (loggedInUserUID) {
+            }
+        } else {
+            if (loggedInUserUID) {
+                firebase.auth().signInAnonymously().then(() => {
                     const userRef = firebase.database().ref(`/users/${loggedInUserUID}`).child('status');
 
                     userRef.once("value").then(async () => {
@@ -51,7 +53,7 @@ const config = {
                     });
 
                     loggedInUserUID = null;
-                }
+                });
             }
         }
     }

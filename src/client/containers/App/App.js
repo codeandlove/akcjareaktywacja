@@ -44,7 +44,7 @@ import {SLACK_NEW_VISITOR_HOOK} from "../../consts";
 import VisitorsOnlineTracker from "../../components/VisitorsOnlineTracker/VisitorsOnlineTracker";
 
 const populates = [
-    { child: "participants", root: "users", keyProp: "uid" }, // replace participants with user object
+    { child: "participants", root: "users", keyProp: "uid" },
     { child: "user", root: "users", keyProp: "uid" },
     { child: "avatarImage", root: "users", keyProp: "avatarImage" },
     { child: "status", root: "users", keyProp: "status"}
@@ -98,6 +98,24 @@ class App extends Component {
         try {
             if(clientData) {
                 this.props.setClientData(clientData);
+
+                if (process.env.NODE_ENV === 'production') {
+                    notifyToSlackChannel(SLACK_NEW_VISITOR_HOOK,
+                        {
+                            "text": "Returning Visitor.",
+                            "blocks": [
+                                {
+                                    "type": "section",
+                                    "text": {
+                                        "type": "mrkdwn",
+                                        "text": `${formatSlackNotifyMessage(clientData)}`
+                                    }
+                                }
+                            ]
+                        }
+                    );
+                }
+
                 return;
             }
 
@@ -530,7 +548,7 @@ const enhance = compose(
         return [
             { path: "/events", storeAs: 'recent', queryParams: recentQueryParams, populates },
             { path: "/events", storeAs: 'events', queryParams: eventsQueryParams, populates },
-            { path: "/chat", storeAs: 'chat', queryParams: ["orderByChild=date", "limitToLast=10"], populates },
+            { path: "/chat", storeAs: 'chat', queryParams: ["orderByChild=date", "limitToLast=25"], populates },
             { path: "/online", storeAs: 'online' }
         ]
     }),

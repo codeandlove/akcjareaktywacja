@@ -13,7 +13,7 @@ import ChatMessage from "../ChatMessage/ChatMessage";
 export const CHAT_LATEST_KEY_COOKIE_NAME = 'lastChatKey';
 
 const Chat = (props) => {
-    const { data, close, toggleColumn, cookies } = props;
+    const {data, close, toggleColumn, cookies} = props;
     const chatListRef = useRef();
 
     useEffect(() => {
