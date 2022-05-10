@@ -20,9 +20,9 @@ import ShowOnMap from "../../components/ShowOnMap/ShowOnMap";
 import {ACTION, EVENT_FORM, SETTINGS} from "../../routers";
 import Countdown from "../../components/Countrdown/Countdown";
 import Recent from "../Recent/Recent";
+import EventsMonitor from "../../components/EventsMonitor/EventsMonitor";
 
 class EventsList extends Component {
-
     componentDidMount() {
         const {toggleColumn} = this.props;
         const { router } = this.context;
@@ -193,15 +193,6 @@ class EventsList extends Component {
 
     renderList = () => {
         const { events } = this.props;
-
-        if(!isLoaded(events)) {
-            return (
-                <Dimmer active inverted>
-                    <Loader size="large">Proszę czekać...</Loader>
-                </Dimmer>
-            )
-        }
-
         let data = [];
 
         if(!isEmpty(events)) {
@@ -225,7 +216,7 @@ class EventsList extends Component {
 
     render() {
         const { router } = this.context;
-        const {settings: {show_recent_events}} = this.props;
+        const {events, settings: {show_recent_events}} = this.props;
 
         return (
             <Container className="events-list">
@@ -237,7 +228,20 @@ class EventsList extends Component {
                     </Header>
                 </Segment>
                 <Segment basic textAlign="center">
-                    {this.renderList()}
+                    {
+                        !isLoaded(events) ? (
+                            <Dimmer active inverted>
+                                <Loader size="large">Proszę czekać...</Loader>
+                            </Dimmer>
+                        ) : (
+                            <>
+                                <EventsMonitor />
+                                {this.renderList()}
+                            </>
+                        )
+
+                    }
+
                 </Segment>
                 {
                     show_recent_events ? (
