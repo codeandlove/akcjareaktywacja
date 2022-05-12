@@ -7,13 +7,11 @@ export function settings(state={}, action) {
                 ...state,
                 view_type: action.payload
             };
-
         case DATE_FROM:
             return {
                 ...state,
                 date_from: action.payload
             };
-
         case DATE_TO:
             return {
                 ...state,

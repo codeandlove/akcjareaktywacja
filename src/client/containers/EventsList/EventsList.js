@@ -1,26 +1,21 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-
 import { Link } from "react-router-dom";
-
-import JoinEvent from "./../Join/Join";
-
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { firebaseConnect, isEmpty, isLoaded } from "react-redux-firebase";
 import { bindActionCreators } from "redux";
 import * as actionCreators from "./../../actions";
-
 import moment from "moment";
-
 import "./EventsList.scss";
-
 import { Container, Header, Segment, Item, Button, Transition, Dimmer, Loader } from "semantic-ui-react";
 import ShowOnMap from "../../components/ShowOnMap/ShowOnMap";
 import {ACTION, EVENT_FORM, SETTINGS} from "../../routers";
+import JoinEvent from "./../Join/Join";
 import Countdown from "../../components/Countrdown/Countdown";
 import Recent from "../Recent/Recent";
 import EventsMonitor from "../../components/EventsMonitor/EventsMonitor";
+import EventsPagination from "../../components/EventsPagination/EventsPagination";
 
 class EventsList extends Component {
     componentDidMount() {
@@ -40,7 +35,7 @@ class EventsList extends Component {
             return (
                 <Segment>
                     <h3>Wydarzenia od <u>{moment(date_from).format("DD MMMM YYYY")}</u> do <u>{moment(date_to).format("DD MMMM YYYY")}</u> ({duration}dni)</h3>
-                    <p>Brak wydarzeń w wybranym zakresie dat. Zmień zakres dat w zakładce <Link to={`/${SETTINGS}`}>Filtry</Link></p>
+                    <p>Brak wydarzeń w wybranym zakresie dat. Zmień zakres dat w zakładce <Link to={`/${SETTINGS}`}>Ustawienia</Link></p>
                 </Segment>
             )
         }
@@ -89,7 +84,7 @@ class EventsList extends Component {
     weeksView = data => {
         const { settings: {date_from, date_to} } = this.props;
         const days = [moment(date_from)];
-        const duration = date_to.diff(date_from, "days");
+        const duration = moment(date_to).diff(date_from, "days");
 
         if(duration < 0) {
             return (
@@ -115,7 +110,7 @@ class EventsList extends Component {
                             return moment(day).isSame(moment(event.date), "day");
                         });
 
-                        const isInPast = (moment(day).diff(moment(), "days", true) < -.5);
+                        const isInPast = (moment(day).diff(moment().startOf('day'), "days", true) < -.5);
 
                         return (
                             <Item key={`List-item-${key}`}>
@@ -237,6 +232,7 @@ class EventsList extends Component {
                             <>
                                 <EventsMonitor />
                                 {this.renderList()}
+                                <EventsPagination />
                             </>
                         )
 

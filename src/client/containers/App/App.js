@@ -369,7 +369,7 @@ class App extends Component {
                                     onClick={() => this.toggleColumn(true)}
                                 >
                                     <Icon name="plus circle" size="large" color="olive" />
-                                    <span>Nowe wydarzenie</span>
+                                    <span>Dodaj wydarzenie</span>
                                 </Menu.Item>
                                 {
                                     isEmpty(auth) || auth.isAnonymous ? (
