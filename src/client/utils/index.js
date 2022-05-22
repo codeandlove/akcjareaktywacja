@@ -281,3 +281,56 @@ export const findSwearWord = (val) => {
 
     return result.length > 0;
 }
+
+export const replaceBasicEmojiInText = (text) => {
+    const basicEmoji = [
+        {
+            id: ':)',
+            replace: '😄'
+        },
+        {
+            id: ':p',
+            replace: '😛'
+        },
+        {
+            id: ';p',
+            replace: '😜'
+        },
+        {
+            id: ':|',
+            replace: '😐'
+        },
+        {
+            id: ':(',
+            replace: '🙁'
+        },
+        {
+            id: ':o',
+            replace: '😮'
+        },
+        {
+            id: ':*',
+            replace: '😙'
+        },
+        {
+            id: ';*',
+            replace: '😘'
+        },
+        {
+            id: '<3',
+            replace: '❤️'
+        },
+        {
+            id: 'XD',
+            replace: '😆'
+        }
+    ];
+
+    let resultText = text || '';
+
+    basicEmoji.forEach(emoji => {
+        resultText = resultText.replace(emoji.id, emoji.replace)
+    })
+
+    return resultText;
+}

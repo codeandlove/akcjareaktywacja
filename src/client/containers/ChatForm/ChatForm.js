@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {useEffect, useState} from "react";
 
 import { connect } from "react-redux";
 import { compose } from "redux";
@@ -6,52 +6,59 @@ import { firebaseConnect, isEmpty, isLoaded } from "react-redux-firebase";
 
 import moment from 'moment';
 
-import { Button, Form, Message, TextArea, Icon, Transition } from "semantic-ui-react";
+import { Button, Form, Message, Icon, Transition } from "semantic-ui-react";
 
 import "./ChatForm.scss";
 import {analytics} from "../../../firebase/analytics";
-import {findPhoneNumber, findSwearWord, findUrlString, verifyCaptcha} from "../../utils";
+import {findPhoneNumber, findSwearWord, findUrlString, replaceBasicEmojiInText, verifyCaptcha} from "../../utils";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {pushNotification} from "../../notifications";
+import ChatTextArea from "../ChatTextArea/ChatTextArea";
 
-const MIN_TIME_OFFSET = 30000;
+const MIN_TIME_OFFSET = process.env.NODE_ENV === 'production' ? 30000 : 0;
 
-class ChatForm extends Component {
-    constructor(props) {
-        super(props);
+const ChatForm = (props) => {
+    const { firebase, profile, auth, suggestions, scrollToBottom } = props;
+    const [formState, setFormState] = useState({
+        nick: null,
+        message: ''
+    });
+    const [messageType, setMessageType] = useState(null);
+    const [expanded, setExpanded] = useState(false);
+    const [timestamp, setTimestamp] = useState(false);
 
-        this.state = {
-            nick: null,
-            messageType: null,
-            message: null,
-            expanded: false,
-            timestamp: null
-        }
-    }
+    useEffect(() => {
+        setUserNickname();
+    }, [auth]);
 
-    setUserNickname = () => {
-        const { profile, auth } = this.props;
+    useEffect(() => {
+        setFormState({
+            ...formState,
+            message: replaceBasicEmojiInText(formState.message)
+        })
+    }, [formState.message])
 
+    const setUserNickname = () => {
         if(!isEmpty(auth) && isLoaded(auth)) {
             if(auth.isAnonymous) return;
 
             if(!isEmpty(profile)) {
-                this.setState({
+                setFormState({
+                    ...formState,
                     nick: profile.displayNick || ""
-                });
+                })
             }
         }
     };
 
-    handleChange = name => event => {
-        this.setState({
+    const handleChange = name => event => {
+        setFormState({
+            ...formState,
             [name]: event.target.value
-        });
+        })
     };
 
-    renderMessage = () => {
-        const { messageType } = this.state;
-
+    const renderMessage = () => {
         let result = null;
 
         switch(messageType) {
@@ -69,7 +76,7 @@ class ChatForm extends Component {
                     <Message
                         error
                         header='Błąd wiadomości'
-                        content={`Nie minęło 30 sekund od Twojego ostateniego wpisu. Pozostało jeszcze ${Math.round((MIN_TIME_OFFSET - (moment().valueOf() - this.state.timestamp)) / 1000)}s.`}
+                        content={`Nie minęło 30 sekund od Twojego ostateniego wpisu. Pozostało jeszcze ${Math.round((MIN_TIME_OFFSET - (moment().valueOf() - timestamp)) / 1000)}s.`}
                     />
                 );
                 break;
@@ -105,41 +112,32 @@ class ChatForm extends Component {
                 break;
         }
 
-        return (result) ? result : null;
+        return result;
     };
 
-    validateValues = (values) => {
+    const validateValues = (values) => {
         const result = values.filter(val => {
-            return this.state[val] === false || this.state[val] === null || !this.state[val];
+            return formState[val] === false || formState[val] === null || !formState[val];
         });
 
         return result.length !== 0;
     };
 
-    validateExcludes = (values) => {
+    const validateExcludes = (values) => {
         const result = values.filter(val => {
-            if(this.state[val] && typeof this.state[val] === 'string') {
-                if(findUrlString(this.state[val])) {
-                    this.setState({
-                        messageType: "found-url-string"
-                    });
-
+            if(formState[val] && typeof formState[val] === 'string') {
+                if(findUrlString(formState[val])) {
+                    setMessageType("found-url-string");
                     return true;
                 }
 
-                if(val !== "contact" && findPhoneNumber(this.state[val])) {
-                    this.setState({
-                        messageType: "found-phone-string"
-                    });
-
+                if(val !== "contact" && findPhoneNumber(formState[val])) {
+                    setMessageType("found-phone-string");
                     return true;
                 }
 
-                if(findSwearWord(this.state[val])) {
-                    this.setState({
-                        messageType: "found-swear-word"
-                    });
-
+                if(findSwearWord(formState[val])) {
+                    setMessageType("found-swear-word");
                     return true;
                 }
 
@@ -152,18 +150,16 @@ class ChatForm extends Component {
         return result.length !== 0;
     }
 
-    handleSave = () => {
-        const { nick, message, timestamp } = this.state;
-        const { firebase, auth } = this.props;
+    const handleSave = () => {
 
-        if(this.validateValues(["nick", "message"])) return;
+        if(validateValues(["nick", "message"])) return;
 
-        if(this.validateExcludes(["nick", "message"])) return;
+        if(validateExcludes(["nick", "message"])) return;
 
-        verifyCaptcha(this.props, 'chatMessage').then(token => {
+        verifyCaptcha(props, 'chatMessage').then(token => {
             if(token) {
-
                 const messageTimestamp =  moment().valueOf();
+                const {nick, message} = formState;
 
                 let preparedData = {
                     nick: nick,
@@ -175,19 +171,33 @@ class ChatForm extends Component {
                 let duration = messageTimestamp - timestamp;
 
                 if(!!timestamp && duration < MIN_TIME_OFFSET) {
-                    this.setState({
-                        messageType: "chat/to-short-time-offset"
-                    });
+                    setMessageType("chat/to-short-time-offset");
                     return;
                 }
 
                 if(!isEmpty(auth) && isLoaded(auth)) {
-                    preparedData = {...preparedData, user: auth.uid};
-                    firebase.push('chat', preparedData, () => {
-                        pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
-                        this.clearForm();
-                    });
 
+                    preparedData = {...preparedData, user: auth.uid};
+
+                    if(auth.isAnonymous) {
+                        const usersRef = firebase.database().ref("/users");
+                        //Check if nick is unique
+                        usersRef.orderByChild("displayNick").equalTo(nick).once("value").then(snapshot => {
+                            if (snapshot.val()) {
+                                setMessageType("nick/nick-exist");
+                            } else {
+                                firebase.push('chat', preparedData, () => {
+                                    pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
+                                    clearForm();
+                                });
+                            }
+                        });
+                    } else {
+                        firebase.push('chat', preparedData, () => {
+                            pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
+                            clearForm();
+                        });
+                    }
                 } else {
                     const usersRef = firebase.database().ref("/users");
 
@@ -199,103 +209,86 @@ class ChatForm extends Component {
 
                                 firebase.push('chat', preparedData, () => {
                                     pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
-                                    this.clearForm();
+                                    clearForm();
                                 });
                             });
                         } else {
-                            this.setState({
-                                messageType: "nick/nick-exist"
-                            })
+                            setMessageType("nick/nick-exist");
                         }
                     });
                 }
 
-                this.setDuration();
+                setDuration();
             }
         })
 
     };
 
-    setDuration = () => {
-        this.setState({
-            timestamp: moment().valueOf()
-        })
+    const setDuration = () => {
+        setTimestamp(moment().valueOf())
     };
 
-
-    clearForm = () => {
-        this.message['ref'].current.value = "";
-
-        this.setState({
-            message: null,
-            validated: false
-        });
-
-        this.collapseForm();
+    const clearForm = () => {
+        setFormState({
+            ...formState,
+            message: ''
+        })
+        setMessageType(null);
+        collapseForm();
     };
 
-    expandForm = () => {
-        this.setUserNickname();
-        setTimeout(this.props.scrollToBottom(), 2500);
+    const expandForm = () => {
+        setUserNickname();
 
-        this.setState({
-            expanded: true
-        })
+        setTimeout(scrollToBottom(), 2500);
+
+        setExpanded(true);
 
         analytics.logEvent('User opened a chat form');
     };
 
-    collapseForm = () => {
-        setTimeout(this.props.scrollToBottom(), 2500);
-
-        this.setState({
-            expanded: false
-        })
+    const collapseForm = () => {
+        setTimeout(scrollToBottom(), 2500);
+        setExpanded(false);
     };
 
-    render() {
+    const {nick, message} = formState;
 
-        const { expanded, messageType, nick } = this.state;
+    return (
+        <Form onFocus={expandForm} error={messageType !== null} onSubmit={handleSave}>
+            <Form.Field>
+                <label>Wiadomość</label>
+                <ChatTextArea value={message} data={suggestions} onChange={handleChange("message")} />
+            </Form.Field>
+            <Transition visible={expanded} animation='fade up' duration={500}>
+                <div>
+                    <Form.Field>
+                        <label>Podpis</label>
+                        {isEmpty(profile) ?
+                            (
+                                <input id="nick" name="nick"
+                                       placeholder="Twój podpis" onChange={handleChange("nick")}/>
+                            ) : (
+                                <input value={nick} name="nick" disabled readOnly onChange={() => null}/>
+                            )
+                        }
+                    </Form.Field>
 
-        const { profile } = this.props;
+                    {renderMessage()}
 
-        return (
-            <Form onFocus={this.expandForm} error={messageType !== null} onSubmit={this.handleSave}>
-                <Form.Field>
-                    <label>Wiadomość</label>
-                    <TextArea rows={3} ref={el => this.message = el} placeholder="Wiadomość" name="message" onChange={this.handleChange("message")} />
-                </Form.Field>
-                <Transition visible={expanded} animation='fade up' duration={500}>
-                    <div>
+                    <Button type="button" onClick={clearForm} floated="left">
+                        <Icon name="x" />
+                        Anuluj
+                    </Button>
 
-                        <Form.Field>
-                            <label>Podpis</label>
-                            {isEmpty(profile) ?
-                                (
-                                    <input ref={el => this.nick = el} id="nick" name="nick"
-                                           placeholder="Twój podpis" onChange={this.handleChange("nick")}/>
-                                ) : (
-                                    <input value={nick} name="nick" disabled onChange={() => null}/>
-                                )
-                            }
-                        </Form.Field>
-
-                        {this.renderMessage()}
-
-                        <Button onClick={this.clearForm} floated="left">
-                            <Icon name="x" />
-                            Anuluj
-                        </Button>
-
-                        <Button disabled={this.validateValues(["nick", "message"])} color="olive" floated="right">
-                            <Icon name="check" />
-                            Wyślij
-                        </Button>
-                    </div>
-                </Transition>
-            </Form>
-        )
-    }
+                    <Button type="submit" disabled={validateValues(["nick", "message"])} color="olive" floated="right">
+                        <Icon name="check" />
+                        Wyślij
+                    </Button>
+                </div>
+            </Transition>
+        </Form>
+    )
 }
 
 export default compose(

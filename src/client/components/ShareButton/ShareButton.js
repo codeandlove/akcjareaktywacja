@@ -6,25 +6,10 @@ import {
     EmailShareButton,
     FacebookShareButton,
     FacebookMessengerShareButton,
-    HatenaShareButton,
-    InstapaperShareButton,
-    LineShareButton,
-    LinkedinShareButton,
-    LivejournalShareButton,
-    MailruShareButton,
-    OKShareButton,
-    PinterestShareButton,
-    PocketShareButton,
-    RedditShareButton,
-    TelegramShareButton,
-    TumblrShareButton,
     TwitterShareButton,
-    ViberShareButton,
-    VKShareButton,
-    WhatsappShareButton,
-    WorkplaceShareButton
+    WhatsappShareButton
 } from "react-share";
-import {Button, Modal, Icon, Segment, Label, Container} from "semantic-ui-react";
+import {Button, Modal, Icon, Segment, Label } from "semantic-ui-react";
 
 const ShareButton = (props) => {
     const {url} = props;
@@ -65,9 +50,6 @@ const ShareButton = (props) => {
                             <FacebookShareButton url={shareUrl}>
                                 <Button circular color='facebook' icon='facebook' />
                             </FacebookShareButton>
-                            {/*<FacebookMessengerShareButton url={shareUrl} >*/}
-                            {/*    <Button circular color='blue' icon='facebook messenger' />*/}
-                            {/*</FacebookMessengerShareButton>*/}
                             <TwitterShareButton url={shareUrl}>
                                 <Button circular color='twitter' icon='twitter' />
                             </TwitterShareButton>

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 
 import ChatForm from './../ChatForm/ChatForm';
 
@@ -14,6 +14,7 @@ export const CHAT_LATEST_KEY_COOKIE_NAME = 'lastChatKey';
 
 const Chat = (props) => {
     const {data, close, toggleColumn, cookies} = props;
+    const [suggestions, setSuggestions] = useState([]);
     const chatListRef = useRef();
 
     useEffect(() => {
@@ -28,6 +29,8 @@ const Chat = (props) => {
             if(latestReceivedKey !== latestKey || !latestReceivedKey) {
                 cookies.set(CHAT_LATEST_KEY_COOKIE_NAME, latestKey);
             }
+
+            setSuggestions(findSuggestions())
         }
 
         scrollToBottom();
@@ -40,6 +43,18 @@ const Chat = (props) => {
             })
         }
     };
+
+    const findSuggestions = () => {
+        const result = Object.keys(data).map(key => {
+            return {
+                id: data[key].nick,
+                display: data[key].nick
+            };
+        });
+
+        return result.filter((item, index, self) =>
+            self.findIndex(t => t.id === item.id && t.display === item.display) === index);
+    }
 
     return (
         <Container className="chat-wrapper">
@@ -68,7 +83,7 @@ const Chat = (props) => {
                 </div>
             </Segment>
             <Segment basic className="chat-form-wrapper">
-                <ChatForm scrollToBottom={scrollToBottom} />
+                <ChatForm scrollToBottom={scrollToBottom} suggestions={suggestions} />
             </Segment>
         </Container>
     )

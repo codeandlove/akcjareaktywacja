@@ -1,4 +1,7 @@
 export const pushNotification = (title, body, topic) => {
+
+    if(process.env.NODE_ENV === 'development') return;
+
     const data = {
         "to" : `/topics/${topic}`,
         "collapse_key" : "type_a",
