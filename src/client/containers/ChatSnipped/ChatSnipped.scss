@@ -6,11 +6,11 @@
   right: 0;
   bottom: 15px;
   width: 100%;
-  max-width: 340px;
+  max-width: 370px;
   margin: 0;
 
   @include media('<tablet') {
-    max-width: 300px;
+    max-width: 380px;
     bottom: 0;
   }
 

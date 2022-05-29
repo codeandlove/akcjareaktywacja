@@ -1,0 +1,98 @@
+@mixin reaction-icons($icon-size: 24px) {
+  &.love,
+  &.cool,
+  &.rotfl,
+  &.dumb {
+    width: $icon-size;
+    height: $icon-size;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+
+    &:before,
+    &:after {
+      background: transparent url(../../../assets/reacicons.svg) 0 0/#{$icon-size * 4 $icon-size * 2} !important;
+      content: "";
+      width: $icon-size;
+      height: $icon-size;
+      display: block;
+    }
+
+    &:after {
+      position: absolute;
+    }
+
+    &.active {
+      &:before,
+      &:after {
+        background-position-y: $icon-size !important;
+      }
+    }
+
+    &.clicked {
+      &:after {
+        animation: react-grow-up .5s ease-in 0s forwards;
+      }
+    }
+  }
+
+  &.love {
+    &:before,
+    &:after {
+      background-position-x: 0 !important;
+    }
+  }
+
+  &.cool {
+    &:before,
+    &:after {
+      background-position-x: $icon-size * -1 !important;
+    }
+  }
+
+  &.rotfl {
+    &:before,
+    &:after {
+      background-position-x: $icon-size * -2 !important;
+    }
+  }
+
+  &.dumb {
+    &:before,
+    &:after {
+      background-position-x: $icon-size * -3 !important;
+    }
+  }
+}
+
+.reaction {
+  &.label {
+    cursor: pointer !important;
+  }
+}
+
+.icon {
+  @include reaction-icons();
+}
+
+.comment-reactions {
+  .icon {
+    @include reaction-icons($icon-size: 20px);
+    margin: 0;
+  }
+}
+
+@keyframes react-grow-up {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2)  translateY(-20px);
+    opacity: 0;
+  }
+}

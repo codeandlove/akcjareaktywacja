@@ -1,16 +1,18 @@
 import React from 'react';
 import {Comment, Segment} from "semantic-ui-react";
 import moment from "moment";
+import './ChatMessage.scss';
 import avatarPlaceholder from "../../../assets/profile_avatar.png";
 import ReportMessage, {
     MESSAGE_REPORTS_LIMIT,
     REPORTED_MESSAGE_PLACEHOLDER
 } from "../../components/ReportMessage/ReportMessage";
 import UserStatusIndicator from "../../components/UserStatusIndicator/UserStatusIndicator";
+import Reactions from "../../components/Reactions/Reactions";
+import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
 
 const ChatMessage = (props) => {
     const {data, messageKey, data:{user, nick, timestamp, message, reports}} = props;
-
 
     const isInPast = (moment(timestamp).diff(moment(), "days", true) < -.5)
 
@@ -25,25 +27,32 @@ const ChatMessage = (props) => {
     }
 
     return (
-        <Segment color="olive" >
-            <Comment>
-                <UserStatusIndicator asAvatar={true} status={userStatus} >
-                    <Comment.Avatar as='div' src={userAvatar} />
-                </UserStatusIndicator>
-                <Comment.Content>
-                    <Comment.Author as='strong'>{nick}</Comment.Author>
-                    <Comment.Metadata>
-                        {`${dateToDisplay}`}
-                    </Comment.Metadata>
-                    <Comment.Text className="short">
-                        {reports && reports.length >= MESSAGE_REPORTS_LIMIT ? REPORTED_MESSAGE_PLACEHOLDER : message}
-                    </Comment.Text>
-                    <Comment.Actions>
-                        <ReportMessage message={data} messageKey={messageKey} />
-                    </Comment.Actions>
-                </Comment.Content>
-            </Comment>
-        </Segment>
+        <Segment.Group>
+            <Segment color="olive" >
+                <Comment>
+                    <UserStatusIndicator asAvatar={true} status={userStatus} >
+                        <Comment.Avatar as='div' src={userAvatar} />
+                    </UserStatusIndicator>
+                    <Comment.Content>
+                        <Comment.Author as='strong'>{nick}</Comment.Author>
+                        <Comment.Metadata>
+                            {`${dateToDisplay}`}
+                        </Comment.Metadata>
+                        <Comment.Text className="short">
+                            {reports && reports.length >= MESSAGE_REPORTS_LIMIT ? REPORTED_MESSAGE_PLACEHOLDER : message}
+                        </Comment.Text>
+                        <Comment.Actions>
+                            <ReportMessage message={data} messageKey={messageKey} />
+                            <Comment.Action as="a" className="comment-reactions">
+                                <ReactionsButton data={data}>
+                                    <Reactions id={messageKey} data={data} type="chat" />
+                                </ReactionsButton>
+                            </Comment.Action>
+                        </Comment.Actions>
+                    </Comment.Content>
+                </Comment>
+            </Segment>
+        </Segment.Group>
     );
 };
 

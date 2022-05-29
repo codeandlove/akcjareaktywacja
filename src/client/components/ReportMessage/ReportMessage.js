@@ -72,7 +72,7 @@ const ReportMessage = (props) => {
     return alreadyReportedByUser ? (
             <Popup
                 inverted
-                trigger={<Comment.Action><Icon name="flag" color="red" size="small"/> Zgłoszenie wysłane</Comment.Action>}
+                trigger={<Comment.Action><Icon name="flag" color="red" size="small"/> Zgłoszono</Comment.Action>}
                 content={`Jako ${messageReports.length} z ${reportLimit} osób zaraportowałaś/eś ten komentarz jako obraźliwy, dziękujemy!`}
                 on='hover'
             />

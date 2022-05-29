@@ -15,6 +15,7 @@ export const CHAT_LATEST_KEY_COOKIE_NAME = 'lastChatKey';
 const Chat = (props) => {
     const {data, close, toggleColumn, cookies} = props;
     const [suggestions, setSuggestions] = useState([]);
+    const [messagesAmount, setMessagesAmout] = useState(0);
     const chatListRef = useRef();
 
     useEffect(() => {
@@ -30,11 +31,14 @@ const Chat = (props) => {
                 cookies.set(CHAT_LATEST_KEY_COOKIE_NAME, latestKey);
             }
 
-            setSuggestions(findSuggestions())
+            setSuggestions(findSuggestions());
+            setMessagesAmout(data.length);
         }
+    }, [data]);
 
+    useEffect(() => {
         scrollToBottom();
-    }, [data])
+    }, [messagesAmount])
 
     const scrollToBottom = () => {
         if(chatListRef.current) {

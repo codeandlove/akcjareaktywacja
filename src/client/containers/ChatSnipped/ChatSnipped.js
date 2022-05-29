@@ -11,6 +11,8 @@ import ReportMessage, {
     REPORTED_MESSAGE_PLACEHOLDER
 } from "../../components/ReportMessage/ReportMessage";
 import UserStatusIndicator from "../../components/UserStatusIndicator/UserStatusIndicator";
+import Reactions from "../../components/Reactions/Reactions";
+import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
 
 const ChatSnipped = (props) => {
     const {data, openChat, isColOpen} = props;
@@ -63,6 +65,11 @@ const ChatSnipped = (props) => {
                                         Odpowiedz
                                     </Comment.Action>
                                     <ReportMessage message={res} messageKey={key} />
+                                    <Comment.Action as="a" className="comment-reactions">
+                                        <ReactionsButton data={res} position="top right">
+                                            <Reactions id={key} data={res} type="chat" />
+                                        </ReactionsButton>
+                                    </Comment.Action>
                                 </Comment.Actions>
                             </Comment.Content>
                         </Comment>
