@@ -1,7 +1,12 @@
 @import "./../../../vars";
 
-.join-button {
-  @include media('<tablet') {
-    margin-bottom: 15px !important;
+.event-page {
+  &.ui.fluid.container {
+    @include media('>=mobile') {
+      width: calc(100% - 40px);
+    }
+    @include media('<mobile') {
+      margin: 0 !important;
+    }
   }
 }

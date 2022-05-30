@@ -176,7 +176,7 @@ const Reactions = (props) => {
                 size="mini"
                 inverted
                 pinned
-                on={['hover', 'click']}
+                on="click"
                 trigger={
                     <Label as="button" className="reaction" size='mini' basic onClick={() => handleReaction(type)}>
                         <Icon name={`${icon}${voted ? ' active' : ''}${click.type === type && voted ? ' clicked' : ''}`} />{amount > 99 ? '99+' : amount}

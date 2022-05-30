@@ -66,6 +66,17 @@
   }
 }
 
+.reactions {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  line-height: 24px;
+
+  span {
+    cursor: pointer;
+  }
+}
+
 .reaction {
   &.label {
     cursor: pointer !important;

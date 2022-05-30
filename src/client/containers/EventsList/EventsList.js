@@ -16,6 +16,8 @@ import Countdown from "../../components/Countrdown/Countdown";
 import Recent from "../Recent/Recent";
 import EventsMonitor from "../../components/EventsMonitor/EventsMonitor";
 import EventsPagination from "../../components/EventsPagination/EventsPagination";
+import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
+import Reactions from "../../components/Reactions/Reactions";
 
 class EventsList extends Component {
     componentDidMount() {
@@ -41,11 +43,8 @@ class EventsList extends Component {
         }
 
         return (
-            <Transition.Group
+            <Item.Group
                 key="events-list"
-                as={Item.Group}
-                duration={300}
-                animation="fade up"
                 relaxed
             >
                 {
@@ -53,31 +52,38 @@ class EventsList extends Component {
                         return (
                             <Item key={`List-item-${key}`}>
                                 <Item.Content>
-                                    <Segment textAlign="left">
-                                        <Item.Header as="h3">
-                                            <Link to={`/${ACTION}/${data.slug}`} >
-                                                {data.title}
-                                            </Link>
-                                            <ShowOnMap {...data} {...this.props} />
-                                        </Item.Header>
-                                        <Item.Meta>
-                                            <small>Data wydarzenia: <strong>{moment(data.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
-                                            <small>Do wydarzenia pozostało <strong><Countdown toDate={data.date} /></strong></small><br />
-                                            <small>Organizator: <strong>{data.owner}</strong></small>
-                                        </Item.Meta>
-                                        <Item.Description>
-                                            {data.short}
-                                        </Item.Description>
-                                        <Item.Extra>
-                                            <JoinEvent eventKey={data.key} event={data} floated="right" />
-                                        </Item.Extra>
-                                    </Segment>
+                                    <Segment.Group>
+                                        <Segment textAlign="left">
+                                            <Item.Header as="h3">
+                                                <Link to={`/${ACTION}/${data.slug}`} >
+                                                    {data.title}
+                                                </Link>
+                                                <ShowOnMap {...data} {...this.props} />
+                                            </Item.Header>
+                                            <Item.Meta>
+                                                <small>Data wydarzenia: <strong>{moment(data.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
+                                                <small>Do wydarzenia pozostało <strong><Countdown toDate={data.date} /></strong></small><br />
+                                                <small>Organizator: <strong>{data.owner}</strong></small>
+                                            </Item.Meta>
+                                            <Item.Description>
+                                                {data.short}
+                                            </Item.Description>
+                                            <Item.Extra className="reactions">
+                                                <ReactionsButton data={data} position="top right">
+                                                    <Reactions id={data.key} data={data} type="events" />
+                                                </ReactionsButton>
+                                            </Item.Extra>
+                                        </Segment>
+                                        <Segment attached textAlign="right">
+                                            <JoinEvent eventKey={data.key} event={data}/>
+                                        </Segment>
+                                    </Segment.Group>
                                 </Item.Content>
                             </Item>
                         )
                     })
                 }
-            </Transition.Group>
+            </Item.Group>
         )
     };
 
@@ -97,11 +103,8 @@ class EventsList extends Component {
         }
 
         return (
-            <Transition.Group
+            <Item.Group
                 key="events-list"
-                as={Item.Group}
-                duration={300}
-                animation="fade up"
                 divided
             >
                 {
@@ -143,34 +146,37 @@ class EventsList extends Component {
                                                     {
                                                         dayEvents.map((event, key) => {
                                                                 return (
-                                                                    <Transition.Group
-                                                                        key={`List-item-events-${key}`}
-                                                                        as={Segment}
-                                                                        duration={300}
-                                                                        animation="fade up"
-                                                                        textAlign="left"
-                                                                        secondary={isInPast}
-                                                                    >
-                                                                        <Item.Header as="h4" >
-                                                                            <Link to={`/${ACTION}/${event.slug}`}>
-                                                                                {event.title}
-                                                                            </Link>
-                                                                            <ShowOnMap {...event} {...this.props} />
-                                                                        </Item.Header>
-                                                                        <Item.Meta>
-                                                                            <small>Data wydarzenia: <strong>{moment(event.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
-                                                                            <small>Do wydarzenia pozostało <strong><Countdown toDate={event.date} /></strong></small><br />
-                                                                            <small>Organizator: <strong>{event.owner}</strong></small>
-                                                                        </Item.Meta>
-                                                                        <Item.Description>
-                                                                            {event.short}
-                                                                        </Item.Description>
-                                                                        <Item.Extra>
-                                                                            <JoinEvent eventKey={event.key} event={event} floated="right" />
-                                                                        </Item.Extra>
-                                                                    </Transition.Group>
+                                                                    <>
+                                                                        <Segment
+                                                                            key={`List-item-events-${key}`}
+                                                                            secondary={isInPast}
+                                                                            textAlign="left"
+                                                                        >
+                                                                            <Item.Header as="h4" >
+                                                                                <Link to={`/${ACTION}/${event.slug}`}>
+                                                                                    {event.title}
+                                                                                </Link>
+                                                                                <ShowOnMap {...event} {...this.props} />
+                                                                            </Item.Header>
+                                                                            <Item.Meta>
+                                                                                <small>Data wydarzenia: <strong>{moment(event.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
+                                                                                <small>Do wydarzenia pozostało <strong><Countdown toDate={event.date} /></strong></small><br />
+                                                                                <small>Organizator: <strong>{event.owner}</strong></small>
+                                                                            </Item.Meta>
+                                                                            <Item.Description>
+                                                                                {event.short}
+                                                                            </Item.Description>
+                                                                            <Item.Extra className="reactions">
+                                                                                <ReactionsButton data={event} position="top right">
+                                                                                    <Reactions id={event.key} data={event} type="events" />
+                                                                                </ReactionsButton>
+                                                                            </Item.Extra>
+                                                                        </Segment>
+                                                                        <Segment attached textAlign="right">
+                                                                            <JoinEvent eventKey={event.key} event={event}/>
+                                                                        </Segment>
+                                                                    </>
                                                                 )
-
                                                             }
                                                         )
                                                     }
@@ -182,7 +188,7 @@ class EventsList extends Component {
                         )
                     })
                 }
-            </Transition.Group>
+            </Item.Group>
         )
     };
 

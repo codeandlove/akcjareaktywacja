@@ -8,7 +8,7 @@ import renderHTML from "react-render-html";
 import moment from "moment";
 import Join from "./../Join/Join";
 
-import {Container, Segment, Header, Button, Icon, Table, Dimmer, Loader} from "semantic-ui-react";
+import {Container, Segment, Header, Button, Icon, Table, Dimmer, Loader, Item} from "semantic-ui-react";
 import {Helmet} from "react-helmet";
 import PropTypes from "prop-types";
 import Countdown from "../../components/Countrdown/Countdown";
@@ -16,6 +16,8 @@ import {EVENT_FORM} from "../../routers";
 import {analytics} from "../../../firebase/analytics";
 import PhoneNumberButton from "../../components/PhoneNumberButton/PhoneNumberButton";
 import ShareButton from "../../components/ShareButton/ShareButton";
+import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
+import Reactions from "../../components/Reactions/Reactions";
 
 class EventPage extends Component {
     componentDidMount() {
@@ -84,20 +86,28 @@ class EventPage extends Component {
                             </Table.Row>
                         </Table.Body>
                     </Table>
-                </Segment>
-                <Segment clearing basic>
                     {
                         eventKey ? (
-                            <>
-                                <Join eventKey={eventKey} event={data} floated="right" />
-                                <ShareButton url={url} />
-                            </>
+                            <Segment.Group>
+                                <Segment textAlign="right" basic className="reactions" >
+                                    <ReactionsButton data={data} position="top right">
+                                        <Reactions id={eventKey} data={data} type="events" />
+                                    </ReactionsButton>
+                                </Segment>
+                                <Segment clearing basic>
+                                    <Join eventKey={eventKey} event={data} floated="right" />
+                                </Segment>
+                            </Segment.Group>
                         ): null
                     }
+                </Segment>
+                <Segment basic clearing>
+                    <ShareButton url={url} floated="right"/>
                     <Button floated="left" onClick={() => this.closeEventPage()} >
                         <Icon name="arrow left" /> Wróć
                     </Button>
                 </Segment>
+
             </Container>
         )
     };

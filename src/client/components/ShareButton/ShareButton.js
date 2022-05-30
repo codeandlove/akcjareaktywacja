@@ -25,7 +25,7 @@ const ShareButton = (props) => {
     return (
         <Modal
             trigger={
-                <Button icon labelPosition="right">
+                <Button icon labelPosition="right" {...props}>
                     Podziel się
                     <Icon name="share" />
                 </Button>
