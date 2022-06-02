@@ -4,6 +4,7 @@
   &.ui.fluid.container {
     @include media('>=mobile') {
       width: calc(100% - 40px);
+      max-width: 1200px !important;
     }
     @include media('<mobile') {
       margin: 0 !important;

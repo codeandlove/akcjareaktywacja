@@ -18,6 +18,7 @@ import PhoneNumberButton from "../../components/PhoneNumberButton/PhoneNumberBut
 import ShareButton from "../../components/ShareButton/ShareButton";
 import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
 import Reactions from "../../components/Reactions/Reactions";
+import Relations from "../Relations/Relations";
 
 class EventPage extends Component {
     componentDidMount() {
@@ -101,13 +102,13 @@ class EventPage extends Component {
                         ): null
                     }
                 </Segment>
+                <Relations data={data.chat} id={eventKey} participants={data.participants}/>
                 <Segment basic clearing>
                     <ShareButton url={url} floated="right"/>
                     <Button floated="left" onClick={() => this.closeEventPage()} >
                         <Icon name="arrow left" /> Wróć
                     </Button>
                 </Segment>
-
             </Container>
         )
     };

@@ -18,7 +18,7 @@ import ChatTextArea from "../ChatTextArea/ChatTextArea";
 const MIN_TIME_OFFSET = process.env.NODE_ENV === 'production' ? 30000 : 0;
 
 const ChatForm = (props) => {
-    const { firebase, profile, auth, suggestions, scrollToBottom } = props;
+    const {firebase, profile, auth, suggestions, scrollToBottom, type, id} = props;
     const [formState, setFormState] = useState({
         nick: null,
         message: ''
@@ -26,6 +26,7 @@ const ChatForm = (props) => {
     const [messageType, setMessageType] = useState(null);
     const [expanded, setExpanded] = useState(false);
     const [timestamp, setTimestamp] = useState(false);
+    const chatType = type || 'chat';
 
     useEffect(() => {
         setUserNickname();
@@ -59,7 +60,7 @@ const ChatForm = (props) => {
     };
 
     const renderMessage = () => {
-        let result = null;
+        let result;
 
         switch(messageType) {
             case "nick/nick-exist":
@@ -161,6 +162,10 @@ const ChatForm = (props) => {
                 const messageTimestamp =  moment().valueOf();
                 const {nick, message} = formState;
 
+                const chatRef = id && type ?
+                    firebase.database().ref(type).child(`${id}/chat`)
+                    : firebase.database().ref('chat');
+
                 let preparedData = {
                     nick: nick,
                     message: message,
@@ -176,9 +181,7 @@ const ChatForm = (props) => {
                 }
 
                 if(!isEmpty(auth) && isLoaded(auth)) {
-
                     preparedData = {...preparedData, user: auth.uid};
-
                     if(auth.isAnonymous) {
                         const usersRef = firebase.database().ref("/users");
                         //Check if nick is unique
@@ -186,14 +189,15 @@ const ChatForm = (props) => {
                             if (snapshot.val()) {
                                 setMessageType("nick/nick-exist");
                             } else {
-                                firebase.push('chat', preparedData, () => {
+                                chatRef.push(preparedData, () => {
                                     pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
                                     clearForm();
                                 });
                             }
                         });
                     } else {
-                        firebase.push('chat', preparedData, () => {
+                        console.log(chatRef);
+                        chatRef.push(preparedData, () => {
                             pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
                             clearForm();
                         });
@@ -207,7 +211,7 @@ const ChatForm = (props) => {
                             firebase.auth().signInAnonymously().then(res => {
                                 preparedData = {...preparedData, user: res.user.uid}
 
-                                firebase.push('chat', preparedData, () => {
+                                chatRef.push(preparedData, () => {
                                     pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
                                     clearForm();
                                 });
@@ -217,11 +221,9 @@ const ChatForm = (props) => {
                         }
                     });
                 }
-
                 setDuration();
             }
         })
-
     };
 
     const setDuration = () => {
@@ -240,15 +242,18 @@ const ChatForm = (props) => {
     const expandForm = () => {
         setUserNickname();
 
-        setTimeout(scrollToBottom(), 2500);
-
+        if(scrollToBottom){
+            setTimeout(scrollToBottom(), 2500);
+        }
         setExpanded(true);
 
         analytics.logEvent('User opened a chat form');
     };
 
     const collapseForm = () => {
-        setTimeout(scrollToBottom(), 2500);
+        if(scrollToBottom){
+            setTimeout(scrollToBottom(), 2500);
+        }
         setExpanded(false);
     };
 

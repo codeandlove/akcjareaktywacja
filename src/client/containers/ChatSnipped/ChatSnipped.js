@@ -64,7 +64,7 @@ const ChatSnipped = (props) => {
                                         <Icon name='reply all' />
                                         Odpowiedz
                                     </Comment.Action>
-                                    <ReportMessage message={res} messageKey={key} />
+                                    <ReportMessage message={res} id={key} type="chat" />
                                     <Comment.Action as="a" className="comment-reactions">
                                         <ReactionsButton data={res} position="top right">
                                             <Reactions id={key} data={res} type="chat" />

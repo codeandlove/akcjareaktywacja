@@ -175,6 +175,7 @@ export const findSwearWord = (val) => {
         'kurwidołek', 'kurwik', 'kurwiki', 'kurwiszcze', 'kurwiszon',
         'kurwiszona', 'kurwiszonem', 'kurwiszony', 'kutas', 'kutasa', 'kutasie',
         'kutasem', 'kutasy', 'kutasów', 'kutasow', 'kutasach', 'kutasami',
+        'penis', 'penisa', 'penisie', 'penisem', 'penisy', 'penisów', 'penisach', 'penisami',
         'matkojebca', 'matkojebcy', 'matkojebcą', 'matkojebca', 'matkojebcami',
         'matkojebcach', 'nabarłożyć', 'najebać', 'najebac', 'najebał',
         'najebal', 'najebała', 'najebala', 'najebane', 'najebany', 'najebaną',

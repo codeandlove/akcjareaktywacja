@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {Mention, MentionsInput} from "react-mentions";
-import {replaceBasicEmojiInText} from "../../utils";
 
 const emojiExampleStyle = {
     control: {

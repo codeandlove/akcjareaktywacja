@@ -76,7 +76,7 @@ const Chat = (props) => {
                                 {
                                     Object.keys(data).map(key => {
                                         return (
-                                            <ChatMessage data={data[key]} key={`comment-${key}`} messageKey={key} />
+                                            <ChatMessage data={data[key]} key={`comment-${key}`} id={key} type="chat" />
                                         )
                                     })
                                 }

@@ -150,7 +150,6 @@ class Join extends Component {
                 return (
                     <Button as="div" labelPosition="left" {...floatedAttr} className="join-button">
                         <Label as="span" basic pointing="right"><small>{this.renderParticipants()}</small></Label>
-
                         {
                             !isParticipant ?
                                 <Button color="olive" onClick={this.joinToEvent}>
@@ -166,13 +165,10 @@ class Join extends Component {
                     </Button>
                 )
             }
-
         } else {
             return null;
         }
-
     }
-
 }
 
 const enhance = compose(

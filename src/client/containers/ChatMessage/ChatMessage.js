@@ -12,7 +12,7 @@ import Reactions from "../../components/Reactions/Reactions";
 import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
 
 const ChatMessage = (props) => {
-    const {data, messageKey, data:{user, nick, timestamp, message, reports}} = props;
+    const {data, id, data:{user, nick, timestamp, message, reports}, type} = props;
 
     const isInPast = (moment(timestamp).diff(moment(), "days", true) < -.5)
 
@@ -42,10 +42,10 @@ const ChatMessage = (props) => {
                             {reports && reports.length >= MESSAGE_REPORTS_LIMIT ? REPORTED_MESSAGE_PLACEHOLDER : message}
                         </Comment.Text>
                         <Comment.Actions>
-                            <ReportMessage message={data} messageKey={messageKey} />
+                            <ReportMessage message={data} id={id} type={type}/>
                             <Comment.Action as="a" className="comment-reactions">
                                 <ReactionsButton data={data}>
-                                    <Reactions id={messageKey} data={data} type="chat" />
+                                    <Reactions id={id} data={data} type={type} />
                                 </ReactionsButton>
                             </Comment.Action>
                         </Comment.Actions>

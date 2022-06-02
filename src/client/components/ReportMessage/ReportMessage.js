@@ -11,7 +11,7 @@ export const REPORTED_MESSAGE_PLACEHOLDER = 'Wiadomość została uznana za obra
 const SLACK_NOTIFICATION_WEBHOOK_CHANNEL = 'https://hooks.slack.com/services/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';
 
 const ReportMessage = (props) => {
-    const {firebase, client: {ip, duuid}, auth, message: {reports, message}, messageKey} = props;
+    const {firebase, client: {ip, duuid}, auth, message: {reports, message}, id, type} = props;
     const [openConfirmation, setOpenConfirmation] = useState(false);
     const [alreadyReportedByUser, setAlreadyReportedByUser] = useState(false);
     const [messageReports, setMessageReports] = useState([]);
@@ -42,20 +42,20 @@ const ReportMessage = (props) => {
         if(isEmpty(auth) && isLoaded(auth)) {
             firebase.auth().signInAnonymously().then(res => {
                 user = res.uid;
-                firebase.update(`chat/${messageKey}`, {
+                firebase.update(`${type}/${id}`, {
                         reports:  [...messageReports, userDUUID]
                     }
                 );
             });
         } else {
             user = auth.uid;
-            firebase.update(`chat/${messageKey}`, {
+            firebase.update(`${type}/${id}`, {
                     reports:  [...messageReports, userDUUID]
                 }
             );
         }
 
-        notifyToSlackChannel(SLACK_NOTIFICATION_WEBHOOK_CHANNEL, {text: `Zgłoszono wiadomość ${messageKey} o treści: ${message}, napisany przez użytkownika ${user}`});
+        notifyToSlackChannel(SLACK_NOTIFICATION_WEBHOOK_CHANNEL, {text: `Zgłoszono wiadomość ${id} o treści: ${message}, napisany przez użytkownika ${user}`});
     }
 
     if(messageReports && messageReports.length >= reportLimit) {
@@ -98,7 +98,7 @@ const ReportMessage = (props) => {
 
 ReportMessage.propTypes = {
     firebase: PropTypes.object.isRequired,
-    messageKey: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
     message: PropTypes.object.isRequired
 }
 
