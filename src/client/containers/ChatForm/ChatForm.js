@@ -196,7 +196,6 @@ const ChatForm = (props) => {
                             }
                         });
                     } else {
-                        console.log(chatRef);
                         chatRef.push(preparedData, () => {
                             pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
                             clearForm();

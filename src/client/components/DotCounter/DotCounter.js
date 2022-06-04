@@ -3,7 +3,7 @@ import {Label} from "semantic-ui-react";
 
 const DotCounter = (props) => {
     const [count, setCount] = useState(0);
-    const {data, lastKey} = props;
+    const {data, lastKey, color} = props;
 
     useEffect(() => {
         if(lastKey && data) {
@@ -23,7 +23,7 @@ const DotCounter = (props) => {
     const countMsg = count > 9 ? '9+' : count;
 
     return count > 0 ? (
-        <Label circular color="red" size="mini" floating as="span" className="red-dot">
+        <Label circular color={color || 'red'} size="mini" floating as="span" className="red-dot">
             {countMsg}
         </Label>
     ) : <></>;

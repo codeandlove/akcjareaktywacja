@@ -18,6 +18,9 @@ import EventsMonitor from "../../components/EventsMonitor/EventsMonitor";
 import EventsPagination from "../../components/EventsPagination/EventsPagination";
 import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
 import Reactions from "../../components/Reactions/Reactions";
+import {EVENT_LATEST_CHAT_KEY_COOKIE_NAME} from "../Chat/Chat";
+import {withCookies} from "react-cookie";
+import DotCounter from "../../components/DotCounter/DotCounter";
 
 class EventsList extends Component {
     componentDidMount() {
@@ -30,7 +33,7 @@ class EventsList extends Component {
     }
 
     listView = data => {
-        const {settings: {date_from, date_to}} = this.props;
+        const {settings: {date_from, date_to}, cookies} = this.props;
         const duration = moment(date_to).diff(moment(date_from), "days");
 
         if(data.length < 1) {
@@ -49,8 +52,11 @@ class EventsList extends Component {
             >
                 {
                     data.map((data, key) => {
+                        const lastKey = cookies.get(EVENT_LATEST_CHAT_KEY_COOKIE_NAME+data.key);
+                        const relationsLength = (!!data.chat && Object.keys(data.chat).length) || 0;
+
                         return (
-                            <Item key={`List-item-${key}`}>
+                            <Item key={`list-item-${key}`}>
                                 <Item.Content>
                                     <Segment.Group>
                                         <Segment textAlign="left">
@@ -64,6 +70,14 @@ class EventsList extends Component {
                                                 <small>Data wydarzenia: <strong>{moment(data.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
                                                 <small>Do wydarzenia pozostało <strong><Countdown toDate={data.date} /></strong></small><br />
                                                 <small>Organizator: <strong>{data.owner}</strong></small>
+                                                { relationsLength ? (
+                                                    <>
+                                                        <br /><small>Relacji: <strong>{relationsLength}</strong></small>
+                                                        <DotCounter data={data.chat}
+                                                                    lastKey={lastKey}
+                                                                    color="blue"/>
+                                                    </>
+                                                ) : <></> }
                                             </Item.Meta>
                                             <Item.Description>
                                                 {data.short}
@@ -88,7 +102,7 @@ class EventsList extends Component {
     };
 
     weeksView = data => {
-        const { settings: {date_from, date_to} } = this.props;
+        const { settings: {date_from, date_to}, cookies } = this.props;
         const days = [moment(date_from)];
         const duration = moment(date_to).diff(date_from, "days");
 
@@ -141,47 +155,55 @@ class EventsList extends Component {
                                         }
 
                                         {
-                                            dayEvents.length > 0 ? (
-                                                <Segment.Group>
-                                                    {
-                                                        dayEvents.map((event, key) => {
-                                                                return (
-                                                                    <>
-                                                                        <Segment
-                                                                            key={`List-item-events-${key}`}
-                                                                            secondary={isInPast}
-                                                                            textAlign="left"
-                                                                        >
-                                                                            <Item.Header as="h4" >
-                                                                                <Link to={`/${ACTION}/${event.slug}`}>
-                                                                                    {event.title}
-                                                                                </Link>
-                                                                                <ShowOnMap {...event} {...this.props} />
-                                                                            </Item.Header>
-                                                                            <Item.Meta>
-                                                                                <small>Data wydarzenia: <strong>{moment(event.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
-                                                                                <small>Do wydarzenia pozostało <strong><Countdown toDate={event.date} /></strong></small><br />
-                                                                                <small>Organizator: <strong>{event.owner}</strong></small>
-                                                                            </Item.Meta>
-                                                                            <Item.Description>
-                                                                                {event.short}
-                                                                            </Item.Description>
-                                                                            <Item.Extra className="reactions">
-                                                                                <ReactionsButton data={event} position="top right">
-                                                                                    <Reactions id={event.key} data={event} type="events" />
-                                                                                </ReactionsButton>
-                                                                            </Item.Extra>
-                                                                        </Segment>
-                                                                        <Segment attached textAlign="right">
-                                                                            <JoinEvent eventKey={event.key} event={event}/>
-                                                                        </Segment>
-                                                                    </>
-                                                                )
-                                                            }
+                                            dayEvents.length > 0 ?
+                                                dayEvents.map((event, key) => {
+                                                        const lastKey = cookies.get(EVENT_LATEST_CHAT_KEY_COOKIE_NAME+event.key);
+                                                        const relationsLength = (!!event.chat && Object.keys(event.chat).length) || 0;
+
+                                                        return (
+                                                            <Segment.Group key={`List-item-events-${key}`}>
+                                                                <Segment
+                                                                    secondary={isInPast}
+                                                                    textAlign="left"
+                                                                >
+                                                                    <Item.Header as="h4" >
+                                                                        <Link to={`/${ACTION}/${event.slug}`}>
+                                                                            {event.title}
+                                                                        </Link>
+                                                                        <ShowOnMap {...event} {...this.props} />
+                                                                    </Item.Header>
+                                                                    <Item.Meta>
+                                                                        <small>Data wydarzenia: <strong>{moment(event.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
+                                                                        <small>Do wydarzenia pozostało <strong><Countdown toDate={event.date} /></strong></small><br />
+                                                                        <small>Organizator: <strong>{event.owner}</strong></small>
+                                                                        { relationsLength ? (
+                                                                            <>
+                                                                                <br /><small>Relacji: <strong>{relationsLength}</strong></small>
+                                                                                <DotCounter data={event.chat}
+                                                                                            lastKey={lastKey}
+                                                                                            color="blue"/>
+                                                                            </>
+                                                                        ) : <></>
+                                                                    }
+                                                                    </Item.Meta>
+                                                                    <Item.Description>
+                                                                        {event.short}
+                                                                    </Item.Description>
+                                                                    <Item.Extra className="reactions">
+
+                                                                        <ReactionsButton data={event} position="top right">
+                                                                            <Reactions id={event.key} data={event} type="events" />
+                                                                        </ReactionsButton>
+                                                                    </Item.Extra>
+                                                                </Segment>
+                                                                <Segment attached textAlign="right">
+                                                                    <JoinEvent eventKey={event.key} event={event}/>
+                                                                </Segment>
+                                                            </Segment.Group>
                                                         )
                                                     }
-                                                </Segment.Group>
-                                            ) : null
+                                                )
+                                         : null
                                     }
                                 </Item.Content>
                             </Item>
@@ -284,4 +306,4 @@ export default compose(
     firebaseConnect(),
     connect(({ firebase: { auth } }) => ({ auth })),
     connect(mapStateToProps, mapDispatchToProps)
-)(EventsList);
+)(withCookies(EventsList));

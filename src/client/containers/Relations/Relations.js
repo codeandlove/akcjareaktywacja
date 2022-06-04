@@ -3,7 +3,8 @@ import {analytics} from "../../../firebase/analytics";
 import {Comment, Divider, Header, Message, Segment} from "semantic-ui-react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import ChatForm from "../ChatForm/ChatForm";
-import {CHAT_LATEST_KEY_COOKIE_NAME} from "../Chat/Chat";
+import {EVENT_LATEST_CHAT_KEY_COOKIE_NAME} from "../Chat/Chat";
+import { withCookies } from 'react-cookie';
 import {compose} from "redux";
 import {firebaseConnect, isEmpty, isLoaded} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -12,6 +13,7 @@ const Relations = (props) => {
     const {data, cookies, id, participants, auth} = props;
     const [suggestions, setSuggestions] = useState([]);
     const [isParticipant, setIsParticipant] = useState(false);
+    const eventChatKeyCookieName = EVENT_LATEST_CHAT_KEY_COOKIE_NAME+id;
 
     useEffect(() => {
         analytics.logEvent('User opened a relation');
@@ -31,11 +33,11 @@ const Relations = (props) => {
 
     useEffect(() => {
         if(data) {
-            // const latestReceivedKey = cookies.get(CHAT_LATEST_KEY_COOKIE_NAME),
-            //     latestKey = Object.keys(data)[Object.keys(data).length - 1];
-            // if(latestReceivedKey !== latestKey || !latestReceivedKey) {
-            //     cookies.set(CHAT_LATEST_KEY_COOKIE_NAME, latestKey);
-            // }
+            const latestReceivedKey = cookies.get(eventChatKeyCookieName),
+                latestKey = Object.keys(data)[Object.keys(data).length - 1];
+            if(latestReceivedKey !== latestKey || !latestReceivedKey) {
+                cookies.set(eventChatKeyCookieName, latestKey);
+            }
 
             setSuggestions(findSuggestions());
         }
@@ -83,14 +85,12 @@ const Relations = (props) => {
                             {
                                 Object.keys(data).reverse().map(key => {
                                     return (
-                                        <>
-                                            <ChatMessage
-                                                data={data[key]}
-                                                key={`comment-${key}`}
-                                                id={key}
-                                                type={`events/${id}/chat`}
-                                            />
-                                        </>
+                                        <ChatMessage
+                                            data={data[key]}
+                                            key={`comment-${key}`}
+                                            id={key}
+                                            type={`events/${id}/chat`}
+                                        />
                                     )
                                 })
                             }
@@ -114,4 +114,4 @@ const enhance = compose(
     }))
 )
 
-export default enhance(Relations);
+export default enhance(withCookies(Relations));

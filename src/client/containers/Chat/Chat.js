@@ -11,6 +11,7 @@ import {withCookies} from "react-cookie";
 import ChatMessage from "../ChatMessage/ChatMessage";
 
 export const CHAT_LATEST_KEY_COOKIE_NAME = 'lastChatKey';
+export const EVENT_LATEST_CHAT_KEY_COOKIE_NAME = 'eventChatLatestKey';
 
 const Chat = (props) => {
     const {data, close, toggleColumn, cookies} = props;

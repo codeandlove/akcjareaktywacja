@@ -42,10 +42,10 @@ const ReactionsButton = (props) => {
 
     const displayReactions = () => {
         let limitedMostReactions = mostReactions.slice(0, 2);
-        return limitedMostReactions.length && amount > 0 ? limitedMostReactions.map((item) => {
+        return limitedMostReactions.length && amount > 0 ? limitedMostReactions.map((item, key) => {
             const {amount, name} = item;
             return (
-                <span><Icon name={name} /> {amount > 99 ? '+99' : amount} </span>
+                <span key={`reaction-${key}`}><Icon name={name} /> {amount > 99 ? '+99' : amount} </span>
             )
         }) : <Icon name="smile outline" color="grey" />
     }
