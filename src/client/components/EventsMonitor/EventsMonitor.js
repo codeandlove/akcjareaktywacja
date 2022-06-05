@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {compose} from "redux";
-import {firebaseConnect, populate} from "react-redux-firebase";
-import {connect} from "react-redux";
+import {firebaseConnect} from "react-redux-firebase";
 import moment from "moment";
 
 const EventsMonitor = (props) => {

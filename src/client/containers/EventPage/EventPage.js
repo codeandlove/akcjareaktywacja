@@ -102,7 +102,7 @@ class EventPage extends Component {
                         ): null
                     }
                 </Segment>
-                <Relations data={data.chat} id={eventKey} participants={data.participants}/>
+                <Relations id={eventKey} participants={data.participants}/>
                 <Segment basic clearing>
                     <ShareButton url={url} floated="right"/>
                     <Button floated="left" onClick={() => this.closeEventPage()} >

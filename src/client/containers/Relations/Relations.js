@@ -6,11 +6,11 @@ import ChatForm from "../ChatForm/ChatForm";
 import {EVENT_LATEST_CHAT_KEY_COOKIE_NAME} from "../Chat/Chat";
 import { withCookies } from 'react-cookie';
 import {compose} from "redux";
-import {firebaseConnect, isEmpty, isLoaded} from "react-redux-firebase";
+import {firebaseConnect, isEmpty, isLoaded, populate} from "react-redux-firebase";
 import {connect} from "react-redux";
 
 const Relations = (props) => {
-    const {data, cookies, id, participants, auth} = props;
+    const {relations, cookies, id, participants, auth} = props;
     const [suggestions, setSuggestions] = useState([]);
     const [isParticipant, setIsParticipant] = useState(false);
     const eventChatKeyCookieName = EVENT_LATEST_CHAT_KEY_COOKIE_NAME+id;
@@ -32,22 +32,22 @@ const Relations = (props) => {
     }, [participants, auth])
 
     useEffect(() => {
-        if(data) {
+        if(relations) {
             const latestReceivedKey = cookies.get(eventChatKeyCookieName),
-                latestKey = Object.keys(data)[Object.keys(data).length - 1];
+                latestKey = Object.keys(relations)[Object.keys(relations).length - 1];
             if(latestReceivedKey !== latestKey || !latestReceivedKey) {
                 cookies.set(eventChatKeyCookieName, latestKey);
             }
 
             setSuggestions(findSuggestions());
         }
-    }, [data]);
+    }, [relations]);
 
     const findSuggestions = () => {
-        const result = Object.keys(data).map(key => {
+        const result = Object.keys(relations).map(key => {
             return {
-                id: data[key].nick,
-                display: data[key].nick
+                id: relations[key].nick,
+                display: relations[key].nick
             };
         });
 
@@ -80,13 +80,13 @@ const Relations = (props) => {
             }
             <Segment clearing basic>
                 {
-                    !!data ? (
+                    !!relations ? (
                         <Comment.Group>
                             {
-                                Object.keys(data).reverse().map(key => {
+                                Object.keys(relations).reverse().map(key => {
                                     return (
                                         <ChatMessage
-                                            data={data[key]}
+                                            data={relations[key]}
                                             key={`comment-${key}`}
                                             id={key}
                                             type={`events/${id}/chat`}
@@ -106,12 +106,25 @@ const Relations = (props) => {
     )
 }
 
+const populates = [
+    { child: "user", root: "users", keyProp: "user" },
+    { child: "avatarImage", root: "users", keyProp: "avatarImage" }
+];
+
 const enhance = compose(
-    firebaseConnect(),
-    connect(({firebase: { auth, profile }}) => ({
-        auth,
-        profile
-    }))
+    firebaseConnect((props, store) => {
+        const {id} = props;
+        return [
+            { path: `events/${id}/chat`, storeAs: 'relations'},
+        ]
+    }),
+    connect(({id, firebase: { auth, profile }, firebase}) => {
+        return {
+            auth,
+            profile,
+            relations: populate(firebase, `relations`, populates)
+        }
+    })
 )
 
 export default enhance(withCookies(Relations));
