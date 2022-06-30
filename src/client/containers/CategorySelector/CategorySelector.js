@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {buildCategories} from "../../utils";
+import {buildCategories, getCategoriesDataByIds} from "../../utils";
 import './CategorySelector.scss';
 import {Image, Icon, List, Transition} from "semantic-ui-react";
+import {analytics} from "../../../firebase/analytics";
 
 const CategorySelector = (props) => {
     const {onChosenCategory, selectedCategories} = props;
