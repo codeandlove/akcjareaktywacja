@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 
 import "./Register.scss";
 
-import { Container, Header, Segment, Message, Form, Input, Checkbox, Button, Icon } from "semantic-ui-react";
+import { Header, Segment, Message, Form, Input, Checkbox, Button, Icon } from "semantic-ui-react";
 import {LOGIN, USER} from "../../routers";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {verifyCaptcha} from "../../utils";
@@ -23,6 +23,8 @@ class Register extends Component {
             terms: true,
             email: null,
             password: null,
+            passwordConfirmation: null,
+            passwordValidated: false,
             nick: null,
             success: false
         }
@@ -37,7 +39,20 @@ class Register extends Component {
         this.setState({
             [name]: event.target.value
         });
+
+        if(name === 'passwordConfirmation') {
+            this.machPasswordConfirmation(event.target.value, this.state.password);
+        } else if(name === 'password') {
+            this.machPasswordConfirmation(event.target.value, this.state.passwordConfirmation);
+        }
     };
+
+    machPasswordConfirmation = (pass1, pass2) => {
+        this.setState({
+            messageType: pass1 !== pass2 ? 'create/password-does-not-mach' : null,
+            passwordValidated:  pass1 === pass2
+        })
+    }
 
     renderMessage = () => {
         const { messageType } = this.state;
@@ -50,6 +65,14 @@ class Register extends Component {
                     <Message negative>
                         <Message.Header>Błąd rejestracji</Message.Header>
                         <p>Użytkownik o takim nicku już istnieje.</p>
+                    </Message>
+                );
+                break;
+            case "create/password-does-not-mach":
+                result = (
+                    <Message warning>
+                        <Message.Header>Błąd rejestracji</Message.Header>
+                        <p>Wpisane hasła różnią się.</p>
                     </Message>
                 );
                 break;
@@ -81,7 +104,7 @@ class Register extends Component {
         const { nick, email, password } = this.state;
         const { firebase } = this.props;
 
-        if(this.validateValues(["email", "password", "nick", "terms"])) return;
+        if(this.validateValues(["email", "password", "passwordConfirmation", "passwordValidated", "nick", "terms"])) return;
 
         verifyCaptcha(this.props, 'registerForm').then(token => {
             if(token) {
@@ -136,7 +159,11 @@ class Register extends Component {
                         </Form.Field>
                         <Form.Field required>
                             <label>Hasło</label>
-                            <Input placeholder="Wpisz swoje hasło" type="password" id="password" name="password" onChange={this.handleChange("password")} />
+                            <Input placeholder="Wpisz  hasło" type="password" id="password" name="password" onChange={this.handleChange("password")} />
+                        </Form.Field>
+                        <Form.Field required>
+                            <label>Powtórz hasło</label>
+                            <Input placeholder="Wpisz ponownie hasło" type="password" id="password_confirmation" name="password_confirmation" onChange={this.handleChange("passwordConfirmation")} />
                         </Form.Field>
                         <Form.Field
                             control={Checkbox}
@@ -150,7 +177,7 @@ class Register extends Component {
                             <Button as={Link} to={`/${LOGIN}`} floated="left" >
                                 Anuluj
                             </Button>
-                            <Button primary onClick={this.registerUser} disabled={this.validateValues(["email", "password", "nick", "terms"])} floated="right" >
+                            <Button primary onClick={this.registerUser} disabled={this.validateValues(["email", "password", "passwordConfirmation", "passwordValidated", "nick", "terms"])} floated="right" >
                                 <Icon name="check" />
                                 Wyślij
                             </Button>
