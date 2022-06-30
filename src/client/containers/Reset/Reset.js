@@ -97,7 +97,7 @@ class Reset extends Component {
     render() {
 
         return (
-            <Container>
+            <>
                 <Segment clearing basic>
                     <Button basic onClick={() => this.props.close()} floated="right" icon="x" />
                     <Header floated="left" size="large">
@@ -123,7 +123,7 @@ class Reset extends Component {
                         </Form.Field>
                     </Form>
                 </Segment>
-            </Container>
+            </>
         );
     }
 }

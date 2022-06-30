@@ -8,7 +8,7 @@ import renderHTML from "react-render-html";
 import moment from "moment";
 import Join from "./../Join/Join";
 
-import {Container, Segment, Header, Button, Icon, Table, Dimmer, Loader, Item} from "semantic-ui-react";
+import {Container, Segment, Header, Button, Icon, Table, Dimmer, Loader, Item, Image, Label} from "semantic-ui-react";
 import {Helmet} from "react-helmet";
 import PropTypes from "prop-types";
 import Countdown from "../../components/Countrdown/Countdown";
@@ -19,6 +19,7 @@ import ShareButton from "../../components/ShareButton/ShareButton";
 import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
 import Reactions from "../../components/Reactions/Reactions";
 import Relations from "../Relations/Relations";
+import {getCategoriesDataByIds} from "../../utils";
 
 class EventPage extends Component {
     componentDidMount() {
@@ -34,12 +35,32 @@ class EventPage extends Component {
         this.props.close();
     }
 
-    renderPage = (data) => {
-        const {match: {url}, isDraft} = this.props;
-        const {owner, title, description, eventKey, short, date, location, contact} = data;
+    renderCategories = (categoriesIds) => {
+        const categoriesData = getCategoriesDataByIds(categoriesIds);
 
         return (
-            <Container fluid className="event-page">
+            <span className="category-row">
+                {
+                    categoriesData.map((category, key) => {
+                        const {label, icon} = category;
+
+                        return (
+                            <>
+                                {!!icon ? <Image size="mini" src={`${process.env.PUBLIC_URL}/categories/${icon}.svg`}/> : <></>} {label} {key < categoriesData.length - 1 ? <Icon name="chevron right" size="small"/> : ''}
+                            </>
+                        )
+                    })
+                }
+            </span>
+        )
+    }
+
+    renderPage = (data) => {
+        const {match: {url}, isDraft} = this.props;
+        const {owner, title, description, eventKey, short, date, location, contact, categories} = data;
+
+        return (
+            <div className="event-page">
                 {!isDraft ? (
                     <Helmet>
                         <meta charSet="utf-8" />
@@ -67,6 +88,15 @@ class EventPage extends Component {
                 <Segment clearing basic>
                     <Table compact color="olive">
                         <Table.Body>
+                            {
+                                !!categories ? (
+                                    <Table.Row>
+                                        <Table.Cell>Kategoria</Table.Cell>
+                                        <Table.Cell>{this.renderCategories(categories)}</Table.Cell>
+                                    </Table.Row>
+                                ) : <></>
+                            }
+
                             <Table.Row>
                                 <Table.Cell>Data</Table.Cell>
                                 <Table.Cell>{moment(date).format("DD MMMM YYYY, HH:mm")}</Table.Cell>
@@ -109,7 +139,7 @@ class EventPage extends Component {
                         <Icon name="arrow left" /> Wróć
                     </Button>
                 </Segment>
-            </Container>
+            </div>
         )
     };
 

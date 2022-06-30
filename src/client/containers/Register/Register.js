@@ -115,7 +115,7 @@ class Register extends Component {
         const { terms } = this.state;
 
         return (
-            <Container>
+            <>
                 <Segment clearing basic>
                     <Button basic onClick={() => this.props.close()} floated="right" icon="x" />
                     <Header floated="left" size="large">
@@ -157,7 +157,7 @@ class Register extends Component {
                         </Form.Field>
                     </Form>
                 </Segment>
-            </Container>
+            </>
         )
     }
 
@@ -165,7 +165,7 @@ class Register extends Component {
         const { router } = this.context;
 
         return (
-            <Container>
+            <>
                 <Segment clearing basic>
                     <Button basic onClick={() => this.props.close()} floated="right" icon="x" />
                     <Header floated="left" size="large">
@@ -180,7 +180,7 @@ class Register extends Component {
                         Twój profil
                     </Button>
                 </Segment>
-            </Container>
+            </>
         )
     }
 

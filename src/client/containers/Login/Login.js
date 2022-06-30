@@ -100,7 +100,7 @@ class Login extends Component {
 
     render() {
         return (
-            <Container>
+            <>
                 <Segment clearing basic>
                     <Button basic onClick={() => this.props.close()} floated="right" icon="x" />
                     <Header floated="left" size='large'>
@@ -139,7 +139,7 @@ class Login extends Component {
                         Gmail
                     </Form.Field>
                 </Segment>
-            </Container>
+            </>
         );
     }
 }

@@ -11,3 +11,13 @@
     }
   }
 }
+
+.category-row {
+  display: flex!important;
+  align-items: center;
+  justify-content: flex-start;
+
+  img {
+    margin-right: 10px!important;
+  }
+}

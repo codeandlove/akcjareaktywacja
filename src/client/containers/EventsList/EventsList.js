@@ -242,7 +242,7 @@ class EventsList extends Component {
         const {events, settings: {show_recent_events}} = this.props;
 
         return (
-            <Container className="events-list">
+            <div className="events-list">
                 <Segment clearing basic>
                     <Button basic onClick={this.props.close} floated="right" icon="x" />
                     <Button basic floated="right" icon="sliders" onClick={() => router.history.replace(`/${SETTINGS}`)} />
@@ -283,7 +283,7 @@ class EventsList extends Component {
                         <></>
                     )
                 }
-            </Container>
+            </div>
         );
     }
 }

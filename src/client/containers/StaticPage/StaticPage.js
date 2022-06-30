@@ -29,7 +29,7 @@ const StaticPage = (props) => {
     }
 
     return (
-        <Container fluid className="static-page">
+        <div className="static-page">
             {
                 data ? (
                     <>
@@ -52,7 +52,7 @@ const StaticPage = (props) => {
                 )
             }
 
-        </Container>
+        </div>
     )
 };
 

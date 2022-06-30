@@ -1,5 +1,6 @@
 import {UAParser} from 'ua-parser-js';
 import moment from "moment";
+import {CATEGORIES} from "../consts";
 
 export const getClientDeviceData = () => {
     const parser = new UAParser();
@@ -334,4 +335,44 @@ export const replaceBasicEmojiInText = (text) => {
     })
 
     return resultText;
+}
+
+export const buildCategories = () => {
+    let result = {};
+
+    CATEGORIES.forEach(category => {
+        if(typeof category.parent === "string") {
+            const parentCategory = CATEGORIES.filter(x => x.id === category.parent)[0];
+            result = {
+                ...result,
+                [category.parent]: {
+                    ...parentCategory,
+                    subcategories: [
+                        ...!!result[category.parent] && result[category.parent].subcategories ? result[category.parent].subcategories : [],
+                        category
+                    ]
+                }
+            }
+        } else {
+            result = {
+                ...result,
+                [category.id]: {
+                    ...category
+                }
+            }
+        }
+    })
+
+    return Object.keys(result).map(key => result[key]);
+}
+
+export const getCategoriesDataByIds = ids => {
+    if(typeof ids === 'object') {
+        return ids.map(id => {
+            return CATEGORIES.filter(cat => cat.id === id);
+        }).reduce(function( last, cur ){
+            if(cur) return last.concat(cur);
+            return last;
+        }, []);
+    }
 }

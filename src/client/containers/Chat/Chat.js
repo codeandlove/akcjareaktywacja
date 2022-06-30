@@ -62,7 +62,7 @@ const Chat = (props) => {
     }
 
     return (
-        <Container className="chat-wrapper">
+        <div className="chat-wrapper">
             <Segment clearing basic>
                 <Button basic onClick={close} key="close-event-list" floated="right" icon="x" />
                 <Header floated="left" size="large">
@@ -90,7 +90,7 @@ const Chat = (props) => {
             <Segment basic className="chat-form-wrapper">
                 <ChatForm scrollToBottom={scrollToBottom} suggestions={suggestions} />
             </Segment>
-        </Container>
+        </div>
     )
 }
 

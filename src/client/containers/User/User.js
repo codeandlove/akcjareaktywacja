@@ -248,7 +248,7 @@ class User extends Component {
         ];
 
         return (
-            <Container>
+            <>
                 <Segment clearing basic>
                     <Button basic onClick={() => this.props.close()} floated="right" icon="x" />
                     <Header floated="left" size='large'>
@@ -259,7 +259,7 @@ class User extends Component {
                 <Segment basic>
                     <Tab panes={panes} />
                 </Segment>
-            </Container>
+            </>
         )
     }
 }
