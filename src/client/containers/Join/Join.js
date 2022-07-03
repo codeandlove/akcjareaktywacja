@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component, useEffect, useState} from 'react';
 import {firebaseConnect, isEmpty, isLoaded} from 'react-redux-firebase';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -7,28 +7,18 @@ import avatarPlaceholder from "../../../assets/profile_avatar.png";
 import moment from 'moment';
 import {Button, Icon, Image, Label, Popup} from 'semantic-ui-react';
 
-class Join extends Component {
-    constructor(props) {
-        super(props);
+const Join = (props) => {
+    const {firebase, event, auth, client: {ip, duuid}, eventKey, floated} = props;
+    const [users, setUsers] = useState([]);
+    const [members, setMembers] = useState([]);
+    const [clientsIps, setClientsIps] = useState([]);
+    const [isParticipant, setIsParticipant] = useState(true);
 
-        this.state = {
-            users: [],
-            members: [],
-            clients_ip: [],
-            isParticipant: true
-        }
-    }
+    useEffect(() => {
+        update();
+    }, [event]);
 
-    componentDidMount() {
-        this.updateStates(this.props);
-    }
-
-    componentWillReceiveProps(props) {
-        this.updateStates(props);
-    }
-
-    updateStates = props => {
-        const { event, auth, client: {ip, duuid} } = props;
+    const update = () => {
 
         if(isEmpty(event)) {
             return;
@@ -68,38 +58,32 @@ class Join extends Component {
             }).length > 0;
         }
 
-        this.setState({
-            users: users,
-            members: members,
-            isParticipant: isAlreadyJoined,
-            clients_ip: event.clients_ip || []
-        });
+        setUsers(users);
+        setMembers(members);
+        setIsParticipant(isAlreadyJoined);
+        setClientsIps(event.clients_ip || [])
     };
 
-    joinToEvent = () => {
-        const { eventKey, firebase, auth, client: {ip, duuid} } = this.props;
-        const { users, clients_ip } = this.state;
-
+    const joinToEvent = () => {
         if(isEmpty(auth) && isLoaded(auth)) {
             firebase.auth().signInAnonymously().then(res => {
                 firebase.update(`events/${eventKey}`, {
                         participants:  [...users, res.user.uid],
-                        clients_ip: [...clients_ip, `${ip}.${duuid}` ]
+                        clients_ip: [...clientsIps, `${ip}.${duuid}` ]
                     }
                 );
             });
         } else {
             firebase.update(`events/${eventKey}`, {
                     participants:  [...users, auth.uid],
-                    clients_ip: [...clients_ip, `${ip}.${duuid}` ]
+                    clients_ip: [...clientsIps, `${ip}.${duuid}` ]
                 }
             );
         }
     };
 
-    renderParticipants = () => {
-        const { users, members } = this.state;
-        const { event: {owner} } = this.props;
+    const renderParticipants = () => {
+        const {owner} = event;
 
         const allMembers = members.map((member, index) => {
             const avatar = member.avatarImage || member.avatarUrl || avatarPlaceholder;
@@ -112,62 +96,57 @@ class Join extends Component {
             /></span>)
         });
 
-        const anonimousAmount = users.length - members.length > 1 ? users.length - members.length - 1 : 0;
+        const anonymousAmount = users.length - members.length > 1 ? users.length - members.length - 1 : 0;
 
         if(members.length > 0) {
             return (
-                <>{owner}, {anonimousAmount} anonimów oraz {allMembers}</>
+                <>{owner}, {anonymousAmount} anonimów oraz {allMembers}</>
             )
         } else {
-            return `${owner} oraz ${anonimousAmount} anonimów.`;
+            return `${owner} oraz ${anonymousAmount} anonimów.`;
         }
     };
 
-    render() {
-        const { isParticipant } = this.state;
-        const { event, floated } = this.props;
+    if(!isEmpty(event)) {
 
-        if(!isEmpty(event)) {
+        //if event is from past, user can not join anymore
+        const isInPast = moment(event.date).isSame(moment().subtract( 1, "days"), "day") || (moment(event.date).diff(moment(), 'days') < 0);
 
-            //if event is from past, user can not join anymore
-            const isInPast = moment(event.date).isSame(moment().subtract( 1, "days"), "day") || (moment(event.date).diff(moment(), 'days') < 0);
+        const floatedAttr = (!!floated) ? {
+            floated: floated
+        } : null;
 
-            const floatedAttr = (!!floated) ? {
-                floated: floated
-            } : null;
-
-            if(isInPast){
-                return (
-                    <Button as="div" labelPosition="left" {...floatedAttr} className="join-button">
-                        <Label as="span" basic pointing="right"><small >{this.renderParticipants()}</small></Label>
-                        <Button disabled >
-                            <Icon name="hand victory" />
-                            Już po spotkaniu...
-                        </Button>
+        if(isInPast){
+            return (
+                <Button as="div" labelPosition="left" {...floatedAttr} className="join-button">
+                    <Label as="span" basic pointing="right"><small >{this.renderParticipants()}</small></Label>
+                    <Button disabled >
+                        <Icon name="hand victory" />
+                        Już po spotkaniu...
                     </Button>
-                )
-            } else {
-                return (
-                    <Button as="div" labelPosition="left" {...floatedAttr} className="join-button">
-                        <Label as="span" basic pointing="right"><small>{this.renderParticipants()}</small></Label>
-                        {
-                            !isParticipant ?
-                                <Button color="olive" onClick={this.joinToEvent}>
-                                    <Icon name="plus" />
-                                    Dołącz
-                                </Button>
-                                :
-                                <Button disabled onClick={this.handleQuitEvent}>
-                                    <Icon name="check" />
-                                    Dołączono
-                                </Button>
-                        }
-                    </Button>
-                )
-            }
+                </Button>
+            )
         } else {
-            return null;
+            return (
+                <Button as="div" labelPosition="left" {...floatedAttr} className="join-button">
+                    <Label as="span" basic pointing="right"><small>{renderParticipants()}</small></Label>
+                    {
+                        !isParticipant ?
+                            <Button color="olive" onClick={joinToEvent}>
+                                <Icon name="plus" />
+                                Dołącz
+                            </Button>
+                            :
+                            <Button disabled >
+                                <Icon name="check" />
+                                Dołączono
+                            </Button>
+                    }
+                </Button>
+            )
         }
+    } else {
+        return <></>;
     }
 }
 

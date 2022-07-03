@@ -15,7 +15,6 @@ const populates = [
     { child: "avatarImage", root: "users", keyProp: "avatarImage" }
 ];
 
-
 const Recent = (props) => {
     const {recent} = props;
 
