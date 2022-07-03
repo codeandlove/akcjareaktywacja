@@ -71,7 +71,6 @@ const Recent = (props) => {
     );
 };
 
-
 Recent.propTypes = {
     firebase: PropTypes.object.isRequired
 }

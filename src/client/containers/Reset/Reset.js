@@ -72,7 +72,6 @@ class Reset extends Component {
     };
 
     resetPassword = () => {
-
         const { email } = this.state;
         const { firebase } = this.props;
 

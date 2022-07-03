@@ -264,7 +264,6 @@ class User extends Component {
     }
 }
 
-
 Uploader.propTypes = {
     firebase: PropTypes.object.isRequired
 };
