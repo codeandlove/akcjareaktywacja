@@ -119,7 +119,7 @@ const Join = (props) => {
         if(isInPast){
             return (
                 <Button as="div" labelPosition="left" {...floatedAttr} className="join-button">
-                    <Label as="span" basic pointing="right"><small >{this.renderParticipants()}</small></Label>
+                    <Label as="span" basic pointing="right"><small >{renderParticipants()}</small></Label>
                     <Button disabled >
                         <Icon name="hand victory" />
                         Już po spotkaniu...
