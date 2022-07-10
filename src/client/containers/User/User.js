@@ -48,10 +48,10 @@ const User = props => {
 
     useEffect(() => {
         if(!isEmpty(profile)) {
-            const {displayNick, avatarImage, subscriptions} = profile;
+            const {displayNick, avatarImage, avatarUrl, subscriptions} = profile;
             setFormState({
                 nick: displayNick,
-                avatar: avatarImage,
+                avatar: avatarImage || avatarUrl,
                 subscriptions: subscriptions === undefined ? false : subscriptions
             });
         }
