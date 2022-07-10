@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component, useState} from "react";
 import PropTypes from "prop-types";
 
 import { firebaseConnect} from "react-redux-firebase";
@@ -76,6 +76,30 @@ class Register extends Component {
                     </Message>
                 );
                 break;
+            case "create/captcha-not-verified":
+                result = (
+                    <Message warning>
+                        <Message.Header>Błąd rejestracji</Message.Header>
+                        <p>Niepowodzenie weryfikacji Captcha. Możliwe, że jesteś robotem.</p>
+                    </Message>
+                );
+                break;
+            case "auth/email-already-in-use":
+                result = (
+                    <Message negative>
+                        <Message.Header>Błąd rejestracji</Message.Header>
+                        <p>Użytkownik o takim adresie email już istnieje.</p>
+                    </Message>
+                )
+                break;
+            case "auth/weak-password":
+                result = (
+                    <Message negative>
+                        <Message.Header>Błąd rejestracji</Message.Header>
+                        <p>Zlituj się, daj lepsze hasło. 6 znaków to minimum.</p>
+                    </Message>
+                )
+                break;
             default:
                 result = null;
                 break;
@@ -106,6 +130,10 @@ class Register extends Component {
 
         if(this.validateValues(["email", "password", "passwordConfirmation", "passwordValidated", "nick", "terms"])) return;
 
+        this.setState({
+            messageType: null
+        })
+
         verifyCaptcha(this.props, 'registerForm').then(token => {
             if(token) {
                 const usersRef = firebase.database().ref("/users");
@@ -119,9 +147,15 @@ class Register extends Component {
                         }, {
                             email: email,
                             displayNick: nick
-                        }).then(() => {
+                        }).then((res) => {
                             this.setState({
                                 success: true
+                            })
+                        }).catch((res) => {
+                            const {code} = res.toJSON();
+                            console.log(typeof code);
+                            this.setState({
+                                messageType: code
                             })
                         })
                     } else {
@@ -130,6 +164,10 @@ class Register extends Component {
                         })
                     }
                 });
+            } else {
+                this.setState({
+                    messageType: "create/captcha-not-verified"
+                })
             }
         });
     };
@@ -159,11 +197,11 @@ class Register extends Component {
                         </Form.Field>
                         <Form.Field required>
                             <label>Hasło</label>
-                            <Input placeholder="Wpisz  hasło" type="password" id="password" name="password" onChange={this.handleChange("password")} />
+                            <PasswordInput placeholder="Wpisz  hasło" id="password" name="password" onChange={this.handleChange("password")} />
                         </Form.Field>
                         <Form.Field required>
                             <label>Powtórz hasło</label>
-                            <Input placeholder="Wpisz ponownie hasło" type="password" id="password_confirmation" name="password_confirmation" onChange={this.handleChange("passwordConfirmation")} />
+                            <PasswordInput placeholder="Wpisz ponownie hasło" id="password_confirmation" name="password_confirmation" onChange={this.handleChange("passwordConfirmation")} />
                         </Form.Field>
                         <Form.Field
                             control={Checkbox}
@@ -215,6 +253,20 @@ class Register extends Component {
         const { success } = this.state;
         return success ? this.renderSuccessPage() : this.renderRegisterForm();
     }
+}
+
+const PasswordInput = (props) => {
+    const [type, setType] = useState('password');
+
+    const toggleType = () => {
+        setType(type === 'password' ? 'text' : 'password')
+    }
+
+    return (
+        <Input type={type} {...props}
+               icon={<Icon name={type === 'password' ? 'eye' : 'eye slash outline'} circular className="password-preview" onClick={toggleType} link/>}
+        />
+    )
 }
 
 Register.contextTypes = {

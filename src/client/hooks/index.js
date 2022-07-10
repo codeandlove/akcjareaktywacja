@@ -31,7 +31,7 @@ export const useToggle = (initialState = false) => {
     // Initialize the state
     const [state, setState] = useState(initialState);
 
-    // Define and memorize toggler function in case we pass down the comopnent,
+    // Define and memorize toggler function in case we pass down the component,
     // This function change the boolean value to it's opposite value
     const toggle = useCallback(() => setState(state => !state), []);
 
@@ -56,4 +56,23 @@ export const useInterval = (callback, delay) => {
             return () => clearInterval(id);
         }
     }, [delay]);
+}
+
+export const useFormState = (initialState = {}) => {
+    // Initialize the state
+    const [state, _setState] = useState({...initialState});
+
+    const setState = (updatedState) => {
+        _setState({...state, ...updatedState});
+    }
+
+    const validateValues = (values) => {
+        const result = values.filter(val => {
+            return state[val] === false || state[val] === null || !state[val];
+        });
+
+        return result.length !== 0;
+    };
+
+    return [state, setState, validateValues];
 }
