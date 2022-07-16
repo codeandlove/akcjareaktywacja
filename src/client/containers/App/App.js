@@ -303,7 +303,7 @@ class App extends Component {
                     !isEmpty(auth) && !auth.isAnonymous ? <Avatar size="mini" /> : <></>
                 }
                 {
-                    !isMobile ? `Witaj, ${profile.displayNick || profile.displayName}` : <></>
+                    !isMobile ? `Witaj, ${profile.displayNick || 'dodaj swój nick!'}` : <></>
                 }
             </>
         )

@@ -6,7 +6,7 @@ import { firebaseConnect, isEmpty, isLoaded } from "react-redux-firebase";
 
 import moment from 'moment';
 
-import { Button, Form, Message, Icon, Transition } from "semantic-ui-react";
+import {Button, Form, Message, Icon, Transition, Input} from "semantic-ui-react";
 
 import "./ChatForm.scss";
 import {analytics} from "../../../firebase/analytics";
@@ -14,10 +14,13 @@ import {findPhoneNumber, findSwearWord, findUrlString, replaceBasicEmojiInText, 
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {pushNotification} from "../../notifications";
 import ChatTextArea from "../ChatTextArea/ChatTextArea";
+import {USER} from "../../routers";
+import PropTypes from "prop-types";
+import {withRouter} from "react-router";
 
 const MIN_TIME_OFFSET = process.env.NODE_ENV === 'production' ? 30000 : 0;
 
-const ChatForm = (props) => {
+const ChatForm = (props, context) => {
     const {firebase, profile, auth, suggestions, scrollToBottom, type, id} = props;
     const [formState, setFormState] = useState({
         nick: null,
@@ -257,6 +260,7 @@ const ChatForm = (props) => {
     };
 
     const {nick, message} = formState;
+    const {history} = props;
 
     return (
         <Form onFocus={expandForm} error={messageType !== null} onSubmit={handleSave}>
@@ -268,12 +272,22 @@ const ChatForm = (props) => {
                 <div>
                     <Form.Field>
                         <label>Podpis</label>
-                        {isEmpty(profile) ?
+                        {
+                            isEmpty(profile) ?
                             (
-                                <input id="nick" name="nick"
-                                       placeholder="Twój podpis" onChange={handleChange("nick")}/>
+                                <input id="nick" name="nick" placeholder="Twój podpis" onChange={handleChange("nick")} />
                             ) : (
-                                <input value={nick} name="nick" disabled readOnly onChange={() => null}/>
+                                <>
+                                    {
+                                        !nick ? (
+                                            <Button fluid basic color="olive" type="button" icon='user' content="Dodaj nick" onClick={() => {
+                                                history.push(`/${USER}`);
+                                            }} />
+                                        ) : (
+                                            <input value={nick} name="nick" disabled readOnly onChange={() => null} />
+                                        )
+                                    }
+                                </>
                             )
                         }
                     </Form.Field>
@@ -295,7 +309,11 @@ const ChatForm = (props) => {
     )
 }
 
+ChatForm.contextTypes = {
+    router: PropTypes.object
+};
+
 export default compose(
     firebaseConnect(),
     connect(({ firebase: { auth, profile } }) => ({ auth, profile }))
-)(withGoogleReCaptcha(ChatForm));
+)(withRouter(withGoogleReCaptcha(ChatForm)));

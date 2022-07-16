@@ -72,7 +72,7 @@ export const useFormState = (initialState = {}) => {
         });
 
         return result.length !== 0;
-    };
+    }
 
     return [state, setState, validateValues];
 }

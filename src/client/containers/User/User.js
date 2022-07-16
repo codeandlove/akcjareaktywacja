@@ -22,7 +22,7 @@ import {
     Image,
     Tab,
     Dimmer,
-    Loader, Checkbox
+    Loader, Checkbox, Modal
 } from "semantic-ui-react";
 import Avatar from "../../components/Avatar/Avatar";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
@@ -106,7 +106,16 @@ const User = props => {
             <Tab.Pane clearing>
                 <Container textAlign='center'>
                     <Avatar size="small"/>
-                    <h3>Witaj, {nick}</h3>
+                    {
+                        !!nick ? (
+                            <h3>Witaj, {nick}!</h3>
+                        ) : (
+                            <>
+                                <h3>Witaj nieznajomy!</h3>
+                                <p>Uzupełnij swój profil</p>
+                            </>
+                        )
+                    }
                 </Container>
             </Tab.Pane>
         )
@@ -116,7 +125,7 @@ const User = props => {
         return (
             <Tab.Pane clearing>
                 <Header>
-                    <Image src={avatar || avatarPlaceholder} size='mini' avatar /> {nick}
+                    <Image src={avatar || avatarPlaceholder} size='mini' avatar /> {!!nick ? nick : ''}
                 </Header>
                 <Form>
                     <Form.Field>
@@ -134,7 +143,7 @@ const User = props => {
                                   defaultChecked={subscriptions}/>
                     </Form.Field>
                     <Form.Field>
-                        <Button floated="right" color="olive" disabled={validateValues(["nick"]) || messageType === "nick/nick-exist"} onClick={updateProfile}>
+                        <Button floated="right" color="olive" disabled={validateValues(["nick"]) || messageType === "nick/nick-exist"} onClick={saveProfile}>
                             <Icon name="check" />
                             Zapisz
                         </Button>
@@ -169,7 +178,7 @@ const User = props => {
         setAvatarImage(data);
     }
 
-    const updateProfile = () => {
+    const saveProfile = () => {
         if(validateValues(["nick"])) return;
 
         verifyCaptcha(props, 'updateUser').then(token => {
@@ -215,14 +224,72 @@ const User = props => {
             <Segment clearing basic>
                 <Button basic onClick={close} floated="right" icon="x" />
                 <Header floated="left" size='large'>
-                    Witaj, {nick}!
+                    {
+                        !!nick ? (
+                            <>Witaj, {nick}!</>
+                        ) : (
+                            <>
+                                Witaj nieznajomy!
+                            </>
+                        )
+                    }
                 </Header>
             </Segment>
             {renderMessage()}
             <Segment basic>
                 <Tab panes={panes} />
             </Segment>
+            <UpdateNickModal {...props} formState={formState} setFormState={data => setFormState(data)} saveProfile={saveProfile} renderMessage={renderMessage} />
         </>
+    )
+}
+
+const UpdateNickModal = props => {
+    const {profile, formState: {nick}, setFormState, saveProfile, renderMessage} = props;
+    const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        if(!isEmpty(profile)) {
+            const {displayNick} = profile;
+            setOpen(!displayNick);
+        }
+    }, [profile]);
+
+    return(
+        <Modal
+            onClose={() => setOpen(false)}
+            onOpen={() => setOpen(true)}
+            open={open}
+            closeOnDimmerClick={false}
+            closeOnEscape={false}
+            closeOnDocumentClick={false}
+            closeOnPortalMouseLeave={false}
+            closeOnTriggerBlur={false}
+            closeOnTriggerMouseLeave={false}
+            closeOnTriggerClick={false}
+        >
+            <Header icon >
+                Wpisz swój nowy nick
+            </Header>
+            <Modal.Content>
+                {renderMessage()}
+                <Form>
+                    <Form.Field>
+                        <label>Nick</label>
+                        <Input placeholder="Wpisz nick" type="text" id="nick" name="nick" value={nick || ""}
+                           onChange={e => setFormState({
+                                nick: e.target.value
+                            })}
+                        />
+                    </Form.Field>
+                </Form>
+            </Modal.Content>
+            <Modal.Actions>
+                <Button color='olive' disabled={!nick} onClick={saveProfile}>
+                    <Icon name='checkmark' /> Zapisz
+                </Button>
+            </Modal.Actions>
+        </Modal>
     )
 }
 
