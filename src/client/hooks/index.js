@@ -74,5 +74,14 @@ export const useFormState = (initialState = {}) => {
         return result.length !== 0;
     }
 
-    return [state, setState, validateValues];
+    const handleChange = name => (event, data) => {
+        const {value, checked} = data;
+
+        setState({
+            [name]: checked !== undefined ? checked : value
+        });
+    };
+
+
+    return [state, setState, handleChange, validateValues];
 }

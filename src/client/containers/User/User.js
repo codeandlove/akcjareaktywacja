@@ -34,7 +34,7 @@ const User = props => {
     const [messageType, setMessageType] = useState(null);
     const [avatarImage, setAvatarImage] = useState(null);
 
-    const [formState, setFormState, validateValues] = useFormState({
+    const [formState, setFormState, handleChange, validateValues] = useFormState({
         nick: null,
         avatar: null,
         subscriptions: null
@@ -64,14 +64,6 @@ const User = props => {
             </Dimmer>
         )
     }
-
-    const handleChange = name => (event, data) => {
-        const {value, checked} = data;
-
-        setFormState({
-            [name]: checked !== undefined ? checked : value
-        });
-    };
 
     const renderMessage = () => {
         let result = null;
