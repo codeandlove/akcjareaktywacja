@@ -5,12 +5,17 @@
 
   img {
     max-width: 800px;
+
+    @include media('<mobile') {
+      max-width: 100%;
+    }
   }
 
   @include media('>=mobile') {
     width: calc(100% - 40px);
     max-width: 1200px !important;
   }
+
   @include media('<mobile') {
     margin: 0 !important;
   }

@@ -132,9 +132,17 @@ class EventPage extends Component {
                         ): null
                     }
                 </Segment>
-                <Relations id={eventKey} participants={data.participants}/>
+                {
+                    !isDraft ? (
+                        <Relations id={eventKey} participants={data.participants}/>
+                    ) : <></>
+                }
                 <Segment basic clearing>
-                    <ShareButton url={url} floated="right"/>
+                    {
+                        !isDraft ? (
+                            <ShareButton url={url} floated="right"/>
+                        ) : <></>
+                    }
                     <Button floated="left" onClick={() => this.closeEventPage()} >
                         <Icon name="arrow left" /> Wróć
                     </Button>
