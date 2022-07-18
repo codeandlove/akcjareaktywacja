@@ -1,4 +1,4 @@
-import React, {Component, useState} from "react";
+import React, {Component, useEffect, useState} from "react";
 import PropTypes from "prop-types";
 
 import { firebaseConnect} from "react-redux-firebase";
@@ -13,50 +13,45 @@ import { Header, Segment, Message, Form, Input, Checkbox, Button, Icon } from "s
 import {LOGIN, USER} from "../../routers";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {verifyCaptcha} from "../../utils";
+import {useFormState} from "../../hooks";
+import {withRouter} from "react-router";
 
-class Register extends Component {
-    constructor(props) {
-        super(props);
+const Register = (props) => {
+    const {toggleColumn, firebase, close, history} = props;
+    const [registerFormPassed, setRegisterFormPassed] = useState(false);
+    const [messageType, setMessageType] = useState(null);
+    const [formState, setFormState, handleChange, validateValues] = useFormState({
+        email: null,
+        password: null,
+        passwordConfirmation: null,
+        passwordValidated: null,
+        nick: null,
+        terms: false
+    });
 
-        this.state = {
-            messageType: null,
-            terms: true,
-            email: null,
-            password: null,
-            passwordConfirmation: null,
-            passwordValidated: false,
-            nick: null,
-            success: false
-        }
-    }
+    const { email, password, passwordConfirmation, passwordValidated, nick, terms } = formState;
 
-    componentDidMount() {
-        const {toggleColumn} = this.props;
+    useEffect(() => {
         toggleColumn(true);
-    }
+    }, []);
 
-    handleChange = name => event => {
-        this.setState({
-            [name]: event.target.value
-        });
-
-        if(name === 'passwordConfirmation') {
-            this.machPasswordConfirmation(event.target.value, this.state.password);
-        } else if(name === 'password') {
-            this.machPasswordConfirmation(event.target.value, this.state.passwordConfirmation);
+    useEffect(() => {
+        if(!!password && !!passwordConfirmation) {
+            setFormState({
+                passwordValidated: password === passwordConfirmation
+            })
+        } else {
+            setFormState({
+                passwordValidated: null
+            })
         }
-    };
+    }, [password, passwordConfirmation])
 
-    machPasswordConfirmation = (pass1, pass2) => {
-        this.setState({
-            messageType: pass1 !== pass2 ? 'create/password-does-not-mach' : null,
-            passwordValidated:  pass1 === pass2
-        })
-    }
+    useEffect(() => {
+        setMessageType(passwordValidated === false ? "create/password-does-not-match" : null)
+    }, [passwordValidated])
 
-    renderMessage = () => {
-        const { messageType } = this.state;
-
+    const renderMessage = () => {
         let result = null;
 
         switch(messageType) {
@@ -68,7 +63,7 @@ class Register extends Component {
                     </Message>
                 );
                 break;
-            case "create/password-does-not-mach":
+            case "create/password-does-not-match":
                 result = (
                     <Message warning>
                         <Message.Header>Błąd rejestracji</Message.Header>
@@ -108,114 +103,79 @@ class Register extends Component {
         return (result) ? <Segment clearing basic>{result}</Segment> : null;
     };
 
-    toggleTerms = () => {
-        this.setState(s => {
-            return {
-                terms: !s.terms
-            }
-        })
-    };
+    const registerUser = () => {
+        if(validateValues(["email", "password", "passwordConfirmation", "passwordValidated", "nick", "terms"])) return;
 
-    validateValues = (values) => {
-        const result = values.filter(val => {
-            return this.state[val] === false || this.state[val] === null || !this.state[val];
-        });
+        setMessageType(null);
 
-        return result.length !== 0;
-    };
-
-    registerUser = () => {
-        const { nick, email, password } = this.state;
-        const { firebase } = this.props;
-
-        if(this.validateValues(["email", "password", "passwordConfirmation", "passwordValidated", "nick", "terms"])) return;
-
-        this.setState({
-            messageType: null
-        })
-
-        verifyCaptcha(this.props, 'registerForm').then(token => {
+        verifyCaptcha(props, 'registerForm').then(token => {
             if(token) {
                 const usersRef = firebase.database().ref("/users");
 
                 //Check if nick is unique
                 usersRef.orderByChild("displayNick").equalTo(nick).once("value").then(snapshot => {
                     if(!snapshot.val()) {
-                        this.props.firebase.createUser({
+                        firebase.createUser({
                             email: email,
                             password: password
                         }, {
                             email: email,
                             displayNick: nick
-                        }).then((res) => {
-                            this.setState({
-                                success: true
-                            })
+                        }).then(() => {
+                            setRegisterFormPassed(true)
                         }).catch((res) => {
                             const {code} = res.toJSON();
-                            console.log(typeof code);
-                            this.setState({
-                                messageType: code
-                            })
+                            setMessageType(code);
                         })
                     } else {
-                        this.setState({
-                            messageType: "create/nick-duplicated"
-                        })
+                        setMessageType("create/nick-duplicated");
                     }
                 });
             } else {
-                this.setState({
-                    messageType: "create/captcha-not-verified"
-                })
+                setMessageType("create/captcha-not-verified");
             }
         });
     };
 
-    renderRegisterForm = () => {
-        const { terms } = this.state;
-
+    const renderRegisterForm = () => {
         return (
             <>
                 <Segment clearing basic>
-                    <Button basic onClick={() => this.props.close()} floated="right" icon="x" />
+                    <Button basic onClick={close} floated="right" icon="x" />
                     <Header floated="left" size="large">
                         Rejestracja
                     </Header>
                 </Segment>
-                {this.renderMessage()}
+                {renderMessage()}
                 <Segment clearing basic>
                     <h3>Wypełnij poniższe pola</h3>
                     <Form>
                         <Form.Field required>
                             <label>Twój nick</label>
-                            <Input placeholder="Wpisz nick" type="nick" id="nick" name="nick" onChange={this.handleChange("nick")} />
+                            <Input placeholder="Wpisz nick" type="nick" id="nick" name="nick" onChange={handleChange("nick")} />
                         </Form.Field>
                         <Form.Field required>
                             <label>Adres email</label>
-                            <Input placeholder="Wpisz adres email" type="email" id="email" name="email" onChange={this.handleChange("email")} />
+                            <Input placeholder="Wpisz adres email" type="email" id="email" name="email" onChange={handleChange("email")} />
                         </Form.Field>
                         <Form.Field required>
                             <label>Hasło</label>
-                            <PasswordInput placeholder="Wpisz  hasło" id="password" name="password" onChange={this.handleChange("password")} />
+                            <PasswordInput placeholder="Wpisz  hasło" id="password" name="password" onChange={handleChange("password")} />
                         </Form.Field>
                         <Form.Field required>
                             <label>Powtórz hasło</label>
-                            <PasswordInput placeholder="Wpisz ponownie hasło" id="password_confirmation" name="password_confirmation" onChange={this.handleChange("passwordConfirmation")} />
+                            <PasswordInput placeholder="Wpisz ponownie hasło" id="password_confirmation" name="password_confirmation" onChange={handleChange("passwordConfirmation")} />
                         </Form.Field>
-                        <Form.Field
-                            control={Checkbox}
-                            label={{ children: `Zgadzam się z ogólnymi warunkami serwisu.` }}
-                            required
-                            inline
-                            defaultChecked={terms}
-                            onChange={() => this.toggleTerms()}
-                        />
+                        <Form.Field required>
+                            <Checkbox label="Zgadzam się z ogólnymi warunkami serwisu." toggle
+                              onChange={handleChange("terms")}
+                              defaultChecked={terms}/>
+                        </Form.Field>
                         <Form.Field>
                             <Button as={Link} to={`/${LOGIN}`} floated="left" >
                                 Anuluj
                             </Button>
-                            <Button primary onClick={this.registerUser} disabled={this.validateValues(["email", "password", "passwordConfirmation", "passwordValidated", "nick", "terms"])} floated="right" >
+                            <Button primary onClick={registerUser} disabled={validateValues(["email", "password", "passwordConfirmation", "passwordValidated", "nick", "terms"])} floated="right" >
                                 <Icon name="check" />
                                 Wyślij
                             </Button>
@@ -226,21 +186,19 @@ class Register extends Component {
         )
     }
 
-    renderSuccessPage = () => {
-        const { router } = this.context;
-
+    const renderSuccessPage = () => {
         return (
             <>
                 <Segment clearing basic>
-                    <Button basic onClick={() => this.props.close()} floated="right" icon="x" />
+                    <Button basic onClick={close} floated="right" icon="x" />
                     <Header floated="left" size="large">
                         Udało się!
                     </Header>
                 </Segment>
-                {this.renderMessage()}
+                {renderMessage()}
                 <Segment clearing basic>
                     <p>Konto zostało utworzone.</p>
-                    <Button floated="right" onClick={() => router.history.push(`/${USER}`)} color="olive">
+                    <Button floated="right" onClick={() => history.push(`/${USER}`)} color="olive">
                         <Icon name="user" />
                         Twój profil
                     </Button>
@@ -249,10 +207,7 @@ class Register extends Component {
         )
     }
 
-    render() {
-        const { success } = this.state;
-        return success ? this.renderSuccessPage() : this.renderRegisterForm();
-    }
+    return registerFormPassed ? renderSuccessPage() : renderRegisterForm();
 }
 
 const PasswordInput = (props) => {
@@ -269,11 +224,7 @@ const PasswordInput = (props) => {
     )
 }
 
-Register.contextTypes = {
-    router: PropTypes.object
-};
-
 export default compose(
     firebaseConnect(),
     connect(({ firebase: { auth, profile } }) => ({ auth, profile }))
-)(withGoogleReCaptcha(Register));
+)(withGoogleReCaptcha(withRouter(Register)));
