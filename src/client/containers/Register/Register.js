@@ -15,6 +15,7 @@ import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {verifyCaptcha} from "../../utils";
 import {useFormState} from "../../hooks";
 import {withRouter} from "react-router";
+import InputPasswordPreview from "../../components/InputPasswordPreview/InputPasswordPreview";
 
 const Register = (props) => {
     const {toggleColumn, firebase, close, history} = props;
@@ -160,11 +161,11 @@ const Register = (props) => {
                         </Form.Field>
                         <Form.Field required>
                             <label>Hasło</label>
-                            <PasswordInput placeholder="Wpisz  hasło" id="password" name="password" onChange={handleChange("password")} />
+                            <InputPasswordPreview placeholder="Wpisz hasło" id="password" name="password" onChange={handleChange("password")} />
                         </Form.Field>
                         <Form.Field required>
                             <label>Powtórz hasło</label>
-                            <PasswordInput placeholder="Wpisz ponownie hasło" id="password_confirmation" name="password_confirmation" onChange={handleChange("passwordConfirmation")} />
+                            <InputPasswordPreview placeholder="Wpisz ponownie hasło" id="password_confirmation" name="password_confirmation" onChange={handleChange("passwordConfirmation")} />
                         </Form.Field>
                         <Form.Field required>
                             <Checkbox label="Zgadzam się z ogólnymi warunkami serwisu." toggle
@@ -208,20 +209,6 @@ const Register = (props) => {
     }
 
     return registerFormPassed ? renderSuccessPage() : renderRegisterForm();
-}
-
-const PasswordInput = (props) => {
-    const [type, setType] = useState('password');
-
-    const toggleType = () => {
-        setType(type === 'password' ? 'text' : 'password')
-    }
-
-    return (
-        <Input type={type} {...props}
-               icon={<Icon name={type === 'password' ? 'eye' : 'eye slash outline'} circular className="password-preview" onClick={toggleType} link/>}
-        />
-    )
 }
 
 export default compose(
