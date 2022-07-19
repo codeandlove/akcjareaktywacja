@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 
-import { firebaseConnect} from 'react-redux-firebase';
+import {firebaseConnect, isEmpty, isLoaded} from 'react-redux-firebase';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 
@@ -17,7 +17,7 @@ import {withRouter} from "react-router";
 import InputPasswordPreview from "../../components/InputPasswordPreview/InputPasswordPreview";
 
 const Login = (props) => {
-    const {toggleColumn, firebase, close, history} = props;
+    const {toggleColumn, firebase, close, history, auth} = props;
     const [messageType, setMessageType] = useState(null);
     const [formState, setFormState, handleChange, validateValues] = useFormState({
         email: null,
@@ -29,6 +29,12 @@ const Login = (props) => {
     useEffect(() => {
         toggleColumn(true);
     }, []);
+
+    useEffect(() => {
+        if(!isEmpty(auth) && isLoaded(auth) && !auth.isAnonymous) {
+            history.push(`/${USER}`);
+        }
+    }, [auth])
 
     const renderMessage = () => {
         let result = null;
