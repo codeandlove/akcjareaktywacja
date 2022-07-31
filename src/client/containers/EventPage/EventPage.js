@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {useEffect} from "react";
 import './EventPage.scss';
 import { connect } from "react-redux";
 import { compose } from "redux";
@@ -8,9 +8,8 @@ import renderHTML from "react-render-html";
 import moment from "moment";
 import Join from "./../Join/Join";
 
-import {Container, Segment, Header, Button, Icon, Table, Dimmer, Loader, Item, Image, Label} from "semantic-ui-react";
+import {Segment, Header, Button, Icon, Table, Dimmer, Loader, Image} from "semantic-ui-react";
 import {Helmet} from "react-helmet";
-import PropTypes from "prop-types";
 import Countdown from "../../components/Countrdown/Countdown";
 import {EVENT_FORM} from "../../routers";
 import {analytics} from "../../../firebase/analytics";
@@ -20,22 +19,22 @@ import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
 import Reactions from "../../components/Reactions/Reactions";
 import Relations from "../Relations/Relations";
 import {getCategoriesDataByIds} from "../../utils";
+import {withRouter} from "react-router";
 
-class EventPage extends Component {
-    componentDidMount() {
-        this.props.open();
+const EventPage = (props) => {
+    const {open, close, isDraft, event, history, match} = props;
+
+    useEffect(() => {
+        open();
         analytics.logEvent('User opened a event page');
+    }, []);
+
+    const closeEventPage = () => {
+        history.push(`${isDraft ? `/${EVENT_FORM}` : `/`}`);
+        close();
     }
 
-    closeEventPage = () => {
-        const { router } = this.context;
-        const { isDraft } = this.props;
-
-        router.history.push(`${isDraft ? `/${EVENT_FORM}` : `/`}`);
-        this.props.close();
-    }
-
-    renderCategories = (categoriesIds) => {
+    const renderCategories = (categoriesIds) => {
         const categoriesData = getCategoriesDataByIds(categoriesIds);
 
         return (
@@ -55,8 +54,9 @@ class EventPage extends Component {
         )
     }
 
-    renderPage = (data) => {
-        const {match: {url}, isDraft} = this.props;
+    const  renderPage = (data) => {
+        console.log(match)
+        const {url} = match;
         const {owner, title, description, eventKey, short, date, location, contact, categories} = data;
 
         return (
@@ -71,7 +71,7 @@ class EventPage extends Component {
                 ) : null}
 
                 <Segment clearing basic>
-                    <Button basic onClick={() => this.closeEventPage()} floated="right" icon="x" />
+                    <Button basic onClick={closeEventPage} floated="right" icon="x" />
                     <Header as="h1" floated="left" size="large">
                         {title}
                         <Header.Subheader>
@@ -92,7 +92,7 @@ class EventPage extends Component {
                                 !!categories ? (
                                     <Table.Row>
                                         <Table.Cell>Kategoria</Table.Cell>
-                                        <Table.Cell>{this.renderCategories(categories)}</Table.Cell>
+                                        <Table.Cell>{renderCategories(categories)}</Table.Cell>
                                     </Table.Row>
                                 ) : <></>
                             }
@@ -143,7 +143,7 @@ class EventPage extends Component {
                             <ShareButton url={url} floated="right"/>
                         ) : <></>
                     }
-                    <Button floated="left" onClick={() => this.closeEventPage()} >
+                    <Button floated="left" onClick={closeEventPage} >
                         <Icon name="arrow left" /> Wróć
                     </Button>
                 </Segment>
@@ -151,44 +151,34 @@ class EventPage extends Component {
         )
     };
 
-    render() {
+    if(isDraft) {
+        const draft = JSON.parse(localStorage.getItem("eventDraft"));
 
-        const { event, isDraft } = this.props;
-
-        if(isDraft) {
-
-            let draft = JSON.parse(localStorage.getItem("eventDraft"));
-
-            if(isEmpty(draft)) {
-                return (
-                    <p>Brak danych</p>
-                );
-            } else {
-                return this.renderPage(draft);
-            }
-        }
-
-        if(!event) {
+        if(isEmpty(draft)) {
             return (
-                <Dimmer active inverted>
-                    <Loader size="large">Proszę czekać...</Loader>
-                </Dimmer>
-            )
-        }
-
-        if(!isLoaded(event)) {
-            return null;
+                <p>Brak danych</p>
+            );
         } else {
-            const data = Object.assign({eventKey: Object.keys(event)[0]}, Object.values(event)[0]);
-
-            return this.renderPage(data);
+            return renderPage(draft);
         }
     }
-}
 
-EventPage.contextTypes = {
-    router: PropTypes.object
-};
+    if(!event) {
+        return (
+            <Dimmer active inverted>
+                <Loader size="large">Proszę czekać...</Loader>
+            </Dimmer>
+        )
+    }
+
+    if(!isLoaded(event)) {
+        return <p>Brak danych</p>;
+    } else {
+        const data = Object.assign({eventKey: Object.keys(event)[0]}, Object.values(event)[0]);
+
+        return renderPage(data);
+    }
+}
 
 const populates = [
     { child: "participants", root: "users", keyProp: "uid" }, // replace participants with user object
@@ -213,4 +203,4 @@ const enhance = compose(
     }))
 );
 
-export default enhance(EventPage)
+export default enhance(withRouter(EventPage))
