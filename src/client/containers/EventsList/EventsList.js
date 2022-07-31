@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component, useEffect} from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
@@ -8,7 +8,7 @@ import { bindActionCreators } from "redux";
 import * as actionCreators from "./../../actions";
 import moment from "moment";
 import "./EventsList.scss";
-import { Container, Header, Segment, Item, Button, Transition, Dimmer, Loader } from "semantic-ui-react";
+import { Header, Segment, Item, Button, Dimmer, Loader } from "semantic-ui-react";
 import ShowOnMap from "../../components/ShowOnMap/ShowOnMap";
 import {ACTION, EVENT_FORM, SETTINGS} from "../../routers";
 import JoinEvent from "./../Join/Join";
@@ -21,19 +21,18 @@ import Reactions from "../../components/Reactions/Reactions";
 import {EVENT_LATEST_CHAT_KEY_COOKIE_NAME} from "../Chat/Chat";
 import {withCookies} from "react-cookie";
 import DotCounter from "../../components/DotCounter/DotCounter";
+import {withRouter} from "react-router";
 
-class EventsList extends Component {
-    componentDidMount() {
-        const {toggleColumn} = this.props;
-        const { router } = this.context;
+const EventsList = (props) => {
+    const {toggleColumn, history, close, match, settings, settings: {date_from, date_to, show_recent_events}, cookies, events} = props;
 
-        if(!router.route.match.isExact) {
+    useEffect(() => {
+        if(!match.isExact) {
             toggleColumn(true);
         }
-    }
+    });
 
-    listView = data => {
-        const {settings: {date_from, date_to}, cookies} = this.props;
+    const listView = data => {
         const duration = moment(date_to).diff(moment(date_from), "days");
 
         if(data.length < 1) {
@@ -44,6 +43,7 @@ class EventsList extends Component {
                 </Segment>
             )
         }
+        console.log(cookies)
 
         return (
             <Item.Group
@@ -64,7 +64,7 @@ class EventsList extends Component {
                                                 <Link to={`/${ACTION}/${data.slug}`} >
                                                     {data.title}
                                                 </Link>
-                                                <ShowOnMap {...data} {...this.props} />
+                                                <ShowOnMap {...data} {...props} />
                                             </Item.Header>
                                             <Item.Meta>
                                                 <small>Data wydarzenia: <strong>{moment(data.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
@@ -99,10 +99,9 @@ class EventsList extends Component {
                 }
             </Item.Group>
         )
-    };
+    }
 
-    weeksView = data => {
-        const { settings: {date_from, date_to}, cookies } = this.props;
+    const weeksView = data => {
         const days = [moment(date_from)];
         const duration = moment(date_to).diff(date_from, "days");
 
@@ -136,74 +135,74 @@ class EventsList extends Component {
                                         {moment(day).format("dddd, DD MMMM YYYY")}
                                     </Item.Header>
 
-                                        {
-                                            (isInPast && dayEvents.length <= 0) ? (
-                                                <p><small>Tego dnia nie odbyło się żadne wydarzenie...</small></p>
-                                            ) : null
-                                        }
+                                    {
+                                        (isInPast && dayEvents.length <= 0) ? (
+                                            <p><small>Tego dnia nie odbyło się żadne wydarzenie...</small></p>
+                                        ) : null
+                                    }
 
-                                        {
-                                            (!isInPast && dayEvents.length <= 0) ? (
-                                                <p><small>W tym dniu nie ma żadnych wydarzeń jeszcze...</small></p>
-                                            ) : null
-                                        }
+                                    {
+                                        (!isInPast && dayEvents.length <= 0) ? (
+                                            <p><small>W tym dniu nie ma żadnych wydarzeń jeszcze...</small></p>
+                                        ) : null
+                                    }
 
-                                        {
-                                            !isInPast ?
-                                                <p><Link to={`/${EVENT_FORM}/${day.format('DD-MM-YYYY')}`}>Dodaj własne wydarzenie</Link></p>
+                                    {
+                                        !isInPast ?
+                                            <p><Link to={`/${EVENT_FORM}/${day.format('DD-MM-YYYY')}`}>Dodaj własne wydarzenie</Link></p>
                                             : null
-                                        }
+                                    }
 
-                                        {
-                                            dayEvents.length > 0 ?
-                                                dayEvents.map((event, key) => {
-                                                        const lastKey = cookies.get(EVENT_LATEST_CHAT_KEY_COOKIE_NAME+event.key);
-                                                        const relationsLength = (!!event.chat && Object.keys(event.chat).length) || 0;
+                                    {
+                                        dayEvents.length > 0 ?
+                                            dayEvents.map((event, key) => {
+                                                    const lastKey = cookies.get(EVENT_LATEST_CHAT_KEY_COOKIE_NAME+event.key);
+                                                    const relationsLength = (!!event.chat && Object.keys(event.chat).length) || 0;
 
-                                                        return (
-                                                            <Segment.Group key={`List-item-events-${key}`}>
-                                                                <Segment
-                                                                    secondary={isInPast}
-                                                                    textAlign="left"
-                                                                >
-                                                                    <Item.Header as="h4" >
-                                                                        <Link to={`/${ACTION}/${event.slug}`}>
-                                                                            {event.title}
-                                                                        </Link>
-                                                                        <ShowOnMap {...event} {...this.props} />
-                                                                    </Item.Header>
-                                                                    <Item.Meta>
-                                                                        <small>Data wydarzenia: <strong>{moment(event.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
-                                                                        <small>Do wydarzenia pozostało <strong><Countdown toDate={event.date} /></strong></small><br />
-                                                                        <small>Organizator: <strong>{event.owner}</strong></small>
-                                                                        { relationsLength ? (
-                                                                            <>
-                                                                                <br /><small>Relacji: <strong>{relationsLength}</strong></small>
-                                                                                <DotCounter data={event.chat}
-                                                                                            lastKey={lastKey}
-                                                                                            color="blue"/>
-                                                                            </>
-                                                                        ) : <></>
+                                                    return (
+                                                        <Segment.Group key={`List-item-events-${key}`}>
+                                                            <Segment
+                                                                secondary={isInPast}
+                                                                textAlign="left"
+                                                            >
+                                                                <Item.Header as="h4" >
+                                                                    <Link to={`/${ACTION}/${event.slug}`}>
+                                                                        {event.title}
+                                                                    </Link>
+                                                                    <ShowOnMap {...event} {...props} />
+                                                                </Item.Header>
+                                                                <Item.Meta>
+                                                                    <small>Data wydarzenia: <strong>{moment(event.date).format("DD MMMM YYYY, HH:mm")}</strong></small><br />
+                                                                    <small>Do wydarzenia pozostało <strong><Countdown toDate={event.date} /></strong></small><br />
+                                                                    <small>Organizator: <strong>{event.owner}</strong></small>
+                                                                    { relationsLength ? (
+                                                                        <>
+                                                                            <br /><small>Relacji: <strong>{relationsLength}</strong></small>
+                                                                            <DotCounter data={event.chat}
+                                                                                        lastKey={lastKey}
+                                                                                        color="blue"/>
+                                                                        </>
+                                                                    ) : <></>
                                                                     }
-                                                                    </Item.Meta>
-                                                                    <Item.Description>
-                                                                        {event.short}
-                                                                    </Item.Description>
-                                                                    <Item.Extra className="reactions">
+                                                                </Item.Meta>
+                                                                <Item.Description>
+                                                                    {event.short}
+                                                                </Item.Description>
+                                                                <Item.Extra className="reactions">
 
-                                                                        <ReactionsButton data={event} position="top right">
-                                                                            <Reactions id={event.key} data={event} type="events" />
-                                                                        </ReactionsButton>
-                                                                    </Item.Extra>
-                                                                </Segment>
-                                                                <Segment attached textAlign="right">
-                                                                    <JoinEvent eventKey={event.key} event={event}/>
-                                                                </Segment>
-                                                            </Segment.Group>
-                                                        )
-                                                    }
-                                                )
-                                         : null
+                                                                    <ReactionsButton data={event} position="top right">
+                                                                        <Reactions id={event.key} data={event} type="events" />
+                                                                    </ReactionsButton>
+                                                                </Item.Extra>
+                                                            </Segment>
+                                                            <Segment attached textAlign="right">
+                                                                <JoinEvent eventKey={event.key} event={event}/>
+                                                            </Segment>
+                                                        </Segment.Group>
+                                                    )
+                                                }
+                                            )
+                                            : <></>
                                     }
                                 </Item.Content>
                             </Item>
@@ -212,11 +211,11 @@ class EventsList extends Component {
                 }
             </Item.Group>
         )
-    };
+    }
 
-    renderList = () => {
-        const { events } = this.props;
+    const renderList = () => {
         let data = [];
+        const {view_type} = settings;
 
         if(!isEmpty(events)) {
             data = Object.keys(events).map((key) => {
@@ -227,70 +226,61 @@ class EventsList extends Component {
             });
         }
 
-        const viewType = this.props.settings.view_type || "weeksView";
+        const viewType = view_type || "weeksView";
 
         switch(viewType) {
             case "weeksView":
-                return this.weeksView(data);
+                return weeksView(data);
             default:
-                return this.listView(data);
+                return listView(data);
         }
-    };
-
-    render() {
-        const { router } = this.context;
-        const {events, settings: {show_recent_events}} = this.props;
-
-        return (
-            <div className="events-list">
-                <Segment clearing basic>
-                    <Button basic onClick={this.props.close} floated="right" icon="x" />
-                    <Button basic floated="right" icon="sliders" onClick={() => router.history.replace(`/${SETTINGS}`)} />
-                    <Header floated="left" size="large">
-                        Wydarzenia
-                    </Header>
-                </Segment>
-                <Segment basic textAlign="center">
-                    {
-                        !isLoaded(events) ? (
-                            <Dimmer active inverted>
-                                <Loader size="large">Proszę czekać...</Loader>
-                            </Dimmer>
-                        ) : (
-                            <>
-                                <EventsMonitor />
-                                {this.renderList()}
-                                <EventsPagination />
-                            </>
-                        )
-
-                    }
-
-                </Segment>
-                {
-                    show_recent_events ? (
-                        <>
-                            <Segment clearing basic>
-                                <Header as="h3" dividing>
-                                    Ostatnio zakończone
-                                </Header>
-                            </Segment>
-                            <Segment basic textAlign="center">
-                                <Recent {...this.props} />
-                            </Segment>
-                        </>
-                    ):(
-                        <></>
-                    )
-                }
-            </div>
-        );
     }
-}
 
-EventsList.contextTypes = {
-    router: PropTypes.object
-};
+    return (
+        <div className="events-list">
+            <Segment clearing basic>
+                <Button basic onClick={close} floated="right" icon="x" />
+                <Button basic floated="right" icon="sliders" onClick={() => history.replace(`/${SETTINGS}`)} />
+                <Header floated="left" size="large">
+                    Wydarzenia
+                </Header>
+            </Segment>
+            <Segment basic textAlign="center">
+                {
+                    !isLoaded(events) ? (
+                        <Dimmer active inverted>
+                            <Loader size="large">Proszę czekać...</Loader>
+                        </Dimmer>
+                    ) : (
+                        <>
+                            <EventsMonitor />
+                            {renderList()}
+                            <EventsPagination />
+                        </>
+                    )
+
+                }
+
+            </Segment>
+            {
+                show_recent_events ? (
+                    <>
+                        <Segment clearing basic>
+                            <Header as="h3" dividing>
+                                Ostatnio zakończone
+                            </Header>
+                        </Segment>
+                        <Segment basic textAlign="center">
+                            <Recent {...props} />
+                        </Segment>
+                    </>
+                ):(
+                    <></>
+                )
+            }
+        </div>
+    )
+}
 
 const mapStateToProps = state => {
     return {
@@ -306,4 +296,4 @@ export default compose(
     firebaseConnect(),
     connect(({ firebase: { auth } }) => ({ auth })),
     connect(mapStateToProps, mapDispatchToProps)
-)(withCookies(EventsList));
+)(withCookies(withRouter(EventsList)));

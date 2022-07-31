@@ -55,7 +55,6 @@ const EventPage = (props) => {
     }
 
     const  renderPage = (data) => {
-        console.log(match)
         const {url} = match;
         const {owner, title, description, eventKey, short, date, location, contact, categories} = data;
 
