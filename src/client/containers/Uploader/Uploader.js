@@ -23,8 +23,8 @@ const Uploader = ({ setAvatarImage }) => {
                 setCroppedImageData(data);
                 setAvatarImage(data);
             });
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.log(error);
         }
     }, [croppedImageRawData])
 
