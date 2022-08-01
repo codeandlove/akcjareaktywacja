@@ -69,13 +69,13 @@ const Layout = (props) => {
     }
 
     const colRoutes = () => {
-        const eventList = <EventsList events={props.events} close={props.colClose} isMobile={props.isMobile} viewEvent={key => props.viewEvent(key)} toggleSettings={props.toggleSettings} toggleColumn={props.toggleColumn} />;
+        const eventList = <EventsList events={props.events} close={props.colClose} isMobile={props.isMobile} toggleColumn={props.toggleColumn} />;
         return (
             <Switch>
                 <Route exact path="/" render={() => eventList } />
-                <Route exact path={`/${EVENT_FORM}`} render={() => <EventForm coordinates={(!!props.event) ? props.event.coordinates : null} cancel={props.formCancel} toggleColExpand={props.toggleColExpand} toggleColumn={props.toggleColumn} isColExpanded={props.isColExpanded} saveEvent={val => props.saveEvent(val)} updateEvent={val => props.updateEvent(val)} isMobile={props.isMobile} /> } />
-                <Route exact path={`/${ACTION}/${PREVIEW}`} render={() => <EventForm cancel={props.formCancel} toggleColExpand={props.toggleColExpand} toggleColumn={props.toggleColumn} isColExpanded={props.isColExpanded} saveEvent={val => props.saveEvent(val)} updateEvent={val => props.updateEvent(val)} isMobile={props.isMobile} /> } />
-                <Route path={`/${EVENT_FORM}/:eventDate`} render={({match}) => <EventForm {...match} coordinates={(!!props.event) ? props.event.coordinates : null} cancel={props.formCancel} toggleColExpand={props.toggleColExpand} toggleColumn={props.toggleColumn} isColExpanded={props.isColExpanded} saveEvent={val => props.saveEvent(val)} updateEvent={val => props.updateEvent(val)} isMobile={props.isMobile} /> } />
+                <Route exact path={`/${EVENT_FORM}`} render={() => <EventForm coordinates={(!!props.event) ? props.event.coordinates : null} cancel={props.formCancel} toggleColExpand={props.toggleColExpand} toggleColumn={props.toggleColumn} isColExpanded={props.isColExpanded} saveEvent={data => props.saveEvent(data)} updateEvent={data => props.updateEvent(data)} isMobile={props.isMobile} /> } />
+                <Route exact path={`/${ACTION}/${PREVIEW}`} render={() => <EventForm cancel={props.formCancel} toggleColExpand={props.toggleColExpand} toggleColumn={props.toggleColumn} isColExpanded={props.isColExpanded} saveEvent={data => props.saveEvent(data)} updateEvent={data => props.updateEvent(data)} isMobile={props.isMobile} /> } />
+                <Route path={`/${EVENT_FORM}/:eventDate`} render={({match}) => <EventForm {...match} coordinates={(!!props.event) ? props.event.coordinates : null} cancel={props.formCancel} toggleColExpand={props.toggleColExpand} toggleColumn={props.toggleColumn} isColExpanded={props.isColExpanded} saveEvent={data => props.saveEvent(data)} updateEvent={data => props.updateEvent(data)} isMobile={props.isMobile} /> } />
                 <Route path={`/${EVENTS_LIST}`} render={() => eventList } />
                 <Route path={`/${CHAT}`} render={() => <Chat data={props.chat} close={props.colClose} {...props} />} />
                 <Route path={`/${LOGIN}`} render={() => <Login close={props.colClose} toggleColumn={props.toggleColumn}/> } />

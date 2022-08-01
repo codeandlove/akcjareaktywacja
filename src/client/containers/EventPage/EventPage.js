@@ -44,9 +44,9 @@ const EventPage = (props) => {
                         const {label, icon} = category;
 
                         return (
-                            <>
+                            <span key={`cat-key-${key}`}>
                                 {!!icon ? <Image size="mini" src={`${process.env.PUBLIC_URL}/categories/${icon}.svg`}/> : <></>} {label} {key < categoriesData.length - 1 ? <Icon name="chevron right" size="small"/> : ''}
-                            </>
+                            </span>
                         )
                     })
                 }

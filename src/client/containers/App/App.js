@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component, useEffect, useState} from "react";
 import PropTypes from "prop-types";
 
 import { connect } from "react-redux";
@@ -42,6 +42,7 @@ import {withCookies} from "react-cookie";
 import {askForPermissionToReceiveNotifications} from "../../../firebase/messaging";
 import {SLACK_NEW_VISITOR_HOOK} from "../../consts";
 import VisitorsOnlineTracker from "../../components/VisitorsOnlineTracker/VisitorsOnlineTracker";
+import {withRouter} from "react-router";
 
 const populates = [
     { child: "participants", root: "users", keyProp: "uid" },
@@ -58,46 +59,31 @@ const toFloatNumber = (str, val) => {
     return Number(str);
 }
 
-class App extends Component {
-    constructor() {
-        super();
+const App = (props) => {
+    const {setClientData, history, firebase, events, recent, chat, auth, profile, cookies} = props;
 
-        this.state = {
-            auth: null,
-            isColOpen: window.innerWidth > 768,
-            isColExpanded: false,
-            isPageOpen: false,
-            eventKey: null,
-            menuVisible: false,
-            event: null,
-            events: null,
-            chat: null,
-            isMobile: false,
-            hasError: false
-        }
-    }
+    const [isMobile, setIsMobile] = useState(false);
+    const [isPageOpen, setIsPageOpen] = useState(false);
+    const [isMenuVisible, setIsMenuVisible] = useState(false);
+    const [isColOpen, setIsColOpen] = useState(window.innerWidth > 768);
+    const [isColExpanded, setIsColExpanded] = useState(false);
+    const [event, setEvent] = useState(null);
+    const [eventKey, setEventKey] = useState(null);
 
-    static getDerivedStateFromError(error) {
-        return { hasError: true };
-    }
+    useEffect(async () => {
+        isMobileDetection();
 
-    componentDidCatch(error, errorInfo) {
-        console.log(error, errorInfo);
-    }
-
-    async componentDidMount() {
-        const clientData =  ls.get('clientDetails');
-
-        this.isMobileDetection();
-        window.addEventListener('resize', this.isMobileDetection.bind(this));
+        window.addEventListener('resize', isMobileDetection);
 
         setTimeout(async () => {
             await askForPermissionToReceiveNotifications();
-        }, 30000)
+        }, 15000)
+
+        const clientData =  ls.get('clientDetails');
 
         try {
             if(clientData) {
-                this.props.setClientData(clientData);
+                setClientData(clientData);
 
                 if (process.env.NODE_ENV === 'production') {
                     notifyToSlackChannel(SLACK_NEW_VISITOR_HOOK,
@@ -139,21 +125,21 @@ class App extends Component {
                         }
 
                         clientData = {...clientData, ...{
-                            defaultCoordinates: defaultCoordinates
-                        }}
+                                defaultCoordinates: defaultCoordinates
+                            }}
 
-                        this.props.setClientData(clientData);
+                        setClientData(clientData);
 
                         ls.set('clientDetails', clientData);
                     });
                 }
 
                 clientData = {...clientData, ...{
-                    defaultCoordinates: defaultCoordinates,
-                    duuid: generateClientDeviceUUID()
-                }};
+                        defaultCoordinates: defaultCoordinates,
+                        duuid: generateClientDeviceUUID()
+                    }};
 
-                this.props.setClientData(clientData);
+                setClientData(clientData);
 
                 notifyToSlackChannel(SLACK_NEW_VISITOR_HOOK,
                     {
@@ -175,353 +161,323 @@ class App extends Component {
         } catch (error) {
             console.log(error);
         }
+
+        return window.removeEventListener('resize', isMobileDetection);
+    }, []);
+
+    const isMobileDetection = () => {
+        setIsMobile(window.innerWidth <= 768)
     }
 
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.isMobileDetection.bind(this));
-    }
-
-    componentWillReceiveProps(props) {
-        const { events, recent, chat, auth} = props;
-
-        this.setState({
-            events: events,
-            recent: recent,
-            chat: chat,
-            auth: auth
-        });
-    }
-
-    isMobileDetection = () => {
-        this.setState({
-            isMobile: window.innerWidth <= 768
-        })
-    }
-
-    toggleMenu = (state) => {
-        this.setState(s => {
-            return {
-                menuVisible: !state ? state : !s.menuVisible
-            }
+    const toggleMenu = (toggle) => {
+        setIsMenuVisible(state => {
+            return !toggle ? toggle : !state
         });
     };
 
-    toggleColExpanded = () => {
-        this.setState(s => {
-            return {
-                isColExpanded: !s.isColExpanded
-            }
+    const toggleColExpanded = () => {
+        setIsColExpanded(state => {
+            return !state
         })
     };
 
-    togglePage = (toggle) => {
-        this.setState(s => {
-            return {
-                menuVisible: false,
-                isPageOpen: toggle,
-                eventKey: !toggle ? null : s.eventKey
-            }
+    const togglePage = (toggle) => {
+        setIsMenuVisible(false);
+        setIsPageOpen(toggle);
+        setEventKey(state => {
+            return !toggle ? null : state
         });
     };
 
-    toggleColumn = toggle => {
-        const { router } = this.context;
+    const toggleColumn = toggle => {
+        setIsMenuVisible(false);
+        setIsColExpanded(false);
+        setIsColOpen(toggle);
 
-        this.setState({
-            menuVisible: false,
-            isColExpanded: false,
-            isColOpen: toggle
-        }, () => {
-            this.togglePage(false);
+        togglePage(false);
 
-            if(!toggle) {
-                router.history.replace("/");
-            }
+        if(!toggle) {
+            history.replace("/");
+        }
+    };
+
+    const updateEvent = data => {
+        setEvent(state => {
+            return {...state, ...data}
         });
     };
 
-    updateEvent = props => {
-        this.setState(s => {
-            return {
-                event: {...s.event, ...props}
+    const openEventForm = data => {
+        const {lat, lng} = data;
+
+        setIsColOpen(true);
+        setIsColExpanded(false);
+        setEvent( {
+            coordinates: {
+                lat: lat,
+                lng: lng
             }
         })
+
+        history.replace(`/${EVENT_FORM}`);
     };
 
-    openEventForm = props => {
-        const {lat, lng} = props;
-        const { router } = this.context;
+    const closeEventForm = () => {
+        setIsColOpen(false);
+        setIsColExpanded(false);
+        setEvent(null);
 
-        this.setState({
-            isColOpen: true,
-            isColExpanded: false,
-            event: {
-                coordinates: {
-                    lat: lat,
-                    lng: lng
-                }
-            }
-        }, () => router.history.replace(`/${EVENT_FORM}`));
-    };
-
-    closeEventForm = () => {
-        const { router } = this.context;
-
-        this.setState({
-            isColOpen: false,
-            isColExpanded: false,
-            event: null
-        }, () => router.history.push("/"));
+        history.push("/");
 
         localStorage.removeItem("eventDraft")
     };
 
-    handleSaveEvent = props => {
-        const { router } = this.context;
-        this.props.firebase.push("events", props).then(() => {
-            this.setState({
-                event: null,
-                isColExpanded: false
-            }, () => router.history.push("/"))
+    const handleSaveEvent = data => {
+        firebase.push("events", data).then(() => {
+            setEvent(null);
+            setIsColExpanded(false);
+
+            history.push("/");
         });
     };
 
-    openChat = () => {
-        const { router } = this.context;
-        this.toggleColumn(true);
-        router.history.push(`/${CHAT}`);
+    const openChat = () => {
+        toggleColumn(true);
+        history.push(`/${CHAT}`);
     }
 
-    render() {
-        const { events, recent, event, chat, menuVisible, auth, isMobile, hasError} = this.state;
+    const dropdownTrigger = (
+        <>
+            {
+                !isEmpty(auth) && !auth.isAnonymous ? <Avatar size="mini" /> : <></>
+            }
+            {
+                !isMobile ? `Witaj, ${profile.displayNick || 'dodaj swój nick!'}` : <></>
+            }
+        </>
+    )
 
-        const { profile, cookies } = this.props;
+    const lastKey = cookies.get(CHAT_LATEST_KEY_COOKIE_NAME);
 
-        const dropdownTrigger = (
-            <>
-                {
-                    !isEmpty(auth) && !auth.isAnonymous ? <Avatar size="mini" /> : <></>
-                }
-                {
-                    !isMobile ? `Witaj, ${profile.displayNick || 'dodaj swój nick!'}` : <></>
-                }
-            </>
-        )
+    const sharedState = {
+        isPageOpen: isPageOpen,
+        isColOpen: isColOpen,
+        isColExpanded: isColExpanded,
+        event: event,
+        eventKey: eventKey
+    }
 
-        const lastKey = cookies.get(CHAT_LATEST_KEY_COOKIE_NAME);
-
-        if (hasError) {
-            return (
-                <div className="bug-container">
-                    <img src={picture} className="picture-img" alt="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." title="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." />
-                    <strong>Przepraszamy, coś poszło nie tak... Wróć do nas za parę minut.</strong>
-                    <p>Jeśli problem się powtarza, daj nam znać na: <a href="mailto:akcjareaktywacjaofficial@gmail.com">akcjareaktywacjaofficial@gmail.com</a></p>
-                </div>
-            )
-        }
-
-        return (
-            <div className="app">
-                <Menu borderless>
+    return (
+        <div className="app">
+            <Menu borderless>
+                <Menu.Item
+                    onClick={toggleMenu}
+                >
+                    <Icon name="bars" className="have-dot">
+                        <DotCounter data={chat} lastKey={lastKey}/>
+                    </Icon>
+                </Menu.Item>
+                <Menu.Item
+                    header
+                    className="logo-item"
+                    as={Link}
+                    to={`/`}
+                    onClick={() => togglePage(false)}
+                >
+                    <img src={logo} className="logo" alt="Akcjareaktywacja.pl" title="Akcjareaktywacja.pl" width="176" height="19" />
+                    <VisitorsOnlineTracker />
+                </Menu.Item>
+                <Menu.Menu position="right">
+                    {
+                        isMobile ? (
+                            <div className="picture-logo">
+                                <img src={picture} className="picture-img" alt="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." title="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." />
+                            </div>
+                        ) : (
+                            <Popup
+                                trigger={
+                                    <div className="picture-logo">
+                                        <img src={picture} className="picture-img" alt="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." title="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." />
+                                    </div>
+                                }
+                                content="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo."
+                                position="bottom center"
+                            />
+                        )
+                    }
+                    {
+                        <>
+                            <Menu.Item
+                                key="add-event-form-nav"
+                                className="add-event-item"
+                                name="addEvent"
+                                as={Link}
+                                to={`/${EVENT_FORM}`}
+                                onClick={() => toggleColumn(true)}
+                            >
+                                <Icon name="plus circle" size="large" color="olive" />
+                                <span>Dodaj wydarzenie</span>
+                            </Menu.Item>
+                            {
+                                isEmpty(auth) || auth.isAnonymous ? (
+                                    <Menu.Item
+                                        key="user-login-nav"
+                                        className="login-item"
+                                        name="login"
+                                        as={Link}
+                                        to={`/${LOGIN}`}
+                                        onClick={() => toggleColumn(true)}
+                                    >
+                                        <Icon name="user circle" size="large" color="olive" />
+                                        <span>Logowanie</span>
+                                    </Menu.Item>
+                                ) : (
+                                    <Menu.Item
+                                        key="user-area-nav"
+                                        className="logout-item"
+                                        name="logout"
+                                    >
+                                        <Dropdown trigger={dropdownTrigger} >
+                                            <Dropdown.Menu>
+                                                <Dropdown.Item text="Twój profil"
+                                                   as={Link}
+                                                   to={`/${USER}`}
+                                                   onClick={() => toggleColumn(true)}
+                                                />
+                                                <Dropdown.Item text="Wyloguj"
+                                                   as={Link}
+                                                   to="/"
+                                                   onClick={() => firebase.logout()}
+                                                />
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    </Menu.Item>
+                                )
+                            }
+                        </>
+                    }
+                </Menu.Menu>
+            </Menu>
+            <Sidebar.Pushable>
+                <Sidebar
+                    as={Menu}
+                    className="sidebar-left"
+                    animation="push"
+                    width="thin"
+                    direction="left"
+                    visible={isMenuVisible}
+                    icon="labeled"
+                    vertical
+                >
                     <Menu.Item
-                        onClick={this.toggleMenu}
+                        name="events"
+                        as={Link}
+                        to={`/${EVENTS_LIST}`}
+                        onClick={() => toggleColumn(true)}
                     >
-                        <Icon name="bars" className="have-dot">
+                        <Icon name="calendar" className="alternate outline" />
+                        Wydarzenia
+                    </Menu.Item>
+                    <Menu.Item
+                        name="chat"
+                        as={Link}
+                        to={`/${CHAT}`}
+                        onClick={() => toggleColumn(true)}
+                    >
+                        <Icon name="comments" className="outline have-dot">
                             <DotCounter data={chat} lastKey={lastKey}/>
                         </Icon>
+                        Chat
                     </Menu.Item>
-                    <Menu.Item
-                        header
-                        className="logo-item"
-                        as={Link}
-                        to={`/`}
-                        onClick={() => this.togglePage(false)}
-                    >
-                        <img src={logo} className="logo" alt="Akcjareaktywacja.pl" title="Akcjareaktywacja.pl" width="176" height="19" />
-                        <VisitorsOnlineTracker />
-                    </Menu.Item>
-                    <Menu.Menu position="right">
-                        {
-                            isMobile ? (
-                                <div className="picture-logo">
-                                    <img src={picture} className="picture-img" alt="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." title="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." />
-                                </div>
-                            ) : (
-                                <Popup
-                                    trigger={
-                                        <div className="picture-logo">
-                                            <img src={picture} className="picture-img" alt="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." title="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." />
-                                        </div>
-                                    }
-                                    content="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo."
-                                    position="bottom center"
-                                />
-                            )
-                        }
-                        {
-                            <>
-                                <Menu.Item
-                                    key="add-event-form-nav"
-                                    className="add-event-item"
-                                    name="addEvent"
-                                    as={Link}
-                                    to={`/${EVENT_FORM}`}
-                                    onClick={() => this.toggleColumn(true)}
-                                >
-                                    <Icon name="plus circle" size="large" color="olive" />
-                                    <span>Dodaj wydarzenie</span>
-                                </Menu.Item>
-                                {
-                                    isEmpty(auth) || auth.isAnonymous ? (
-                                        <Menu.Item
-                                            key="user-login-nav"
-                                            className="login-item"
-                                            name="login"
-                                            as={Link}
-                                            to={`/${LOGIN}`}
-                                            onClick={() => this.toggleColumn(true)}
-                                        >
-                                            <Icon name="user circle" size="large" color="olive" />
-                                            <span>Logowanie</span>
-                                        </Menu.Item>
-                                    ) : (
-                                        <Menu.Item
-                                            key="user-area-nav"
-                                            className="logout-item"
-                                            name="logout"
-                                        >
-                                            <Dropdown trigger={dropdownTrigger} >
-                                                <Dropdown.Menu>
-                                                    <Dropdown.Item text="Twój profil"
-                                                                   as={Link}
-                                                                   to={`/${USER}`}
-                                                                   onClick={() => this.toggleColumn(true)}
-                                                    />
-                                                    <Dropdown.Item text="Wyloguj"
-                                                                   as={Link}
-                                                                   to="/"
-                                                                   onClick={() => this.props.firebase.logout()}
-                                                    />
-                                                </Dropdown.Menu>
-                                            </Dropdown>
-                                        </Menu.Item>
-                                    )
-                                }
-                            </>
-                        }
-                    </Menu.Menu>
-                </Menu>
-                <Sidebar.Pushable>
-                    <Sidebar
-                        as={Menu}
-                        className="sidebar-left"
-                        animation="push"
-                        width="thin"
-                        direction="left"
-                        visible={menuVisible}
-                        icon="labeled"
-                        vertical
-                    >
-                        <Menu.Item
-                            name="events"
-                            as={Link}
-                            to={`/${EVENTS_LIST}`}
-                            onClick={() => this.toggleColumn(true)}
-                        >
-                            <Icon name="calendar" className="alternate outline" />
-                            Wydarzenia
-                        </Menu.Item>
-                        <Menu.Item
-                            name="chat"
-                            as={Link}
-                            to={`/${CHAT}`}
-                            onClick={() => this.toggleColumn(true)}
-                        >
-                            <Icon name="comments" className="outline have-dot">
-                                <DotCounter data={chat} lastKey={lastKey}/>
-                            </Icon>
-                            Chat
-                        </Menu.Item>
-                        <Dropdown item text="Pomoc" pointing="left" icon="help" className="dropdown-menu">
-                            <Dropdown.Menu>
-                                <Dropdown.Item
-                                    as={Link}
-                                    to={`/${STATIC}/${TERMS_OF_USE}`}
-                                    onClick={() => this.toggleColumn(true)}
-                                >
-                                    Regulamin
-                                </Dropdown.Item>
-                                <Dropdown.Item
-                                    as={Link}
-                                    to={`/${STATIC}/${GDPR}`}
-                                    onClick={() => this.toggleColumn(true)}
-                                >
-                                    RODO
-                                </Dropdown.Item>
-                                <Dropdown.Item
-                                    as={Link}
-                                    to={`/${STATIC}/${PRIVACY_POLICY}`}
-                                    onClick={() => this.toggleColumn(true)}
-                                >
-                                    Prywatność
-                                </Dropdown.Item>
-                                <Dropdown.Item
-                                    as={Link}
-                                    to={`/${STATIC}/${CONTACT}`}
-                                    onClick={() => this.toggleColumn(true)}
-                                >
-                                    Kontakt
-                                </Dropdown.Item>
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </Sidebar>
-                    <Sidebar.Pusher>
-                        <Sidebar.Pushable onClick={() => this.toggleMenu(false)}>
-                            <ChatSnipped data={chat} {...this.state} openChat={this.openChat} />
-                            <Layout
-                                {...this.state}
-                                auth={auth}
-                                colClose={() => this.toggleColumn(false)}
-                                pageClose={() => this.togglePage(false)}
-                                pageOpen={() => this.togglePage(true)}
-                                toggleColExpand={this.toggleColExpanded}
-                                toggleColumn={val => this.toggleColumn(val)}
-                                formCancel={this.closeEventForm}
-                                saveEvent={props => this.handleSaveEvent(props)}
-                                updateEvent={props => this.updateEvent(props)}
-                                toggleSettings={this.toggleSettings}
+                    <Dropdown item text="Pomoc" pointing="left" icon="help" className="dropdown-menu">
+                        <Dropdown.Menu>
+                            <Dropdown.Item
+                                as={Link}
+                                to={`/${STATIC}/${TERMS_OF_USE}`}
+                                onClick={() => toggleColumn(true)}
                             >
-                                {
-                                    !isLoaded(events) ? (
-                                        <Dimmer active>
-                                            <Loader size="large">Proszę czekać...</Loader>
-                                        </Dimmer>
-                                    ) : (
-                                        <Map
-                                            {...this.state}
-                                            events={events}
-                                            recent={recent}
-                                            event={event}
-                                            addEvent={props => this.openEventForm(props)}
-                                            updateEvent={props => this.updateEvent(props)}
-                                            viewEvent={key => this.viewEvent(key)}
-                                            cancelEvent={this.closeEventForm}
-                                        />
-                                    )
+                                Regulamin
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                                as={Link}
+                                to={`/${STATIC}/${GDPR}`}
+                                onClick={() => toggleColumn(true)}
+                            >
+                                RODO
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                                as={Link}
+                                to={`/${STATIC}/${PRIVACY_POLICY}`}
+                                onClick={() => toggleColumn(true)}
+                            >
+                                Prywatność
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                                as={Link}
+                                to={`/${STATIC}/${CONTACT}`}
+                                onClick={() => toggleColumn(true)}
+                            >
+                                Kontakt
+                            </Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </Sidebar>
+                <Sidebar.Pusher>
+                    <Sidebar.Pushable onClick={() => toggleMenu(false)}>
+                        <ChatSnipped
+                            {
+                                ...sharedState
+                            }
+                            data={chat}
+                            openChat={openChat}
+                        />
+                        <Layout
+                            {
+                                ...sharedState
+                            }
+                            auth={auth}
+                            events={events}
+                            recent={recent}
+                            chat={chat}
+                            isMobile={isMobile}
+                            colClose={() => toggleColumn(false)}
+                            pageClose={() => togglePage(false)}
+                            pageOpen={() => togglePage(true)}
+                            toggleColExpand={toggleColExpanded}
+                            toggleColumn={data => toggleColumn(data)}
+                            formCancel={closeEventForm}
+                            saveEvent={data => handleSaveEvent(data)}
+                            updateEvent={data => updateEvent(data)}
+                            //toggleSettings={toggleSettings}
+                        >
+                            {
+                                !isLoaded(events) ? (
+                                    <Dimmer active>
+                                        <Loader size="large">Proszę czekać...</Loader>
+                                    </Dimmer>
+                                ) : (
+                                    <Map
+                                        {
+                                            ...sharedState
+                                        }
+                                        events={events}
+                                        recent={recent}
+                                        event={event}
+                                        addEvent={data => openEventForm(data)}
+                                        updateEvent={data => updateEvent(data)}
+                                        //viewEvent={key => viewEvent(key)}
+                                        cancelEvent={closeEventForm}
+                                    />
+                                )
 
-                                }
-                            </Layout>
-                        </Sidebar.Pushable>
-                    </Sidebar.Pusher>
-                </Sidebar.Pushable>
-            </div>
-        );
-    }
+                            }
+                        </Layout>
+                    </Sidebar.Pushable>
+                </Sidebar.Pusher>
+            </Sidebar.Pushable>
+        </div>
+    );
 }
-
-App.contextTypes = {
-    router: PropTypes.object
-};
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators(actionCreators, dispatch);
@@ -566,5 +522,5 @@ const enhance = compose(
     }), mapDispatchToProps)
 );
 
-export default enhance(withCookies(App));
+export default enhance(withCookies(withRouter(App)));
 

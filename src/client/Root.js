@@ -12,6 +12,7 @@ import {formatSlackNotifyMessage, getIPInfoApiUrl, notifyToSlackChannel} from ".
 import picture from "../assets/picture.webp";
 import {Dimmer, Loader} from "semantic-ui-react";
 import {SLACK_NEW_VISITOR_HOOK} from "./consts";
+import ErrorBoundary from "./containers/ErrorBundary/ErrorBundary";
 
 export const Root = () => {
     const [loading, setLoading] = useState(true);
@@ -93,7 +94,9 @@ export const Root = () => {
                         copyClosePrompt="Zamknij"
                         delay={60000}
                     />
-                    <App history={history} />
+                    <ErrorBoundary>
+                        <App history={history} />
+                    </ErrorBoundary>
                 </>
             </ConnectedRouter>
         </Provider>

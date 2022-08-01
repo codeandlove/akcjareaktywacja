@@ -26,6 +26,11 @@
   align-items: center;
   justify-content: flex-start;
 
+  > span {
+    display: flex!important;
+    align-items: center;
+  }
+
   img {
     margin-right: 10px!important;
   }

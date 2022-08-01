@@ -226,7 +226,7 @@ const Map = (props) => {
 
         const markers = Object.keys(data).map((key) => {
             const event = data[key];
-            return <MarkerWithInfo key={`marker-${key}`} position={event.coordinates} data={event} viewEvent={() => this.props.viewEvent(key)}/>
+            return <MarkerWithInfo key={`marker-${key}`} position={event.coordinates} data={event}/>
         })
 
         setMarkers(markers)
