@@ -1,7 +1,6 @@
 export const ADD_EVENT = `ADD_EVENT`;
 export const REMOVE_EVENT = `REMOVE_EVENT`;
-export const EDIT_EVENT = `EDIT_EVENT`;
-export const UPDATE_EVENT_DRAFT = `EDIT_EVENT`;
+export const UPDATE_EVENT = `EDIT_EVENT`;
 
 export function addEvent(payload) {
     return {
@@ -10,7 +9,7 @@ export function addEvent(payload) {
     }
 }
 
-export function editEvent(payload) {
+export function updateEvent(payload) {
     return {
         type: ADD_EVENT,
         payload: payload
@@ -20,11 +19,5 @@ export function editEvent(payload) {
 export function removeEvent() {
     return {
         type: REMOVE_EVENT
-    }
-}
-
-export function updateEventDraft() {
-    return {
-        type: ADD_EVENT
     }
 }

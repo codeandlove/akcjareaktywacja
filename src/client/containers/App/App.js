@@ -1,5 +1,4 @@
-import React, {Component, useEffect, useState} from "react";
-import PropTypes from "prop-types";
+import React, {useEffect, useState} from "react";
 
 import { connect } from "react-redux";
 import { compose } from "redux";
@@ -19,7 +18,6 @@ import {Sidebar, Menu, Icon, Popup, Dropdown, Dimmer, Loader} from "semantic-ui-
 
 import "./App.scss";
 import ChatSnipped from "../ChatSnipped/ChatSnipped";
-import SecureLS from "secure-ls";
 
 import {formatSlackNotifyMessage, generateClientDeviceUUID, getIPInfoApiUrl, notifyToSlackChannel} from "../../utils";
 
@@ -51,8 +49,6 @@ const populates = [
     { child: "status", root: "users", keyProp: "status"}
 ];
 
-const ls = new SecureLS();
-
 const toFloatNumber = (str, val) => {
     str = str.toString();
     str = str.slice(0, (str.indexOf(".")) + val + 1);
@@ -60,17 +56,16 @@ const toFloatNumber = (str, val) => {
 }
 
 const App = (props) => {
-    const {setClientData, history, firebase, events, recent, chat, auth, profile, cookies} = props;
+    const {setClientData, history, firebase, client, event, addEvent, updateEvent, removeEvent, events, recent, chat, auth, profile, cookies} = props;
 
     const [isMobile, setIsMobile] = useState(false);
     const [isPageOpen, setIsPageOpen] = useState(false);
     const [isMenuVisible, setIsMenuVisible] = useState(false);
     const [isColOpen, setIsColOpen] = useState(window.innerWidth > 768);
     const [isColExpanded, setIsColExpanded] = useState(false);
-    const [event, setEvent] = useState(null);
     const [eventKey, setEventKey] = useState(null);
 
-    useEffect(async () => {
+    useEffect(() => {
         isMobileDetection();
 
         window.addEventListener('resize', isMobileDetection);
@@ -79,12 +74,8 @@ const App = (props) => {
             await askForPermissionToReceiveNotifications();
         }, 15000)
 
-        const clientData =  ls.get('clientDetails');
-
-        try {
-            if(clientData) {
-                setClientData(clientData);
-
+        const getClientData = async () => {
+            if(Object.keys(client).length) {
                 if (process.env.NODE_ENV === 'production') {
                     notifyToSlackChannel(SLACK_NEW_VISITOR_HOOK,
                         {
@@ -94,7 +85,7 @@ const App = (props) => {
                                     "type": "section",
                                     "text": {
                                         "type": "mrkdwn",
-                                        "text": `${formatSlackNotifyMessage(clientData)}`
+                                        "text": `${formatSlackNotifyMessage(client)}`
                                     }
                                 }
                             ]
@@ -102,65 +93,69 @@ const App = (props) => {
                     );
                 }
 
-                return;
+                return true;
             }
 
-            await fetch(getIPInfoApiUrl()).then((response) => response.json()).then((jsonResponse) => {
-                const {loc} = jsonResponse;
-                let defaultCoordinates = null;
-                let clientData = jsonResponse;
+            try {
+                await fetch(getIPInfoApiUrl()).then((response) => response.json()).then((jsonResponse) => {
+                    const {loc} = jsonResponse;
+                    let defaultCoordinates = null;
+                    let clientData = jsonResponse;
 
-                if(loc) {
-                    defaultCoordinates = {
-                        lat: toFloatNumber(loc.split(',')[0], 4),
-                        lng: toFloatNumber(loc.split(',')[1], 4)
-                    }
-                }
-
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
+                    if(loc) {
                         defaultCoordinates = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
+                            lat: toFloatNumber(loc.split(',')[0], 4),
+                            lng: toFloatNumber(loc.split(',')[1], 4)
                         }
-
-                        clientData = {...clientData, ...{
-                                defaultCoordinates: defaultCoordinates
-                            }}
-
-                        setClientData(clientData);
-
-                        ls.set('clientDetails', clientData);
-                    });
-                }
-
-                clientData = {...clientData, ...{
-                        defaultCoordinates: defaultCoordinates,
-                        duuid: generateClientDeviceUUID()
-                    }};
-
-                setClientData(clientData);
-
-                notifyToSlackChannel(SLACK_NEW_VISITOR_HOOK,
-                    {
-                        "text": "New Visitor.",
-                        "blocks": [
-                            {
-                                "type": "section",
-                                "text": {
-                                    "type": "mrkdwn",
-                                    "text": `${formatSlackNotifyMessage(jsonResponse)}`
-                                }
-                            }
-                        ]
                     }
-                );
 
-                ls.set('clientDetails', clientData);
-            });
-        } catch (error) {
-            console.log(error);
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((position) => {
+                            defaultCoordinates = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            }
+
+                            clientData = {...clientData, ...{
+                                    defaultCoordinates: defaultCoordinates
+                                }}
+
+                            setClientData(clientData);
+                        });
+                    }
+
+                    clientData = {...clientData, ...{
+                            defaultCoordinates: defaultCoordinates,
+                            duuid: generateClientDeviceUUID()
+                        }};
+
+                    setClientData(clientData);
+
+                    notifyToSlackChannel(SLACK_NEW_VISITOR_HOOK,
+                        {
+                            "text": "New Visitor.",
+                            "blocks": [
+                                {
+                                    "type": "section",
+                                    "text": {
+                                        "type": "mrkdwn",
+                                        "text": `${formatSlackNotifyMessage(jsonResponse)}`
+                                    }
+                                }
+                            ]
+                        }
+                    );
+
+                    if(!!clientData) {
+                        return true;
+                    }
+                });
+            } catch (error) {
+                console.log(error);
+            }
         }
+
+        getClientData();
 
         return window.removeEventListener('resize', isMobileDetection);
     }, []);
@@ -201,18 +196,11 @@ const App = (props) => {
         }
     };
 
-    const updateEvent = data => {
-        setEvent(state => {
-            return {...state, ...data}
-        });
-    };
-
     const openEventForm = data => {
         const {lat, lng} = data;
-
         setIsColOpen(true);
         setIsColExpanded(false);
-        setEvent( {
+        addEvent({
             coordinates: {
                 lat: lat,
                 lng: lng
@@ -225,20 +213,9 @@ const App = (props) => {
     const closeEventForm = () => {
         setIsColOpen(false);
         setIsColExpanded(false);
-        setEvent(null);
+        removeEvent();
 
         history.push("/");
-
-        localStorage.removeItem("eventDraft")
-    };
-
-    const handleSaveEvent = data => {
-        firebase.push("events", data).then(() => {
-            setEvent(null);
-            setIsColExpanded(false);
-
-            history.push("/");
-        });
     };
 
     const openChat = () => {
@@ -263,7 +240,6 @@ const App = (props) => {
         isPageOpen: isPageOpen,
         isColOpen: isColOpen,
         isColExpanded: isColExpanded,
-        event: event,
         eventKey: eventKey
     }
 
@@ -446,9 +422,6 @@ const App = (props) => {
                             toggleColExpand={toggleColExpanded}
                             toggleColumn={data => toggleColumn(data)}
                             formCancel={closeEventForm}
-                            saveEvent={data => handleSaveEvent(data)}
-                            updateEvent={data => updateEvent(data)}
-                            //toggleSettings={toggleSettings}
                         >
                             {
                                 !isLoaded(events) ? (
@@ -462,10 +435,7 @@ const App = (props) => {
                                         }
                                         events={events}
                                         recent={recent}
-                                        event={event}
-                                        addEvent={data => openEventForm(data)}
-                                        updateEvent={data => updateEvent(data)}
-                                        //viewEvent={key => viewEvent(key)}
+                                        openEventForm={data => openEventForm(data)}
                                         cancelEvent={closeEventForm}
                                     />
                                 )
@@ -508,7 +478,7 @@ const enhance = compose(
             { path: "/online", storeAs: 'online' }
         ]
     }),
-    connect(({ firebase, settings, client, event, draft }) => ({
+    connect(({ firebase, settings, client, event }) => ({
         recent: populate(firebase, "recent", populates),
         events: populate(firebase, "events", populates),
         chat: populate(firebase, "chat", populates),
@@ -517,8 +487,7 @@ const enhance = compose(
         profile: firebase.profile,
         settings: settings,
         client: client,
-        event: event,
-        draft: draft
+        event: event
     }), mapDispatchToProps)
 );
 

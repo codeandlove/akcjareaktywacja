@@ -21,6 +21,24 @@ export const generateClientDeviceUUID = () => {
     return btoa(`${data.cpu.architecture}|${data.engine.name}|${data.os.name}-${data.os.version}|${device.model}-${device.type}-${device.vendor}`);
 }
 
+export const getCookie = (cname) => {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+
+    for (let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+
 export const verifyCaptcha = async (props, eventName) => {
     const {googleReCaptchaProps: {executeRecaptcha}} = props;
 

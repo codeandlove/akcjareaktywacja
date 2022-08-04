@@ -21,31 +21,31 @@ export const formatLocationName = (phrase, data) => {
         }
 
         if(road) {
-            rest += `${road}`
+            rest += `${road} `
         }
 
         if(house_number) {
-            rest += ` ${house_number}`
+            rest += `${house_number}, `
         }
 
         if(postcode) {
-            rest += `, ${postcode}`
+            rest += `${postcode} `
         }
 
         if(town) {
-            rest += `, ${town}`
+            rest += `${town}, `
         }
 
         if(city) {
-            rest += `, ${city}`
+            rest += `${city}, `
         }
 
         if(municipality) {
-            rest += `, ${municipality}`
+            rest += `${municipality}, `
         }
 
         if(country) {
-            rest += `, ${country}`
+            rest += `${country}`
         }
 
         return [meaning, rest];

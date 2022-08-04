@@ -6,21 +6,23 @@ import { Helmet } from "react-helmet";
 import App from './containers/App/App';
 import GDPRModal from "./containers/GDPRModal/GDPRModal";
 import PWAPrompt from 'react-ios-pwa-prompt'
-import { store, history } from './store/store';
+import Store from './store/store';
 import {verifyAppCheck} from "../firebase/appCheck";
 import {formatSlackNotifyMessage, getIPInfoApiUrl, notifyToSlackChannel} from "./utils";
 import picture from "../assets/picture.webp";
 import {Dimmer, Loader} from "semantic-ui-react";
 import {SLACK_NEW_VISITOR_HOOK} from "./consts";
 import ErrorBoundary from "./containers/ErrorBundary/ErrorBundary";
+import {PersistGate} from "redux-persist/integration/react";
 
 export const Root = () => {
     const [loading, setLoading] = useState(true);
     const [appCheck, setAppCheck] = useState(true);
+    const {store, persistor, history} = Store();
 
-    useEffect(async () => {
+    useEffect( () => {
         if(process.env.NODE_ENV === 'production') {
-            await verifyAppCheck().then(result => {
+             verifyAppCheck().then(result => {
                 if(!result) {
                     setAppCheck(false);
 
@@ -55,7 +57,7 @@ export const Root = () => {
             setLoading(false);
         }
 
-    }, [])
+    })
 
     if(loading) {
         if(!appCheck) {
@@ -77,28 +79,30 @@ export const Root = () => {
 
     return (
         <Provider store={store}>
-            <ConnectedRouter history={history}>
-                <>
-                    <Helmet>
-                        <meta charSet="utf-8" />
-                        <title>Akcjareaktywacja.pl | Spotkania na żywo</title>
-                        <meta name="description" content="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." />
-                        <link rel="canonical" href="https://akcjareaktywacja.pl" />
-                    </Helmet>
-                    <GDPRModal/>
-                    <PWAPrompt
-                        copyTitle="Zainstaluj jako aplikację"
-                        copyBody="Ta strona pozwala na uruchamianie jej jako aplikacji w telefonie, wystarczy że postąpisz zgodnie z poniższą instrukcją:"
-                        copyShareButtonLabel="1) Przyciśnij przycisk 'Share' poniżej"
-                        copyAddHomeButtonLabel="2) Wybierz pozycję 'Do ekranu początkowego.'"
-                        copyClosePrompt="Zamknij"
-                        delay={60000}
-                    />
-                    <ErrorBoundary>
-                        <App history={history} />
-                    </ErrorBoundary>
-                </>
-            </ConnectedRouter>
+            <PersistGate loading={null} persistor={persistor}>
+                <ConnectedRouter history={history}>
+                    <>
+                        <Helmet>
+                            <meta charSet="utf-8" />
+                            <title>Akcjareaktywacja.pl | Spotkania na żywo</title>
+                            <meta name="description" content="Wyjdź z domu i poznaj nowych ludzi. Grupowe spotkania na żywo." />
+                            <link rel="canonical" href="https://akcjareaktywacja.pl" />
+                        </Helmet>
+                        <GDPRModal/>
+                        <PWAPrompt
+                            copyTitle="Zainstaluj jako aplikację"
+                            copyBody="Ta strona pozwala na uruchamianie jej jako aplikacji w telefonie, wystarczy że postąpisz zgodnie z poniższą instrukcją:"
+                            copyShareButtonLabel="1) Przyciśnij przycisk 'Share' poniżej"
+                            copyAddHomeButtonLabel="2) Wybierz pozycję 'Do ekranu początkowego.'"
+                            copyClosePrompt="Zamknij"
+                            delay={60000}
+                        />
+                        <ErrorBoundary>
+                            <App history={history} />
+                        </ErrorBoundary>
+                    </>
+                </ConnectedRouter>
+            </PersistGate>
         </Provider>
     )
 };

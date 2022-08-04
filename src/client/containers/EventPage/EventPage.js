@@ -1,7 +1,7 @@
 import React, {useEffect} from "react";
 import './EventPage.scss';
 import { connect } from "react-redux";
-import { compose } from "redux";
+import {bindActionCreators, compose} from "redux";
 import {firebaseConnect, isLoaded, isEmpty, populate} from "react-redux-firebase";
 
 import renderHTML from "react-render-html";
@@ -20,9 +20,10 @@ import Reactions from "../../components/Reactions/Reactions";
 import Relations from "../Relations/Relations";
 import {getCategoriesDataByIds} from "../../utils";
 import {withRouter} from "react-router";
+import * as actionCreators from "../../actions";
 
 const EventPage = (props) => {
-    const {open, close, isDraft, event, history, match} = props;
+    const {open, close, isDraft, event, draft, history, match} = props;
 
     useEffect(() => {
         open();
@@ -151,8 +152,6 @@ const EventPage = (props) => {
     };
 
     if(isDraft) {
-        const draft = JSON.parse(localStorage.getItem("eventDraft"));
-
         if(isEmpty(draft)) {
             return (
                 <p>Brak danych</p>
@@ -185,6 +184,16 @@ const populates = [
     { child: "avatarImage", root: "users", keyProp: "avatarImage" }
 ];
 
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators(actionCreators, dispatch);
+};
+
+const mapStateToProps = state => {
+    return {
+        draft: state.event
+    }
+};
+
 const enhance = compose(
     firebaseConnect((props) => {
         return ([
@@ -198,8 +207,10 @@ const enhance = compose(
 
     }),
     connect(({ firebase }) => ({
-        event: populate(firebase, "event", populates)
-    }))
+        event: populate(firebase, "event", populates),
+    })),
+    connect(mapStateToProps, mapDispatchToProps)
 );
+
 
 export default enhance(withRouter(EventPage))

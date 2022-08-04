@@ -4,7 +4,6 @@ import { settings } from './settings';
 import { client } from './client';
 import { map } from './map';
 import { event } from './event';
-import { draft } from './draft';
 
 import { routerReducer } from 'react-router-redux';
 
@@ -14,7 +13,6 @@ const rootReducer = combineReducers({
     settings: settings,
     client,
     event,
-    draft,
     map
 });
 

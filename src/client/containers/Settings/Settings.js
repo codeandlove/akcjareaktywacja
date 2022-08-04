@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker";
 import {Form, Radio, Input, Modal, Header, Button, Icon, Checkbox} from "semantic-ui-react";
 import {getBool} from "../../utils";
 import {withRouter} from "react-router";
+import moment from "moment";
 
 const Settings = (props) => {
     const { settings, cookies, history, setViewType, toggleRecentEvents, setDateFrom, setDateTo,
@@ -78,7 +79,7 @@ const Settings = (props) => {
                             <label>Data początkowa:</label>
                             <DatePicker
                                 customInput={<DateFrom />}
-                                selected={date_from}
+                                selected={moment(date_from)}
                                 onChange={handleChange("dateFrom")}
                                 dateFormat="LL"
                                 locale="pl"
@@ -88,7 +89,7 @@ const Settings = (props) => {
                             <label>Data końcowa:</label>
                             <DatePicker
                                 customInput={<DateTo />}
-                                selected={date_to}
+                                selected={moment(date_to)}
                                 onChange={handleChange("dateTo")}
                                 dateFormat="LL"
                                 locale="pl"

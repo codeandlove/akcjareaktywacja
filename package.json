@@ -23,6 +23,8 @@
     "react-mentions": "^4.3.2",
     "react-scripts": "4.0.3",
     "react-share": "^4.4.0",
+    "redux-persist": "^6.0.0",
+    "redux-persist-expire": "^1.1.0",
     "ua-parser-js": "^1.0.2",
     "web-vitals": "^1.1.2",
     "workbox-background-sync": "^5.1.4",

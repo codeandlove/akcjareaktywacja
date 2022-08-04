@@ -58,20 +58,20 @@ const EventMarkerLocator = (props) => {
     })
 
     const cancelEvent = () => {
-        const {cancelEvent} = props
+        const {cancelEvent} = props;
         setEditMode(false)
         setPosition(null)
         cancelEvent()
     }
 
     const addEvent = () => {
-        const {addEvent} = props
+        const {openEventForm} = props;
 
         setEditMode(true)
         setPrevPosition(null)
         setPrevLocation(null)
 
-        addEvent({...position})
+        openEventForm({ ...position})
     }
 
     const cancelPositionChange = () => {
@@ -263,7 +263,8 @@ const Map = (props) => {
 const mapStateToProps = state => {
     return {
         ...state.map,
-        client: state.client
+        client: state.client,
+        event: state.event
     }
 };
 

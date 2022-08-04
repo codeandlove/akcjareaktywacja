@@ -1,22 +1,16 @@
-import { ADD_EVENT, EDIT_EVENT, REMOVE_EVENT } from '../actions/event';
+import { ADD_EVENT, UPDATE_EVENT, REMOVE_EVENT } from '../actions/event';
 
 export function event(state= {}, action) {
     switch(action.type) {
         case ADD_EVENT :
             return {
                 ...state,
-                event: action.payload
+                ...action.payload
             };
-        case EDIT_EVENT :
-            return {
-                ...state,
-                event: {...state.event, ...action.payload}
-            };
+        case UPDATE_EVENT :
+            return {...state.event, ...action.payload};
         case REMOVE_EVENT :
-            return {
-                ...state,
-                event: {}
-            };
+            return {};
         default:
             return state;
     }
