@@ -20,9 +20,9 @@ export const Root = () => {
     const [appCheck, setAppCheck] = useState(true);
     const {store, persistor, history} = Store();
 
-    useEffect( () => {
+    useEffect(async () => {
         if(process.env.NODE_ENV === 'production') {
-             verifyAppCheck().then(result => {
+            await verifyAppCheck().then(result => {
                 if(!result) {
                     setAppCheck(false);
 
@@ -57,7 +57,7 @@ export const Root = () => {
             setLoading(false);
         }
 
-    })
+    }, [])
 
     if(loading) {
         if(!appCheck) {
