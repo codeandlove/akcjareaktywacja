@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 
 import ChatForm from './../ChatForm/ChatForm';
 
-import { Container, Segment, Header, Button, Comment } from "semantic-ui-react";
+import { Segment, Header, Button, Comment } from "semantic-ui-react";
 
 import "./Chat.scss";
 

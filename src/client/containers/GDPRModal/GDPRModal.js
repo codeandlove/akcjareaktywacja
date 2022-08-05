@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import './GDPRModal.scss';
-import {Button, Container, Segment} from "semantic-ui-react";
+import {Button, Segment} from "semantic-ui-react";
 import { useCookies } from 'react-cookie';
 import {Link} from "react-router-dom";
 import {GDPR, PRIVACY_POLICY, STATIC, TERMS_OF_USE} from "../../routers";

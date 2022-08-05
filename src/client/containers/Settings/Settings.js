@@ -2,7 +2,6 @@ import React, {forwardRef, useEffect} from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import * as actionCreators from "./../../actions";
-import { withCookies } from 'react-cookie';
 import DatePicker from "react-datepicker";
 import {Form, Radio, Input, Modal, Header, Button, Icon, Checkbox} from "semantic-ui-react";
 import {getBool} from "../../utils";
@@ -10,7 +9,7 @@ import {withRouter} from "react-router";
 import moment from "moment";
 
 const Settings = (props) => {
-    const { settings, cookies, history, setViewType, toggleRecentEvents, setDateFrom, setDateTo,
+    const { settings, history, setViewType, toggleRecentEvents, setDateFrom, setDateTo,
         settings: {view_type, date_from, date_to, show_recent_events}} = props;
 
     useEffect(() => {
@@ -20,11 +19,6 @@ const Settings = (props) => {
                 date_from: settings.date_from,
                 date_to: settings.date_to,
             };
-
-            cookies.set('data', {...data}, {
-                path: "/",
-                maxAge: 12 * 3600
-            });
         }
     }, [])
 
@@ -135,5 +129,5 @@ const mapDispatchToProps = (dispatch) => {
     return bindActionCreators(actionCreators, dispatch);
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(withCookies(withRouter(Settings)));
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Settings));
 

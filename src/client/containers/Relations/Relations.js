@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {analytics} from "../../../firebase/analytics";
-import {Comment, Divider, Header, Message, Segment} from "semantic-ui-react";
+import {Comment, Header, Message, Segment} from "semantic-ui-react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import ChatForm from "../ChatForm/ChatForm";
 import {EVENT_LATEST_CHAT_KEY_COOKIE_NAME} from "../Chat/Chat";

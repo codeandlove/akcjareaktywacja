@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Comment, Icon, Segment} from "semantic-ui-react";
 import avatarPlaceholder from "../../../assets/profile_avatar.png";
 

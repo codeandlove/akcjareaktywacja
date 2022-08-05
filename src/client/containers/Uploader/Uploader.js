@@ -1,16 +1,12 @@
 import React, {useEffect, useState} from "react";
-import PropTypes from "prop-types";
 import Dropzone from '../../components/Dropzone/Dropzone';
-
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { firebaseConnect } from "react-redux-firebase";
-
 import "./Uploader.scss";
 import CropImage from "../../components/CropImage/CropImage";
 import {resizeImage} from "../../utils";
 import {Container} from "semantic-ui-react";
-
 
 const Uploader = ({ setAvatarImage }) => {
     const [uploadedImage, setUploadedImage] = useState(null);
@@ -42,10 +38,6 @@ const Uploader = ({ setAvatarImage }) => {
         </div>
     )
 }
-
-Uploader.propTypes = {
-    firebase: PropTypes.object.isRequired
-};
 
 const enhance = compose(
     firebaseConnect(),

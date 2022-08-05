@@ -1,5 +1,4 @@
-import React, {Component, useEffect, useState} from "react";
-import PropTypes from "prop-types";
+import React, {useEffect, useState} from "react";
 
 import { firebaseConnect} from "react-redux-firebase";
 import { compose } from "redux";
@@ -9,7 +8,7 @@ import { Link } from "react-router-dom";
 
 import "./Register.scss";
 
-import { Header, Segment, Message, Form, Input, Checkbox, Button, Icon } from "semantic-ui-react";
+import {Header, Segment, Message, Form, Input, Checkbox, Button, Icon} from "semantic-ui-react";
 import {LOGIN, USER} from "../../routers";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {verifyCaptcha} from "../../utils";

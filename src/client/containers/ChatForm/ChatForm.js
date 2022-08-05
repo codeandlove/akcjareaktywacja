@@ -1,13 +1,9 @@
 import React, {useEffect, useState} from "react";
-
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { firebaseConnect, isEmpty, isLoaded } from "react-redux-firebase";
-
 import moment from 'moment';
-
-import {Button, Form, Message, Icon, Transition, Input} from "semantic-ui-react";
-
+import {Button, Form, Message, Icon, Transition} from "semantic-ui-react";
 import "./ChatForm.scss";
 import {analytics} from "../../../firebase/analytics";
 import {findPhoneNumber, findSwearWord, findUrlString, replaceBasicEmojiInText, verifyCaptcha} from "../../utils";
@@ -15,12 +11,11 @@ import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {pushNotification} from "../../notifications";
 import ChatTextArea from "../ChatTextArea/ChatTextArea";
 import {USER} from "../../routers";
-import PropTypes from "prop-types";
 import {withRouter} from "react-router";
 
 const MIN_TIME_OFFSET = process.env.NODE_ENV === 'production' ? 30000 : 0;
 
-const ChatForm = (props, context) => {
+const ChatForm = (props) => {
     const {firebase, profile, auth, suggestions, scrollToBottom, type, id} = props;
     const [formState, setFormState] = useState({
         nick: null,
@@ -165,8 +160,8 @@ const ChatForm = (props, context) => {
                 const messageTimestamp =  moment().valueOf();
                 const {nick, message} = formState;
 
-                const chatRef = id && type ?
-                    firebase.database().ref(type).child(`${id}/chat`)
+                const chatRef = id && chatType ?
+                    firebase.database().ref(chatType).child(`${id}/chat`)
                     : firebase.database().ref('chat');
 
                 let preparedData = {
@@ -294,7 +289,7 @@ const ChatForm = (props, context) => {
 
                     {renderMessage()}
 
-                    <Button type="button" onClick={clearForm} floated="left">
+                    <Button type="button" onClick={clearForm}>
                         <Icon name="x" />
                         Anuluj
                     </Button>
@@ -308,10 +303,6 @@ const ChatForm = (props, context) => {
         </Form>
     )
 }
-
-ChatForm.contextTypes = {
-    router: PropTypes.object
-};
 
 export default compose(
     firebaseConnect(),

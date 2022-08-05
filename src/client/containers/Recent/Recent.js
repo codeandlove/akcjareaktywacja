@@ -4,7 +4,6 @@ import moment from "moment";
 import {Link} from "react-router-dom";
 import {ACTION} from "../../routers";
 import ShowOnMap from "../../components/ShowOnMap/ShowOnMap";
-import PropTypes from "prop-types";
 import {compose} from "redux";
 import {firebaseConnect, isEmpty, isLoaded, populate} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -69,10 +68,6 @@ const Recent = (props) => {
         </Transition.Group>
     );
 };
-
-Recent.propTypes = {
-    firebase: PropTypes.object.isRequired
-}
 
 const enhance = compose(
     firebaseConnect((props, store) => {
