@@ -16,6 +16,7 @@ import moment from "moment";
 import rootReducer from "./../reducers";
 
 import {firebaseConfig} from "./config";
+import {routingMiddleware} from "./middleware";
 
 const initialState = {
     settings: {
@@ -25,6 +26,12 @@ const initialState = {
         show_recent_events: true
     },
     client: {},
+    layout: {
+        pageIsOpen: false,
+        sidebarIsOpen: window.innerWidth > 768,
+        sidebarIsExpanded: false,
+        menuIsOpen: false,
+    },
     map: null
 };
 
@@ -66,7 +73,7 @@ const composeEnhancers =
 // Add redux Firebase to compose
 const createStoreWithFirebase = composeEnhancers(
     reactReduxFirebase(firebase, firebaseConfig),
-    applyMiddleware(middleware)
+    applyMiddleware(routingMiddleware, middleware)
 )(createStore);
 
 // Create store with reducers and initial state and persistence

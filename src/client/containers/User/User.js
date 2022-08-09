@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 
 import {firebaseConnect, isEmpty} from 'react-redux-firebase';
-import { compose } from 'redux';
+import {bindActionCreators, compose} from 'redux';
 import { connect } from 'react-redux';
 
 import Uploader from './../Uploader/Uploader';
@@ -28,9 +28,10 @@ import Avatar from "../../components/Avatar/Avatar";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {verifyCaptcha} from "../../utils";
 import {useFormState} from "../../hooks";
+import * as actionCreators from "../../actions";
 
 const User = props => {
-    const {profile, auth, uploader, close, toggleColumn, firebase} = props;
+    const {openSidebar, closeSidebar, profile, auth, uploader, firebase} = props;
     const [messageType, setMessageType] = useState(null);
     const [avatarImage, setAvatarImage] = useState(null);
 
@@ -43,7 +44,7 @@ const User = props => {
     const { nick, avatar, subscriptions } = formState;
 
     useEffect(() => {
-        toggleColumn(true);
+        openSidebar();
     }, [])
 
     useEffect(() => {
@@ -60,7 +61,7 @@ const User = props => {
     if(!profile.isLoaded) {
         return (
             <Dimmer active inverted>
-                <Loader size="large">Proszę czekać...</Loader>
+                <Loader actives size="large">Proszę czekać...</Loader>
             </Dimmer>
         )
     }
@@ -121,11 +122,11 @@ const User = props => {
                 </Header>
                 <Form>
                     <Form.Field>
-                        <label>Avatar</label>
+                        <label>Awatar</label>
                         <Uploader open={uploader} setAvatarImage={avatarImage => updateAvatarImage(avatarImage)}/>
                     </Form.Field>
                     <Form.Field>
-                        <label>Nick</label>
+                        <label>Podpis</label>
                         <Input placeholder="Wpisz nick" type="text" id="nick" name="nick" value={nick || ""} onChange={handleChange("nick")} />
                     </Form.Field>
                     <Form.Field>
@@ -214,7 +215,7 @@ const User = props => {
     return (
         <>
             <Segment clearing basic>
-                <Button basic onClick={close} floated="right" icon="x" />
+                <Button basic onClick={closeSidebar} floated="right" icon="x" />
                 <Header floated="left" size='large'>
                     {
                         !!nick ? (
@@ -285,9 +286,13 @@ const UpdateNickModal = props => {
     )
 }
 
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators(actionCreators, dispatch);
+};
+
 const enhance = compose(
     firebaseConnect(),
-    connect(({firebase: { auth, profile }}) => ({auth, profile}))
+    connect(({firebase: { auth, profile }}) => ({auth, profile}), mapDispatchToProps)
 );
 
 export default enhance(withGoogleReCaptcha(User));

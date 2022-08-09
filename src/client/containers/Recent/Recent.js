@@ -20,7 +20,7 @@ const Recent = (props) => {
     if(!isLoaded(recent)) {
         return (
             <Dimmer active inverted>
-                <Loader size="large">Proszę czekać...</Loader>
+                <Loader active size="large">Proszę czekać...</Loader>
             </Dimmer>
         )
     }

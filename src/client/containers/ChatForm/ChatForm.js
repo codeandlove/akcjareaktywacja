@@ -286,15 +286,12 @@ const ChatForm = (props) => {
                             )
                         }
                     </Form.Field>
-
                     {renderMessage()}
-
                     <Button type="button" onClick={clearForm}>
                         <Icon name="x" />
                         Anuluj
                     </Button>
-
-                    <Button type="submit" disabled={validateValues(["nick", "message"])} color="olive" floated="right">
+                    <Button type="submit" disabled={validateValues(["nick", "message"])} primary floated="right">
                         <Icon name="check" />
                         Wyślij
                     </Button>

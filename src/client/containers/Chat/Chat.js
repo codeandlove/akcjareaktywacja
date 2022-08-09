@@ -14,13 +14,13 @@ export const CHAT_LATEST_KEY_COOKIE_NAME = 'lastChatKey';
 export const EVENT_LATEST_CHAT_KEY_COOKIE_NAME = 'eventChatLatestKey';
 
 const Chat = (props) => {
-    const {data, close, toggleColumn, cookies} = props;
+    const {openSidebar, closeSidebar, data, cookies} = props;
     const [suggestions, setSuggestions] = useState([]);
-    const [messagesAmount, setMessagesAmout] = useState(0);
+    const [messagesAmount, setMessagesAmount] = useState(0);
     const chatListRef = useRef();
 
     useEffect(() => {
-        toggleColumn(true);
+        openSidebar();
         analytics.logEvent('User opened a chat');
     }, [])
 
@@ -33,7 +33,7 @@ const Chat = (props) => {
             }
 
             setSuggestions(findSuggestions());
-            setMessagesAmout(data.length);
+            setMessagesAmount(data.length);
         }
     }, [data]);
 
@@ -64,7 +64,7 @@ const Chat = (props) => {
     return (
         <div className="chat-wrapper">
             <Segment clearing basic>
-                <Button basic onClick={close} key="close-event-list" floated="right" icon="x" />
+                <Button basic onClick={closeSidebar} key="close-event-list" floated="right" icon="x" />
                 <Header floated="left" size="large">
                     Chat
                 </Header>

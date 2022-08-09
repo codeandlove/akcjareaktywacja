@@ -25,9 +25,9 @@ export const pushNotification = (title, body, topic) => {
                 'Authorization': 'Key= ' + key
             },
             body: JSON.stringify(data)
-        }).catch(err => console.log(err));
+        }).catch(error => console.log(error));
 
-    } catch (e) {
-        console.log(e);
+    } catch (error) {
+        console.log(error);
     }
 }

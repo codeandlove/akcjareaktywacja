@@ -6,10 +6,10 @@ import {Button} from "semantic-ui-react";
 
 const ShowOnMap = (props) => {
     const showEventLocationOnMap = () => {
-        const {close, map, isMobile} = props;
+        const {closeSidebar, map, isMobile} = props;
 
         if(isMobile) {
-            close();
+            closeSidebar();
         }
 
         map.flyTo(props.coordinates, 16);

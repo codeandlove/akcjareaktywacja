@@ -1,6 +1,6 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 
-import { Redirect } from "react-router";
+import {Redirect} from "react-router";
 import { Route, Switch } from "react-router-dom"
 
 import EventsList from "../EventsList/EventsList";
@@ -27,16 +27,29 @@ import {
     SETTINGS, STATIC,
     USER
 } from "../../routers";
-import {isLoaded} from "react-redux-firebase";
+import {firebaseConnect, isLoaded} from "react-redux-firebase";
 import {Dimmer, Loader} from "semantic-ui-react";
+import {bindActionCreators, compose} from "redux";
+import * as actionCreators from "../../actions";
+import {connect} from "react-redux";
 
 const Layout = (props) => {
-    const {auth} = props;
+    const {auth, sidebarIsOpen, sidebarIsExpanded, pageIsOpen } = props;
+    const [cssClass, setCssClass] = useState('');
+
+    useEffect(() => {
+        const sidebarClass = sidebarIsOpen ? "col-open": "";
+        const sidebarExpandClass = sidebarIsExpanded ? "col-expand": "";
+        const pageClass = pageIsOpen ? "page-open": "";
+
+        setCssClass(`${sidebarClass} ${sidebarExpandClass} ${pageClass}`);
+
+    }, [sidebarIsOpen, sidebarIsExpanded, pageIsOpen])
 
     if(!isLoaded(auth)) {
         return (
             <Dimmer active inverted>
-                <Loader size="large">Proszę czekać...</Loader>
+                <Loader active size="large">Proszę czekać...</Loader>
             </Dimmer>
         )
     }
@@ -55,46 +68,31 @@ const Layout = (props) => {
         }
     }
 
-    const cssClass = () => {
-
-        const { isColOpen, isColExpanded, isPageOpen } = props;
-
-        const colClass = (isColOpen) ? "col-open": "";
-
-        const colExpandClass = (isColExpanded) ? "col-expand": "";
-
-        const pageClass = (isPageOpen) ? "page-open": "";
-
-        return `${colClass} ${colExpandClass} ${pageClass}`;
-    }
-
-    const colRoutes = () => {
-        const eventList = <EventsList events={props.events} close={props.colClose} isMobile={props.isMobile} toggleColumn={props.toggleColumn} />;
+    const sidebarRoutes = () => {
         return (
             <Switch>
-                <Route exact path="/" render={() => eventList } />
-                <Route exact path={`/${EVENT_FORM}`} render={() => <EventForm cancel={props.formCancel} toggleColExpand={props.toggleColExpand} toggleColumn={props.toggleColumn} isColExpanded={props.isColExpanded} isMobile={props.isMobile} /> } />
-                <Route exact path={`/${ACTION}/${PREVIEW}`} render={() => <EventForm cancel={props.formCancel} toggleColExpand={props.toggleColExpand} toggleColumn={props.toggleColumn} isColExpanded={props.isColExpanded} isMobile={props.isMobile} /> } />
-                <Route path={`/${EVENT_FORM}/:eventDate`} render={({match}) => <EventForm {...match} cancel={props.formCancel} toggleColExpand={props.toggleColExpand} toggleColumn={props.toggleColumn} isColExpanded={props.isColExpanded} isMobile={props.isMobile} /> } />
-                <Route path={`/${EVENTS_LIST}`} render={() => eventList } />
-                <Route path={`/${CHAT}`} render={() => <Chat data={props.chat} close={props.colClose} {...props} />} />
-                <Route path={`/${LOGIN}`} render={() => <Login close={props.colClose} toggleColumn={props.toggleColumn}/> } />
-                <Route path={`/${REGISTER}`} render={() => <Register close={props.colClose} toggleColumn={props.toggleColumn}/> } />
-                <Route path={`/${RESET}`} render={() => <Reset close={props.colClose} toggleColumn={props.toggleColumn}/> } />
-                <Route path={`/${USER}`} render={() => isAuthorized(<User close={props.colClose} toggleColumn={props.toggleColumn} />, `${LOGIN}`)} />
-                <Route path="/*" render={() => eventList } />
+                <Route exact path="/" render={() => <EventsList events={props.events} isExact={false} /> } />
+                <Route exact path={`/${EVENT_FORM}`} render={() => <EventForm isMobile={props.isMobile} />} />
+                <Route exact path={`/${ACTION}/${PREVIEW}`} render={() => <EventForm isMobile={props.isMobile} />} />
+                <Route path={`/${EVENT_FORM}/:eventDate`} render={() => <EventForm isMobile={props.isMobile} />} />
+                <Route path={`/${EVENTS_LIST}`} render={() =>  <EventsList events={props.events} isExact={true} />} />
+                <Route path={`/${CHAT}`} render={() => <Chat data={props.chat} {...props} />} />
+                <Route path={`/${LOGIN}`} render={() => <Login /> } />
+                <Route path={`/${REGISTER}`} render={() => <Register /> } />
+                <Route path={`/${RESET}`} render={() => <Reset /> } />
+                <Route path={`/${USER}`} render={() => isAuthorized(<User  />, `${LOGIN}`)} />
+                <Route path="/*" render={() =>  <EventsList events={props.events} isExact={false} />} />
             </Switch>
         )
     }
 
     const pageRoutes = () => {
-        const { pageClose, pageOpen } = props;
         return (
             <Switch>
                 <Route exact path="/" render={() => null } />
-                <Route exact path={`/${ACTION}/${PREVIEW}`} render={(props) => <EventPage {...props} isDraft={true} close={pageClose} open={pageOpen} /> } />
-                <Route path={`/${ACTION}/:slug`} render={(props) => <EventPage {...props} close={pageClose} open={pageOpen} /> } />
-                <Route path={`/${STATIC}/:slug`} render={(props) => <StaticPage {...props} close={pageClose} open={pageOpen} /> } />
+                <Route exact path={`/${ACTION}/${PREVIEW}`} render={(props) => <EventPage {...props} isDraft={true}/> } />
+                <Route path={`/${ACTION}/:slug`} render={(props) => <EventPage {...props}/> } />
+                <Route path={`/${STATIC}/:slug`} render={(props) => <StaticPage {...props}/> } />
             </Switch>
         )
     }
@@ -108,9 +106,9 @@ const Layout = (props) => {
     }
 
     return (
-        <main className={cssClass()} >
+        <main className={cssClass} >
             <div className="col-wrapper">
-                {colRoutes()}
+                {sidebarRoutes()}
             </div>
             <div className="map-wrapper">
                 {props.children}
@@ -123,4 +121,18 @@ const Layout = (props) => {
     )
 };
 
-export default Layout;
+const mapStateToProps = state => {
+    return {
+        ...state.layout
+    }
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators(actionCreators, dispatch);
+};
+
+export default compose(
+    firebaseConnect(),
+    connect(({ firebase: { auth, profile } }) => ({ auth, profile })),
+    connect(mapStateToProps, mapDispatchToProps)
+)(Layout);

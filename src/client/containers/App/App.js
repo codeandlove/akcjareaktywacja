@@ -41,6 +41,7 @@ import {askForPermissionToReceiveNotifications} from "../../../firebase/messagin
 import {SLACK_NEW_VISITOR_HOOK} from "../../consts";
 import VisitorsOnlineTracker from "../../components/VisitorsOnlineTracker/VisitorsOnlineTracker";
 import {withRouter} from "react-router";
+import {collapseSidebar, openSidebar} from "../../actions";
 
 const populates = [
     { child: "participants", root: "users", keyProp: "uid" },
@@ -56,14 +57,10 @@ const toFloatNumber = (str, val) => {
 }
 
 const App = (props) => {
-    const {setClientData, history, firebase, client, event, addEvent, updateEvent, removeEvent, events, recent, chat, auth, profile, cookies} = props;
+    const {setClientData, history, firebase, client, openMenu, closeMenu, closePage, menuIsOpen, pageIsOpen, sidebarIsOpen, sidebarIsExpanded,
+        addEvent, removeEvent, events, recent, chat, auth, profile, cookies} = props;
 
     const [isMobile, setIsMobile] = useState(false);
-    const [isPageOpen, setIsPageOpen] = useState(false);
-    const [isMenuVisible, setIsMenuVisible] = useState(false);
-    const [isColOpen, setIsColOpen] = useState(window.innerWidth > 768);
-    const [isColExpanded, setIsColExpanded] = useState(false);
-    const [eventKey, setEventKey] = useState(null);
 
     useEffect(() => {
         isMobileDetection();
@@ -164,62 +161,7 @@ const App = (props) => {
         setIsMobile(window.innerWidth <= 768)
     }
 
-    const toggleMenu = (toggle) => {
-        setIsMenuVisible(state => {
-            return !toggle ? toggle : !state
-        });
-    };
-
-    const toggleColExpanded = () => {
-        setIsColExpanded(state => {
-            return !state
-        })
-    };
-
-    const togglePage = (toggle) => {
-        setIsMenuVisible(false);
-        setIsPageOpen(toggle);
-        setEventKey(state => {
-            return !toggle ? null : state
-        });
-    };
-
-    const toggleColumn = toggle => {
-        setIsMenuVisible(false);
-        setIsColExpanded(false);
-        setIsColOpen(toggle);
-
-        togglePage(false);
-
-        if(!toggle) {
-            history.replace("/");
-        }
-    };
-
-    const openEventForm = data => {
-        const {lat, lng} = data;
-        setIsColOpen(true);
-        setIsColExpanded(false);
-        addEvent({
-            coordinates: {
-                lat: lat,
-                lng: lng
-            }
-        })
-
-        history.replace(`/${EVENT_FORM}`);
-    };
-
-    const closeEventForm = () => {
-        setIsColOpen(false);
-        setIsColExpanded(false);
-        removeEvent();
-
-        history.push("/");
-    };
-
     const openChat = () => {
-        toggleColumn(true);
         history.push(`/${CHAT}`);
     }
 
@@ -236,18 +178,11 @@ const App = (props) => {
 
     const lastKey = cookies.get(CHAT_LATEST_KEY_COOKIE_NAME);
 
-    const sharedState = {
-        isPageOpen: isPageOpen,
-        isColOpen: isColOpen,
-        isColExpanded: isColExpanded,
-        eventKey: eventKey
-    }
-
     return (
         <div className="app">
             <Menu borderless>
                 <Menu.Item
-                    onClick={toggleMenu}
+                    onClick={menuIsOpen ? closeMenu : openMenu}
                 >
                     <Icon name="bars" className="have-dot">
                         <DotCounter data={chat} lastKey={lastKey}/>
@@ -258,7 +193,7 @@ const App = (props) => {
                     className="logo-item"
                     as={Link}
                     to={`/`}
-                    onClick={() => togglePage(false)}
+                    onClick={() => {closePage(); closeMenu(); }}
                 >
                     <img src={logo} className="logo" alt="Akcjareaktywacja.pl" title="Akcjareaktywacja.pl" width="176" height="19" />
                     <VisitorsOnlineTracker />
@@ -289,7 +224,7 @@ const App = (props) => {
                                 name="addEvent"
                                 as={Link}
                                 to={`/${EVENT_FORM}`}
-                                onClick={() => toggleColumn(true)}
+                                onClick={closeMenu}
                             >
                                 <Icon name="plus circle" size="large" color="olive" />
                                 <span>Dodaj wydarzenie</span>
@@ -302,7 +237,7 @@ const App = (props) => {
                                         name="login"
                                         as={Link}
                                         to={`/${LOGIN}`}
-                                        onClick={() => toggleColumn(true)}
+                                        onClick={closeMenu}
                                     >
                                         <Icon name="user circle" size="large" color="olive" />
                                         <span>Logowanie</span>
@@ -318,7 +253,7 @@ const App = (props) => {
                                                 <Dropdown.Item text="Twój profil"
                                                    as={Link}
                                                    to={`/${USER}`}
-                                                   onClick={() => toggleColumn(true)}
+                                                   onClick={closeMenu}
                                                 />
                                                 <Dropdown.Item text="Wyloguj"
                                                    as={Link}
@@ -341,7 +276,7 @@ const App = (props) => {
                     animation="push"
                     width="thin"
                     direction="left"
-                    visible={isMenuVisible}
+                    visible={menuIsOpen}
                     icon="labeled"
                     vertical
                 >
@@ -349,7 +284,7 @@ const App = (props) => {
                         name="events"
                         as={Link}
                         to={`/${EVENTS_LIST}`}
-                        onClick={() => toggleColumn(true)}
+                        onClick={closeMenu}
                     >
                         <Icon name="calendar" className="alternate outline" />
                         Wydarzenia
@@ -358,7 +293,7 @@ const App = (props) => {
                         name="chat"
                         as={Link}
                         to={`/${CHAT}`}
-                        onClick={() => toggleColumn(true)}
+                        onClick={closeMenu}
                     >
                         <Icon name="comments" className="outline have-dot">
                             <DotCounter data={chat} lastKey={lastKey}/>
@@ -370,28 +305,28 @@ const App = (props) => {
                             <Dropdown.Item
                                 as={Link}
                                 to={`/${STATIC}/${TERMS_OF_USE}`}
-                                onClick={() => toggleColumn(true)}
+                                onClick={closeMenu}
                             >
                                 Regulamin
                             </Dropdown.Item>
                             <Dropdown.Item
                                 as={Link}
                                 to={`/${STATIC}/${GDPR}`}
-                                onClick={() => toggleColumn(true)}
+                                onClick={closeMenu}
                             >
                                 RODO
                             </Dropdown.Item>
                             <Dropdown.Item
                                 as={Link}
                                 to={`/${STATIC}/${PRIVACY_POLICY}`}
-                                onClick={() => toggleColumn(true)}
+                                onClick={closeMenu}
                             >
                                 Prywatność
                             </Dropdown.Item>
                             <Dropdown.Item
                                 as={Link}
                                 to={`/${STATIC}/${CONTACT}`}
-                                onClick={() => toggleColumn(true)}
+                                onClick={closeMenu}
                             >
                                 Kontakt
                             </Dropdown.Item>
@@ -399,47 +334,29 @@ const App = (props) => {
                     </Dropdown>
                 </Sidebar>
                 <Sidebar.Pusher>
-                    <Sidebar.Pushable onClick={() => toggleMenu(false)}>
+                    <Sidebar.Pushable onClick={closeMenu}>
                         <ChatSnipped
-                            {
-                                ...sharedState
-                            }
                             data={chat}
                             openChat={openChat}
                         />
                         <Layout
-                            {
-                                ...sharedState
-                            }
-                            auth={auth}
                             events={events}
                             recent={recent}
                             chat={chat}
                             isMobile={isMobile}
-                            colClose={() => toggleColumn(false)}
-                            pageClose={() => togglePage(false)}
-                            pageOpen={() => togglePage(true)}
-                            toggleColExpand={toggleColExpanded}
-                            toggleColumn={data => toggleColumn(data)}
-                            formCancel={closeEventForm}
                         >
                             {
                                 !isLoaded(events) ? (
                                     <Dimmer active>
-                                        <Loader size="large">Proszę czekać...</Loader>
+                                        <Loader active size="large">Proszę czekać...</Loader>
                                     </Dimmer>
                                 ) : (
                                     <Map
-                                        {
-                                            ...sharedState
-                                        }
                                         events={events}
                                         recent={recent}
-                                        openEventForm={data => openEventForm(data)}
-                                        cancelEvent={closeEventForm}
+                                        isMobile={isMobile}
                                     />
                                 )
-
                             }
                         </Layout>
                     </Sidebar.Pushable>
@@ -478,7 +395,7 @@ const enhance = compose(
             { path: "/online", storeAs: 'online' }
         ]
     }),
-    connect(({ firebase, settings, client, event }) => ({
+    connect(({ firebase, settings, client, event, layout }) => ({
         recent: populate(firebase, "recent", populates),
         events: populate(firebase, "events", populates),
         chat: populate(firebase, "chat", populates),
@@ -487,7 +404,8 @@ const enhance = compose(
         profile: firebase.profile,
         settings: settings,
         client: client,
-        event: event
+        event: event,
+        ...layout
     }), mapDispatchToProps)
 );
 

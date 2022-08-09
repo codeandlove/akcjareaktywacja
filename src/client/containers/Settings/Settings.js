@@ -9,20 +9,10 @@ import {withRouter} from "react-router";
 import moment from "moment";
 
 const Settings = (props) => {
-    const { settings, history, setViewType, toggleRecentEvents, setDateFrom, setDateTo,
+    const { history, setViewType, toggleRecentEvents, setDateFrom, setDateTo,
         settings: {view_type, date_from, date_to, show_recent_events}} = props;
 
-    useEffect(() => {
-        return () => {
-            const data = {
-                ...settings,
-                date_from: settings.date_from,
-                date_to: settings.date_to,
-            };
-        }
-    }, [])
-
-    const close = () => {
+    const closeSettings = () => {
         history.replace('/');
     };
 
@@ -51,13 +41,13 @@ const Settings = (props) => {
         <Modal
             open={true}
             closeIcon
-            onClose={close}
+            onClose={closeSettings}
         >
             <Header icon="sliders" content="Ustawienia" />
             <Modal.Content>
                 <h3>Filtruj wydarzenia</h3>
                 <Form>
-                    <Form.Group>
+                    <Form.Group inline>
                         <Form.Field>
                             <label>Wyświetlaj jako:</label>
                         </Form.Field>
@@ -68,7 +58,7 @@ const Settings = (props) => {
                             <Radio label="Lista" name="viewGroup" value="listView" checked={view_type === "listView"} onChange={changeViewType}/>
                         </Form.Field>
                     </Form.Group>
-                    <Form.Group widths="equal">
+                    <Form.Group inline>
                         <Form.Field>
                             <label>Data początkowa:</label>
                             <DatePicker
@@ -90,7 +80,7 @@ const Settings = (props) => {
                             />
                         </Form.Field>
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group inline>
                         <Form.Field>
                             <label>Ostatnie wydarzenia:</label>
                         </Form.Field>
@@ -101,7 +91,7 @@ const Settings = (props) => {
                 </Form>
             </Modal.Content>
             <Modal.Actions>
-                <Button positive onClick={close}>
+                <Button positive onClick={closeSettings}>
                     <Icon name="checkmark" /> Zastosuj
                 </Button>
             </Modal.Actions>

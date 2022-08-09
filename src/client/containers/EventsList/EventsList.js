@@ -9,7 +9,7 @@ import moment from "moment";
 import "./EventsList.scss";
 import { Header, Segment, Item, Button, Dimmer, Loader } from "semantic-ui-react";
 import ShowOnMap from "../../components/ShowOnMap/ShowOnMap";
-import {ACTION, EVENT_FORM, SETTINGS} from "../../routers";
+import {ACTION, EVENT_FORM, EVENTS_LIST, SETTINGS} from "../../routers";
 import JoinEvent from "./../Join/Join";
 import Countdown from "../../components/Countrdown/Countdown";
 import Recent from "../Recent/Recent";
@@ -23,13 +23,13 @@ import DotCounter from "../../components/DotCounter/DotCounter";
 import {withRouter} from "react-router";
 
 const EventsList = (props) => {
-    const {toggleColumn, history, close, match, settings, settings: {date_from, date_to, show_recent_events}, cookies, events} = props;
+    const {openSidebar, closeSidebar, history, settings, isExact, settings: {date_from, date_to, show_recent_events}, cookies, events} = props;
 
     useEffect(() => {
-        if(!match.isExact) {
-            toggleColumn(true);
+        if(isExact) {
+            openSidebar();
         }
-    });
+    }, [isExact]);
 
     const listView = data => {
         const duration = moment(date_to).diff(moment(date_from), "days");
@@ -129,10 +129,11 @@ const EventsList = (props) => {
                         return (
                             <Item key={`List-item-${key}`}>
                                 <Item.Content>
-                                    <Item.Header as={Header} color={isInPast ? "grey" : "olive"}>
-                                        {moment(day).format("dddd, DD MMMM YYYY")}
+                                    <Item.Header>
+                                        <Header color={isInPast ? "grey" : "olive"} as="h4">
+                                            {moment(day).format("dddd, DD MMMM YYYY")}
+                                        </Header>
                                     </Item.Header>
-
                                     {
                                         (isInPast && dayEvents.length <= 0) ? (
                                             <p><small>Tego dnia nie odbyło się żadne wydarzenie...</small></p>
@@ -163,7 +164,7 @@ const EventsList = (props) => {
                                                                 secondary={isInPast}
                                                                 textAlign="left"
                                                             >
-                                                                <Item.Header as="h4" >
+                                                                <Item.Header as="h4">
                                                                     <Link to={`/${ACTION}/${event.slug}`}>
                                                                         {event.title}
                                                                     </Link>
@@ -237,7 +238,7 @@ const EventsList = (props) => {
     return (
         <div className="events-list">
             <Segment clearing basic>
-                <Button basic onClick={close} floated="right" icon="x" />
+                <Button basic onClick={closeSidebar} floated="right" icon="x" />
                 <Button basic floated="right" icon="sliders" onClick={() => history.replace(`/${SETTINGS}`)} />
                 <Header floated="left" size="large">
                     Wydarzenia
@@ -247,7 +248,7 @@ const EventsList = (props) => {
                 {
                     !isLoaded(events) ? (
                         <Dimmer active inverted>
-                            <Loader size="large">Proszę czekać...</Loader>
+                            <Loader active size="large">Proszę czekać...</Loader>
                         </Dimmer>
                     ) : (
                         <>
@@ -282,7 +283,8 @@ const EventsList = (props) => {
 
 const mapStateToProps = state => {
     return {
-        settings: state.settings
+        settings: state.settings,
+        layout: state.layout
     }
 };
 

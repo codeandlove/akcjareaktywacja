@@ -43,7 +43,7 @@ export const verifyCaptcha = async (props, eventName) => {
     const {googleReCaptchaProps: {executeRecaptcha}} = props;
 
     if(!executeRecaptcha) {
-        console.log('Recaptcha has not been loaded');
+        console.log('Recaptcha has not loaded');
 
         return false;
     }
@@ -148,8 +148,8 @@ export const searchPlaceData = (place, args) => {
 
     return fetch(`https://nominatim.openstreetmap.org/search.php?addressdetails=1&q=${encodeURIComponent(place)}${customParams}&limit=5&format=jsonv2`)
         .then(response => response.json())
-        .catch(err => {
-            console.log(err);
+        .catch(error => {
+            console.log(error);
             return null;
         });
 }

@@ -2,7 +2,7 @@ $font-url: 'https://fonts.googleapis.com/css?family=Raleway:300,400,600,700&subs
 $font-name: 'Raleway' !default;
 $font-family: $font-name, Arial, Helvetica, sans-serif !default;
 
-@import "~semantic-ui-sass/semantic-ui";
+@import "/src/fomantic-ui/dist/semantic.min.css";
 @import "~leaflet/dist/leaflet";
 @import '~react-leaflet-markercluster/dist/styles.min';
 @import "~react-draft-wysiwyg/dist/react-draft-wysiwyg.css";

@@ -9,9 +9,11 @@ import * as actionCreators from "../../actions";
 
 import {connect} from "react-redux";
 import {Button, Dimmer, Loader} from "semantic-ui-react";
+import {EVENT_FORM} from "../../routers";
+ import {withRouter} from "react-router";
 
 const EventMarkerLocator = (props) => {
-    const {event, updateEvent, isMobile, isColOpen} = props
+    const {event, openSidebar, closeMenu, collapseSidebar, addEvent, updateEvent, removeEvent, isMobile, sidebarIsOpen, history} = props
     const [position, setPosition] = useState(null)
     const [location, setLocation] = useState(null)
     const [prevPosition, setPrevPosition] = useState(null)
@@ -57,21 +59,41 @@ const EventMarkerLocator = (props) => {
         }
     })
 
-    const cancelEvent = () => {
-        const {cancelEvent} = props;
-        setEditMode(false)
-        setPosition(null)
-        cancelEvent()
+    const removeEventFromMap = () => {
+        setEditMode(false);
+        setPosition(null);
+
+        removeEvent();
+        history.replace('/')
     }
 
-    const addEvent = () => {
-        const {openEventForm} = props;
+    const addEventToMap = () => {
+        const {lat, lng} = position;
+        setEditMode(true);
+        setPrevPosition(null);
+        setPrevLocation(null);
+        
+        closeMenu();
+        collapseSidebar();
+        openSidebar();
 
-        setEditMode(true)
-        setPrevPosition(null)
-        setPrevLocation(null)
+        if(!!event) {
+            addEvent({
+                coordinates: {
+                    lat: lat,
+                    lng: lng
+                }
+            })
+        } else {
+            updateEvent({
+                coordinates: {
+                    lat: lat,
+                    lng: lng
+                }
+            })
+        }
 
-        openEventForm({ ...position})
+        history.replace(`/${EVENT_FORM}`);
     }
 
     const cancelPositionChange = () => {
@@ -127,13 +149,13 @@ const EventMarkerLocator = (props) => {
                                 location !== prevLocation ? (
                                     <>
                                         <p>Ustawiono nowe miejsce na mapie.</p>
-                                        <Button onClick={addEvent} color="olive" size="mini">Zatwierdź</Button>
+                                        <Button onClick={addEventToMap} color="olive" size="mini">Zatwierdź</Button>
                                     </>
                                 ) : (
                                     <>
                                         <p>Ustawiono nowe miejsce na mapie, czy zatwierdzić?</p>
                                         <Button onClick={cancelPositionChange} size="mini">Anuluj</Button>
-                                        <Button onClick={addEvent} color="olive" size="mini">Zatwierdź</Button>
+                                        <Button onClick={addEventToMap} color="olive" size="mini">Zatwierdź</Button>
                                     </>
                                 )
                             }
@@ -142,8 +164,8 @@ const EventMarkerLocator = (props) => {
                         <>
                             <p>Kliknij gdzieś lub przeciągnij pineskę, aby zmienić pozycję na mapie.</p>
                             {
-                                (isMobile || !isColOpen) && (
-                                    <Button onClick={addEvent} color="olive" size="mini">Wróć</Button>
+                                (isMobile || !sidebarIsOpen) && (
+                                    <Button onClick={addEventToMap} color="olive" size="mini">Wróć</Button>
                                 )
                             }
                         </>
@@ -153,8 +175,8 @@ const EventMarkerLocator = (props) => {
         ):(
             <>
                 <p>Dodać nowe wydarzenie?</p>
-                <Button onClick={() => cancelEvent()} size="mini">Nie</Button>
-                <Button onClick={() => addEvent()} color="olive" size="mini">Tak</Button>
+                <Button onClick={() => removeEventFromMap()} size="mini">Nie</Button>
+                <Button onClick={() => addEventToMap()} color="olive" size="mini">Tak</Button>
             </>
         )
     }
@@ -235,7 +257,7 @@ const Map = (props) => {
     if(!defaultCoordinates) {
         return (
             <Dimmer active inverted>
-                <Loader size="large">Proszę czekać...</Loader>
+                <Loader active size="large">Proszę czekać...</Loader>
             </Dimmer>
         )
     }
@@ -264,7 +286,8 @@ const mapStateToProps = state => {
     return {
         ...state.map,
         client: state.client,
-        event: state.event
+        event: state.event,
+        ...state.layout
     }
 };
 
@@ -272,4 +295,4 @@ const mapDispatchToProps = (dispatch) => {
     return bindActionCreators(actionCreators, dispatch);
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Map);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Map));

@@ -1,14 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import "./StaticPage.scss";
-import {Button, Container, Dimmer, Header, Loader, Segment} from "semantic-ui-react";
+import {Button, Dimmer, Header, Loader, Segment} from "semantic-ui-react";
 import renderHTML from "react-render-html";
+import {bindActionCreators, compose} from "redux";
+import * as actionCreators from "../../actions";
+import {connect} from "react-redux";
 
 const StaticPage = (props) => {
-    const { close, match: {params: {slug}, url} } = props;
+    const { openPage, closePage, match: {params: {slug}, url} } = props;
     const [data, setData] = useState(null);
 
     useEffect(() => {
-        props.open();
+        openPage();
         getData();
     }, [url]);
 
@@ -34,7 +37,7 @@ const StaticPage = (props) => {
                 data ? (
                     <>
                         <Segment clearing basic>
-                            <Button basic onClick={close} floated="right" icon="x" />
+                            <Button basic onClick={closePage} floated="right" icon="x" />
                             <Header as="h1" floated="left" size="large">
                                 {data.title}
                             </Header>
@@ -47,7 +50,7 @@ const StaticPage = (props) => {
                     </>
                 ) : (
                     <Dimmer active inverted>
-                        <Loader size="large">Proszę czekać...</Loader>
+                        <Loader active size="large">Proszę czekać...</Loader>
                     </Dimmer>
                 )
             }
@@ -56,4 +59,17 @@ const StaticPage = (props) => {
     )
 };
 
-export default StaticPage;
+
+const mapStateToProps = state => {
+    return {
+        ...state.layout
+    }
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators(actionCreators, dispatch);
+};
+
+export default compose(
+    connect(mapStateToProps, mapDispatchToProps)
+)(StaticPage);

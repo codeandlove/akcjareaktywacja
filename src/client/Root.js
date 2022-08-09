@@ -72,7 +72,7 @@ export const Root = () => {
 
         return (
             <Dimmer active inverted>
-                <Loader size="large">Proszę czekać...</Loader>
+                <Loader active size="large">Proszę czekać...</Loader>
             </Dimmer>
         )
     }

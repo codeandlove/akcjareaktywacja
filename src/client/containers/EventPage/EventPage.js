@@ -23,16 +23,16 @@ import {withRouter} from "react-router";
 import * as actionCreators from "../../actions";
 
 const EventPage = (props) => {
-    const {open, close, isDraft, event, draft, history, match} = props;
+    const {openPage, closePage, isDraft, event, draft, history, match} = props;
 
     useEffect(() => {
-        open();
+        openPage();
         analytics.logEvent('User opened a event page');
     }, []);
 
     const closeEventPage = () => {
         history.push(`${isDraft ? `/${EVENT_FORM}` : `/`}`);
-        close();
+        closePage();
     }
 
     const renderCategories = (categoriesIds) => {
@@ -164,7 +164,7 @@ const EventPage = (props) => {
     if(!event) {
         return (
             <Dimmer active inverted>
-                <Loader size="large">Proszę czekać...</Loader>
+                <Loader active size="large">Proszę czekać...</Loader>
             </Dimmer>
         )
     }

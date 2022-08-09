@@ -1,7 +1,7 @@
 import React, {Component, useEffect, useState} from "react";
 
 import { firebaseConnect} from "react-redux-firebase";
-import { compose } from "redux";
+import {bindActionCreators, compose} from "redux";
 import { connect } from "react-redux";
 
 import { Link } from "react-router-dom";
@@ -13,9 +13,10 @@ import { LOGIN } from "../../routers";
 import {verifyCaptcha} from "../../utils";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {useFormState} from "../../hooks";
+import * as actionCreators from "../../actions";
 
 const Reset = (props) => {
-    const {toggleColumn, firebase, close } = props;
+    const {openSidebar, closeSidebar, firebase} = props;
     const [messageType, setMessageType] = useState(null);
     const [formState, setFormState, handleChange, validateValues] = useFormState({
         email: null
@@ -24,7 +25,7 @@ const Reset = (props) => {
     const { email } = formState;
 
     useEffect(() => {
-        toggleColumn(true);
+        openSidebar();
     }, []);
 
     const renderMessage = () => {
@@ -74,7 +75,7 @@ const Reset = (props) => {
     return (
         <>
             <Segment clearing basic>
-                <Button basic onClick={close} floated="right" icon="x" />
+                <Button basic onClick={closeSidebar} floated="right" icon="x" />
                 <Header floated="left" size="large">
                     Odzyskaj hasło
                 </Header>
@@ -102,7 +103,11 @@ const Reset = (props) => {
     );
 }
 
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators(actionCreators, dispatch);
+};
+
 export default compose(
     firebaseConnect(),
-    connect(({ firebase: { auth, profile } }) => ({ auth, profile }))
+    connect(({ firebase: { auth, profile } }) => ({ auth, profile }), mapDispatchToProps)
 )(withGoogleReCaptcha(Reset));

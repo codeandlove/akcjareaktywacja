@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 
 import { firebaseConnect} from "react-redux-firebase";
-import { compose } from "redux";
+import {bindActionCreators, compose} from "redux";
 import { connect } from "react-redux";
 
 import { Link } from "react-router-dom";
@@ -15,9 +15,10 @@ import {verifyCaptcha} from "../../utils";
 import {useFormState} from "../../hooks";
 import {withRouter} from "react-router";
 import InputPasswordPreview from "../../components/InputPasswordPreview/InputPasswordPreview";
+import * as actionCreators from "../../actions";
 
 const Register = (props) => {
-    const {toggleColumn, firebase, close, history} = props;
+    const {openSidebar, closeSidebar, firebase, history} = props;
     const [registerFormPassed, setRegisterFormPassed] = useState(false);
     const [messageType, setMessageType] = useState(null);
     const [formState, setFormState, handleChange, validateValues] = useFormState({
@@ -32,7 +33,7 @@ const Register = (props) => {
     const { email, password, passwordConfirmation, passwordValidated, nick, terms } = formState;
 
     useEffect(() => {
-        toggleColumn(true);
+        openSidebar();
     }, []);
 
     useEffect(() => {
@@ -141,7 +142,7 @@ const Register = (props) => {
         return (
             <>
                 <Segment clearing basic>
-                    <Button basic onClick={close} floated="right" icon="x" />
+                    <Button basic onClick={closeSidebar} floated="right" icon="x" />
                     <Header floated="left" size="large">
                         Rejestracja
                     </Header>
@@ -190,7 +191,7 @@ const Register = (props) => {
         return (
             <>
                 <Segment clearing basic>
-                    <Button basic onClick={close} floated="right" icon="x" />
+                    <Button basic onClick={closeSidebar} floated="right" icon="x" />
                     <Header floated="left" size="large">
                         Udało się!
                     </Header>
@@ -210,7 +211,11 @@ const Register = (props) => {
     return registerFormPassed ? renderSuccessPage() : renderRegisterForm();
 }
 
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators(actionCreators, dispatch);
+};
+
 export default compose(
     firebaseConnect(),
-    connect(({ firebase: { auth, profile } }) => ({ auth, profile }))
+    connect(({ firebase: { auth, profile } }) => ({ auth, profile }), mapDispatchToProps)
 )(withGoogleReCaptcha(withRouter(Register)));
