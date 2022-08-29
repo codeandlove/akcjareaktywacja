@@ -6,6 +6,8 @@ const PhoneNumberButton = (props) => {
     const {text} = props;
     const [isVisible, setIsVisible] = useState(false);
 
+    if(!text) return <></>
+
     if(!findPhoneNumber(text)) {
         return text;
     }
