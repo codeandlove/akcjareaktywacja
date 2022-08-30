@@ -5268,6 +5268,10 @@ body .ui.inverted:not(.dimmer)::-webkit-scrollbar-thumb:hover {
 /*******************************
            Overrides
 *******************************/
+
+/*******************************
+           Overrides
+*******************************/
 /*!
  * # Fomantic-UI 2.8.8 - Container
  * http://github.com/fomantic/Fomantic-UI/
@@ -58976,7 +58980,7 @@ a.ui.nag {
   z-index: 1900;
   border: 1px solid #D4D4D5;
   line-height: 1.4285em;
-  max-width: 250px;
+  max-width: initial;
   background: #FFFFFF;
   padding: 0.833em 1em;
   font-weight: normal;
@@ -59151,7 +59155,7 @@ a.ui.nag {
 
 [data-tooltip][data-variation~="fixed"]:after {
   white-space: normal;
-  width: 250px;
+  width: initial;
 }
 
 [data-tooltip][data-variation*="wide fixed"]:after {
@@ -59164,7 +59168,7 @@ a.ui.nag {
 
 @media only screen and (max-width: 767.98px) {
   [data-tooltip][data-variation~="fixed"]:after {
-    width: 250px;
+    width: initial;
   }
 }
 
@@ -59654,7 +59658,7 @@ a.ui.nag {
 }
 
 .ui.fixed.popup {
-  width: 250px;
+  width: initial;
 }
 
 /*--------------
@@ -59680,12 +59684,12 @@ a.ui.nag {
 @media only screen and (max-width: 767.98px) {
   .ui.wide.popup,
   .ui[class*="very wide"].popup {
-    max-width: 250px;
+    max-width: initial;
   }
 
   .ui.wide.popup.fixed,
   .ui[class*="very wide"].popup.fixed {
-    width: 250px;
+    width: initial;
   }
 }
 

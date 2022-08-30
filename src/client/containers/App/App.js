@@ -300,6 +300,15 @@ const App = (props) => {
                         </Icon>
                         Chat
                     </Menu.Item>
+                    <Menu.Item
+                        name="users"
+                        as={Link}
+                        to={`/`}
+                        disabled
+                    >
+                        <Icon name="smile" className="outline" />
+                        Użytkownicy
+                    </Menu.Item>
                     <Dropdown item text="Pomoc" pointing="left" icon="help" className="dropdown-menu">
                         <Dropdown.Menu>
                             <Dropdown.Item
