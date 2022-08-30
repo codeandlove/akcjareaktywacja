@@ -71,17 +71,17 @@ const Layout = (props) => {
     const sidebarRoutes = () => {
         return (
             <Switch>
-                <Route exact path="/" render={() => <EventsList events={props.events} isExact={false} /> } />
+                <Route exact path="/" render={() => <EventsList events={props.events} isExact={false} isMobile={props.isMobile}/> } />
                 <Route exact path={`/${EVENT_FORM}`} render={() => <EventForm isMobile={props.isMobile} />} />
                 <Route exact path={`/${ACTION}/${PREVIEW}`} render={() => <EventForm isMobile={props.isMobile} />} />
                 <Route path={`/${EVENT_FORM}/:eventDate`} render={() => <EventForm isMobile={props.isMobile} />} />
-                <Route path={`/${EVENTS_LIST}`} render={() =>  <EventsList events={props.events} isExact={true} />} />
+                <Route path={`/${EVENTS_LIST}`} render={() =>  <EventsList events={props.events} isExact={true} isMobile={props.isMobile} />} />
                 <Route path={`/${CHAT}`} render={() => <Chat data={props.chat} {...props} />} />
                 <Route path={`/${LOGIN}`} render={() => <Login /> } />
                 <Route path={`/${REGISTER}`} render={() => <Register /> } />
                 <Route path={`/${RESET}`} render={() => <Reset /> } />
                 <Route path={`/${USER}`} render={() => isAuthorized(<User  />, `${LOGIN}`)} />
-                <Route path="/*" render={() =>  <EventsList events={props.events} isExact={false} />} />
+                <Route path="/*" render={() =>  <EventsList events={props.events} isExact={false} isMobile={props.isMobile} />} />
             </Switch>
         )
     }
