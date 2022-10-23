@@ -6,17 +6,24 @@ import moment from 'moment';
 import {Button, Form, Message, Icon, Transition} from "semantic-ui-react";
 import "./ChatForm.scss";
 import {analytics} from "../../../firebase/analytics";
-import {findPhoneNumber, findSwearWord, findUrlString, replaceBasicEmojiInText, verifyCaptcha} from "../../utils";
+import {
+    encryptMessage,
+    findPhoneNumber,
+    findSwearWord,
+    findUrlString,
+    replaceBasicEmojiInText,
+    verifyCaptcha
+} from "../../utils";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {pushNotification} from "../../notifications";
 import ChatTextArea from "../ChatTextArea/ChatTextArea";
-import {USER} from "../../routers";
+import {ACCOUNT} from "../../routers";
 import {withRouter} from "react-router";
 
 const MIN_TIME_OFFSET = process.env.NODE_ENV === 'production' ? 30000 : 0;
 
 const ChatForm = (props) => {
-    const {firebase, profile, auth, suggestions, scrollToBottom, type, id} = props;
+    const {firebase, profile, auth, suggestions, scrollToBottom, type, id, notify, encryptPass} = props;
     const [formState, setFormState] = useState({
         nick: null,
         message: ''
@@ -150,9 +157,7 @@ const ChatForm = (props) => {
     }
 
     const handleSave = () => {
-
         if(validateValues(["nick", "message"])) return;
-
         if(validateExcludes(["nick", "message"])) return;
 
         verifyCaptcha(props, 'chatMessage').then(token => {
@@ -160,13 +165,17 @@ const ChatForm = (props) => {
                 const messageTimestamp =  moment().valueOf();
                 const {nick, message} = formState;
 
-                const chatRef = id && chatType ?
-                    firebase.database().ref(chatType).child(`${id}/chat`)
+                let chatRef = chatType ?
+                    firebase.database().ref(chatType)
                     : firebase.database().ref('chat');
+
+                if(id) {
+                    chatRef = chatRef.child(`${id}/chat`);
+                }
 
                 let preparedData = {
                     nick: nick,
-                    message: message,
+                    message: !!encryptPass ? encryptMessage(message, encryptPass) : message,
                     timestamp: messageTimestamp
                 };
 
@@ -188,14 +197,14 @@ const ChatForm = (props) => {
                                 setMessageType("nick/nick-exist");
                             } else {
                                 chatRef.push(preparedData, () => {
-                                    pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
+                                    notify && pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
                                     clearForm();
                                 });
                             }
                         });
                     } else {
                         chatRef.push(preparedData, () => {
-                            pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
+                            notify && pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
                             clearForm();
                         });
                     }
@@ -209,7 +218,7 @@ const ChatForm = (props) => {
                                 preparedData = {...preparedData, user: res.user.uid}
 
                                 chatRef.push(preparedData, () => {
-                                    pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
+                                    notify && pushNotification(`Nowa wiadomość od ${nick}`, `${message}`, 'chat');
                                     clearForm();
                                 });
                             });
@@ -276,7 +285,7 @@ const ChatForm = (props) => {
                                     {
                                         !nick ? (
                                             <Button fluid basic color="olive" type="button" icon='user' content="Dodaj nick" onClick={() => {
-                                                history.push(`/${USER}`);
+                                                history.push(`/${ACCOUNT}`);
                                             }} />
                                         ) : (
                                             <input value={nick} name="nick" disabled readOnly onChange={() => null} />

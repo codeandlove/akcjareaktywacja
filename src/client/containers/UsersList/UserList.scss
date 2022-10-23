@@ -1,0 +1,14 @@
+@import "./../../../vars";
+
+.user-list-wrapper{
+  .user-status-indicator {
+    float: left;
+    margin-right: 15px;
+  }
+
+  .user-link {
+    display: flex !important;
+    align-items: center;
+    padding: 10px 0 !important;
+  }
+}

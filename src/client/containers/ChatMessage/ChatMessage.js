@@ -1,6 +1,5 @@
 import React from 'react';
 import {Comment, Segment} from "semantic-ui-react";
-import moment from "moment";
 import './ChatMessage.scss';
 import avatarPlaceholder from "../../../assets/profile_avatar.png";
 import ReportMessage, {
@@ -10,13 +9,12 @@ import ReportMessage, {
 import UserStatusIndicator from "../../components/UserStatusIndicator/UserStatusIndicator";
 import Reactions from "../../components/Reactions/Reactions";
 import ReactionsButton from "../../components/ReactionsButton/ReactionsButton";
+import {decryptMessage, timestampToHumanTime} from "../../utils";
 
 const ChatMessage = (props) => {
-    const {data, id, data:{user, nick, timestamp, message, reports}, type} = props;
+    const {data, id, data:{user, nick, timestamp, message, reports}, type, disableReports, decryptPass} = props;
 
-    const isInPast = (moment(timestamp).diff(moment(), "days", true) < -.5)
-
-    const dateToDisplay = isInPast ? moment(timestamp).format("DD MMMM YYYY, HH:mm:ss") : moment(timestamp).fromNow()
+    const dateToDisplay = timestampToHumanTime(timestamp);
 
     let userAvatar = avatarPlaceholder,
         userStatus;
@@ -39,10 +37,10 @@ const ChatMessage = (props) => {
                             {`${dateToDisplay}`}
                         </Comment.Metadata>
                         <Comment.Text className="short">
-                            {reports && reports.length >= MESSAGE_REPORTS_LIMIT ? REPORTED_MESSAGE_PLACEHOLDER : message}
+                            {reports && reports.length >= MESSAGE_REPORTS_LIMIT ? REPORTED_MESSAGE_PLACEHOLDER : !!decryptPass ? decryptMessage(message, decryptPass) : message}
                         </Comment.Text>
                         <Comment.Actions>
-                            <ReportMessage message={data} id={id} type={type}/>
+                            {!disableReports && <ReportMessage message={data} id={id} type={type} decryptPass={decryptPass}/>}
                             <Comment.Action as="a" className="comment-reactions">
                                 <ReactionsButton data={data}>
                                     <Reactions id={id} data={data} type={type} />

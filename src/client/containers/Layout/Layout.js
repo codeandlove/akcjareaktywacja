@@ -9,7 +9,7 @@ import EventForm from "./../EventForm/EventForm";
 import Login from "./../Login/Login";
 import Register from "./../Register/Register";
 import Reset from "./../Reset/Reset";
-import User from "./../User/User";
+import Account from "../Account/Account";
 import EventPage from "./../EventPage/EventPage";
 import Settings from "../Settings/Settings";
 
@@ -24,14 +24,20 @@ import {
     PREVIEW,
     REGISTER,
     RESET,
-    SETTINGS, STATIC,
-    USER
+    SETTINGS, STATIC, UNAUTHORIZED,
+    ACCOUNT,
+    USERS, USER, MESSAGE, ACCOUNT_MESSAGES
 } from "../../routers";
 import {firebaseConnect, isLoaded} from "react-redux-firebase";
 import {Dimmer, Loader} from "semantic-ui-react";
 import {bindActionCreators, compose} from "redux";
 import * as actionCreators from "../../actions";
 import {connect} from "react-redux";
+import Users from "../Users/Users";
+import Unauthorized from "../Unauthorized/Unauthorized";
+import User from "../User/User";
+import UserChat from "../UserChat/UserChat";
+import AccountMessagesDashboard from "../AccountMessagesDashboard/AccountMessagesDashboard";
 
 const Layout = (props) => {
     const {auth, sidebarIsOpen, sidebarIsExpanded, pageIsOpen } = props;
@@ -75,13 +81,18 @@ const Layout = (props) => {
                 <Route exact path={`/${EVENT_FORM}`} render={() => <EventForm isMobile={props.isMobile} />} />
                 <Route exact path={`/${ACTION}/${PREVIEW}`} render={() => <EventForm isMobile={props.isMobile} />} />
                 <Route path={`/${EVENT_FORM}/:eventDate`} render={() => <EventForm isMobile={props.isMobile} />} />
-                <Route path={`/${EVENTS_LIST}`} render={() =>  <EventsList events={props.events} isExact={true} isMobile={props.isMobile} />} />
+                <Route path={`/${EVENTS_LIST}`} render={() => <EventsList events={props.events} isExact={true} isMobile={props.isMobile} />} />
                 <Route path={`/${CHAT}`} render={() => <Chat data={props.chat} {...props} />} />
+                <Route path={`/${USERS}`} render={() => isAuthorized(<Users />, `${UNAUTHORIZED}`)} />
+                <Route path={`/${USER}/:userId`} render={(props) => isAuthorized(<User {...props}/>, `${UNAUTHORIZED}`)} />
+                <Route path={`/${MESSAGE}/:messageId`} render={(props) => isAuthorized(<UserChat {...props}/>, `${UNAUTHORIZED}`)} />
+                <Route path={`/${ACCOUNT_MESSAGES}`} render={(props) => isAuthorized(<AccountMessagesDashboard {...props}/>, `${UNAUTHORIZED}`)} />
+                <Route path={`/${UNAUTHORIZED}`} render={() => <Unauthorized />} />
                 <Route path={`/${LOGIN}`} render={() => <Login /> } />
                 <Route path={`/${REGISTER}`} render={() => <Register /> } />
                 <Route path={`/${RESET}`} render={() => <Reset /> } />
-                <Route path={`/${USER}`} render={() => isAuthorized(<User  />, `${LOGIN}`)} />
-                <Route path="/*" render={() =>  <EventsList events={props.events} isExact={false} isMobile={props.isMobile} />} />
+                <Route path={`/${ACCOUNT}`} render={() => isAuthorized(<Account />, `${LOGIN}`)} />
+                <Route path="/*" render={() => <EventsList events={props.events} isExact={false} isMobile={props.isMobile} />} />
             </Switch>
         )
     }

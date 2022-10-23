@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import "./Login.scss";
 
 import { Header, Segment, Message, Form, Input, Button, Icon, Divider } from "semantic-ui-react";
-import {REGISTER, RESET, USER} from "../../routers";
+import {REGISTER, RESET, ACCOUNT} from "../../routers";
 import {verifyCaptcha} from "../../utils";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {useFormState} from "../../hooks";
@@ -33,7 +33,7 @@ const Login = (props) => {
 
     useEffect(() => {
         if(!isEmpty(auth) && isLoaded(auth) && !auth.isAnonymous) {
-            history.push(`/${USER}`);
+            history.push(`/${ACCOUNT}`);
         }
     }, [auth])
 
@@ -69,7 +69,7 @@ const Login = (props) => {
         verifyCaptcha(props, 'loginByProvider').then(token => {
             if(token) {
                 firebase.login({ provider: provider, type: 'redirect' }).then(() => {
-                    history.push(`/${USER}`);
+                    history.push(`/${ACCOUNT}`);
                 })
             }
         });
@@ -85,8 +85,8 @@ const Login = (props) => {
                     setFormState({
                         email: null,
                         password: null
-                    })
-                    history.push(`/${USER}`);
+                    });
+                    history.push(`/${ACCOUNT}`);
                 }).catch(res => {
                     const {code} = res.toJSON();
                     setMessageType(code);

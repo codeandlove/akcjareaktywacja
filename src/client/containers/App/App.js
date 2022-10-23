@@ -24,6 +24,7 @@ import {formatSlackNotifyMessage, generateClientDeviceUUID, getIPInfoApiUrl, not
 import {bindActionCreators} from "redux";
 import * as actionCreators from "../../actions";
 import {
+    ACCOUNT, ACCOUNT_MESSAGES,
     CHAT,
     CONTACT,
     EVENT_FORM,
@@ -32,7 +33,7 @@ import {
     PRIVACY_POLICY,
     STATIC,
     TERMS_OF_USE,
-    USER
+    USERS
 } from "../../routers";
 import Avatar from "../../components/Avatar/Avatar";
 import DotCounter from "../../components/DotCounter/DotCounter";
@@ -41,7 +42,6 @@ import {askForPermissionToReceiveNotifications} from "../../../firebase/messagin
 import {SLACK_NEW_VISITOR_HOOK} from "../../consts";
 import VisitorsOnlineTracker from "../../components/VisitorsOnlineTracker/VisitorsOnlineTracker";
 import {withRouter} from "react-router";
-import {collapseSidebar, openSidebar} from "../../actions";
 
 const populates = [
     { child: "participants", root: "users", keyProp: "uid" },
@@ -252,7 +252,12 @@ const App = (props) => {
                                             <Dropdown.Menu>
                                                 <Dropdown.Item text="Twój profil"
                                                    as={Link}
-                                                   to={`/${USER}`}
+                                                   to={`/${ACCOUNT}`}
+                                                   onClick={closeMenu}
+                                                />
+                                                <Dropdown.Item text="Wiadomości"
+                                                   as={Link}
+                                                   to={`/${ACCOUNT_MESSAGES}`}
                                                    onClick={closeMenu}
                                                 />
                                                 <Dropdown.Item text="Wyloguj"
@@ -303,8 +308,8 @@ const App = (props) => {
                     <Menu.Item
                         name="users"
                         as={Link}
-                        to={`/`}
-                        disabled
+                        to={`/${USERS}`}
+                        onClick={closeMenu}
                     >
                         <Icon name="smile" className="outline" />
                         Użytkownicy

@@ -1,6 +1,8 @@
 import {UAParser} from 'ua-parser-js';
 import moment from "moment";
+import AES from 'crypto-js/aes';
 import {CATEGORIES} from "../consts";
+import Utf8 from "crypto-js/enc-utf8";
 
 export const getClientDeviceData = () => {
     const parser = new UAParser();
@@ -36,6 +38,12 @@ export const getCookie = (cname) => {
         }
     }
     return "";
+}
+
+export const timestampToHumanTime = (timestamp) => {
+    const isInPast = (moment(timestamp).diff(moment(), "days", true) < -.5);
+
+    return isInPast ? moment(timestamp).format("DD MMMM YYYY, HH:mm:ss") : moment(timestamp).fromNow();
 }
 
 
@@ -392,4 +400,17 @@ export const getCategoriesDataByIds = ids => {
             return last;
         }, []);
     }
+}
+
+export const encryptMessage = (message, passKey) => {
+    return AES.encrypt(message, passKey).toString();
+}
+
+
+export const decryptMessage = (data, passKey) => {
+    if(data && passKey) {
+       return AES.decrypt(data, passKey).toString(Utf8);
+    }
+
+    return 'Coś poszło nie tak...';
 }

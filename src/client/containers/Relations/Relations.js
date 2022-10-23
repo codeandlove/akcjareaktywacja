@@ -74,7 +74,7 @@ const Relations = (props) => {
             {
                 isParticipant ? (
                     <Segment clearing basic>
-                        <ChatForm suggestions={suggestions} type="events" id={id} />
+                        <ChatForm suggestions={suggestions} type="events" id={id} notify={true}/>
                     </Segment>
                ) : <></>
             }

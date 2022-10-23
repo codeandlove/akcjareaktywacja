@@ -3,14 +3,14 @@ import {Confirm, Icon, Popup, Comment} from "semantic-ui-react";
 import {compose} from "redux";
 import {firebaseConnect, isEmpty, isLoaded} from "react-redux-firebase";
 import {connect} from "react-redux";
-import {notifyToSlackChannel} from "../../utils";
+import {decryptMessage, notifyToSlackChannel} from "../../utils";
 
 export const MESSAGE_REPORTS_LIMIT = 3;
 export const REPORTED_MESSAGE_PLACEHOLDER = 'Wiadomość została uznana za obraźliwą przez innych użytkoników serwisu.';
 const SLACK_NOTIFICATION_WEBHOOK_CHANNEL = 'https://hooks.slack.com/services/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';
 
 const ReportMessage = (props) => {
-    const {firebase, client: {ip, duuid}, auth, message: {reports, message}, id, type} = props;
+    const {firebase, client: {ip, duuid}, auth, message: {reports, message}, id, type, decryptPass} = props;
     const [openConfirmation, setOpenConfirmation] = useState(false);
     const [alreadyReportedByUser, setAlreadyReportedByUser] = useState(false);
     const [messageReports, setMessageReports] = useState([]);
@@ -54,7 +54,7 @@ const ReportMessage = (props) => {
             );
         }
 
-        notifyToSlackChannel(SLACK_NOTIFICATION_WEBHOOK_CHANNEL, {text: `Zgłoszono wiadomość ${id} o treści: ${message}, napisany przez użytkownika ${user}`});
+        notifyToSlackChannel(SLACK_NOTIFICATION_WEBHOOK_CHANNEL, {text: `Zgłoszono wiadomość ${id} o treści: ${!!decryptPass ? decryptMessage(message, decryptPass) : message}, napisany przez użytkownika ${user}`});
     }
 
     if(messageReports && messageReports.length >= reportLimit) {

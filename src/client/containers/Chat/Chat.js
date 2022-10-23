@@ -88,7 +88,7 @@ const Chat = (props) => {
                 </div>
             </Segment>
             <Segment basic className="chat-form-wrapper">
-                <ChatForm scrollToBottom={scrollToBottom} suggestions={suggestions} />
+                <ChatForm scrollToBottom={scrollToBottom} suggestions={suggestions} notify={true} />
             </Segment>
         </div>
     )

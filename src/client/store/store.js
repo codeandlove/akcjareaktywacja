@@ -48,7 +48,6 @@ const persistConfig = {
             // (Optional) State to be used for resetting e.g. provide initial reducer state
             expiredState: initialState.settings,
             autoExpire: true
-
         })
         // You can add more `expireReducer` calls here for different reducers
         // that you may want to expire

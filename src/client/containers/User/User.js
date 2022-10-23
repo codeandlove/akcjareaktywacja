@@ -1,298 +1,162 @@
-import React, {useEffect, useState} from "react";
-
-import {firebaseConnect, isEmpty} from 'react-redux-firebase';
-import {bindActionCreators, compose} from 'redux';
-import { connect } from 'react-redux';
-
-import Uploader from './../Uploader/Uploader';
-
-import avatarPlaceholder from "./../../../assets/profile_avatar.png";
-
-import "./User.scss";
-
-import {
-    Container,
-    Header,
-    Segment,
-    Form,
-    Input,
-    Button,
-    Icon,
-    Message,
-    Image,
-    Tab,
-    Dimmer,
-    Loader, Checkbox, Modal
-} from "semantic-ui-react";
-import Avatar from "../../components/Avatar/Avatar";
-import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
-import {verifyCaptcha} from "../../utils";
-import {useFormState} from "../../hooks";
+import React, {useEffect, useState} from 'react';
+import {bindActionCreators, compose} from "redux";
 import * as actionCreators from "../../actions";
+import {firebaseConnect, isEmpty, withFirebase} from "react-redux-firebase";
+import {connect} from "react-redux";
+import {Button, Comment, Dimmer, Header, Icon, Image, Loader, Segment} from "semantic-ui-react";
+import {analytics} from "../../../firebase/analytics";
+import {withRouter} from "react-router";
+import avatarPlaceholder from "../../../assets/profile_avatar.png";
+import {Link} from "react-router-dom";
+import {MESSAGE, USER, USERS} from "../../routers";
+import UserStatusIndicator from "../../components/UserStatusIndicator/UserStatusIndicator";
+import './User.scss';
+import moment from "moment";
 
-const User = props => {
-    const {openSidebar, closeSidebar, profile, auth, uploader, firebase} = props;
-    const [messageType, setMessageType] = useState(null);
-    const [avatarImage, setAvatarImage] = useState(null);
-
-    const [formState, setFormState, handleChange, validateValues] = useFormState({
-        nick: null,
-        avatar: null,
-        subscriptions: null
-    });
-
-    const { nick, avatar, subscriptions } = formState;
+const User = (props) => {
+    const {closeSidebar, openSidebar, firebase, history, user, profile, match: {params: {userId}}, auth: {uid}} = props;
+    const [messageChatId, setMessageChatId] = useState(null);
 
     useEffect(() => {
         openSidebar();
-    }, [])
+        analytics.logEvent('User profile opened');
+    }, []);
 
     useEffect(() => {
-        if(!isEmpty(profile)) {
-            const {displayNick, avatarImage, avatarUrl, subscriptions} = profile;
-            setFormState({
-                nick: displayNick,
-                avatar: avatarImage || avatarUrl,
-                subscriptions: subscriptions === undefined ? false : subscriptions
-            });
+        if(!isEmpty(user) && !isEmpty(profile)) {
+            const messageKey = findMessageChatId(user);
+            if(messageKey) {
+                setMessageChatId(messageKey);
+            }
         }
-    }, [profile]);
+    }, [user, profile])
 
-    if(!profile.isLoaded) {
+    if(!user) {
         return (
             <Dimmer active inverted>
-                <Loader actives size="large">Proszę czekać...</Loader>
+                <Loader active size="large">Proszę czekać...</Loader>
             </Dimmer>
         )
     }
 
-    const renderMessage = () => {
-        let result = null;
+    const findMessageChatId = (refUser) => {
+        const {messages} = profile;
+        if(!messages || !refUser || !refUser.messages) return null;
 
-        switch(messageType) {
-            case "create/profile-updated":
-                result = (
-                    <Message positive>
-                        <Message.Header>Zapisano</Message.Header>
-                        <p>Twój profil został zaktualizowany.</p>
-                    </Message>
-                );
-                break;
-            case "create/nick-duplicated":
-                result = (
-                    <Message negative>
-                        <Message.Header>Błąd aktualizacji profilu</Message.Header>
-                        <p>Użytkownik o takim nicku już istnieje.</p>
-                    </Message>
-                );
-                break;
-            default:
-                result = null;
-                break;
+        return messages.filter(id => refUser.messages.includes(id))[0];
+    }
+
+    const openUserChat = () => {
+        if (!messageChatId) {
+            CreateNewChat();
+            return;
         }
 
-        return (result) ? <Segment clearing basic>{result}</Segment> : null;
+        history.push(`/${MESSAGE}/${messageChatId}`);
     }
 
-    const userWelcome = () => {
-        return (
-            <Tab.Pane clearing>
-                <Container textAlign='center'>
-                    <Avatar size="small"/>
-                    {
-                        !!nick ? (
-                            <h3>Witaj, {nick}!</h3>
-                        ) : (
-                            <>
-                                <h3>Witaj nieznajomy!</h3>
-                                <p>Uzupełnij swój profil</p>
-                            </>
-                        )
-                    }
-                </Container>
-            </Tab.Pane>
-        )
-    };
+    const CreateNewChat = () => {
+        const messageRef = firebase.database().ref('messages');
+        const messageTimestamp = moment().valueOf();
+        const userKeys = [uid, userId];
+        const messagesPromises = [];
+        let messageKey;
 
-    const userSettings = () => {
-        return (
-            <Tab.Pane clearing>
-                <Header>
-                    <Image src={avatar || avatarPlaceholder} size='mini' avatar /> {!!nick ? nick : ''}
-                </Header>
-                <Form>
-                    <Form.Field>
-                        <label>Awatar</label>
-                        <Uploader open={uploader} setAvatarImage={avatarImage => updateAvatarImage(avatarImage)}/>
-                    </Form.Field>
-                    <Form.Field>
-                        <label>Podpis</label>
-                        <Input placeholder="Wpisz nick" type="text" id="nick" name="nick" value={nick || ""} onChange={handleChange("nick")} />
-                    </Form.Field>
-                    <Form.Field>
-                        <label>Powiadomienia</label>
-                        <Checkbox label="Chcę otrzymywać powiadomienia o nowych aktywnościach." toggle
-                                  onChange={handleChange("subscriptions")}
-                                  defaultChecked={subscriptions}/>
-                    </Form.Field>
-                    <Form.Field>
-                        <Button floated="right" color="olive" disabled={validateValues(["nick"]) || messageType === "nick/nick-exist"} onClick={saveProfile}>
-                            <Icon name="check" />
-                            Zapisz
-                        </Button>
-                    </Form.Field>
-                </Form>
-            </Tab.Pane>
-        )
-    };
+        messageRef.push({
+            myId: uid,
+            userId: userId,
+            timestamp: messageTimestamp
+        }).then(res => {
+            messageKey = res.key;
 
-    const userLogout = () => {
-        return (
-            <Tab.Pane clearing>
-                <Button color="red" onClick={logout} floated="right" >
-                    <Icon name="sign out" />
-                    Wyloguj się
-                </Button>
-            </Tab.Pane>
-        )
-    }
+            userKeys.forEach(userKey => {
+                const userMessagesRef = firebase.database().ref(`users/${userKey}`).child('messages');
 
-    const panes = [
-        { menuItem: 'Witaj', render: userWelcome },
-        { menuItem: 'Twoje konto', render: userSettings },
-        { menuItem: 'Wyloguj się', render: userLogout }
-    ];
-
-    const logout = () => {
-        firebase.logout();
-    }
-
-    const updateAvatarImage = (data) => {
-        setAvatarImage(data);
-    }
-
-    const saveProfile = () => {
-        if(validateValues(["nick"])) return;
-
-        verifyCaptcha(props, 'updateUser').then(token => {
-            if(token) {
-                const usersRef = firebase.database().ref('/users');
-
-                //Check if nick is unique
-                usersRef.orderByChild('displayNick').equalTo(nick).once('value').then(snapshot => {
-                    const isItMe = auth.uid === (snapshot.val() && Object.keys(snapshot.val())[0]);
-
-                    if(!snapshot.val() || isItMe) {
-                        let data = {
-                            displayNick: nick
-                        }
-
-                        if(subscriptions) {
-                            data = {
-                                ...data,
-                                subscriptions: subscriptions
-                            }
-                        }
-
-                        if(avatarImage) {
-                            data = {
-                                ...data,
-                                avatarImage: avatarImage
-                            }
-                        }
-
-                        firebase.update(`users/${auth.uid}`, data, () => {
-                            setMessageType("create/profile-updated")
-                        });
+                const snapPromise = userMessagesRef.once("value").then((snapshot) => {
+                    if(snapshot.exists()) {
+                        const val = snapshot.val();
+                        userMessagesRef.set(!!val ? [
+                            ...val,
+                            messageKey
+                        ] : [messageKey]);
                     } else {
-                        setMessageType("create/nick-duplicated")
+                        userMessagesRef.set([messageKey]);
                     }
-                });
-            }
-        })
+                }).catch(err => err);
+
+                messagesPromises.push(snapPromise);
+            });
+
+            Promise.all(messagesPromises).then(() => {
+                history.push(`/${MESSAGE}/${messageKey}`);
+            }).catch(err => err);
+        });
     }
+
+    const {displayNick, avatarImage, status} = user;
 
     return (
-        <>
+        <div>
             <Segment clearing basic>
                 <Button basic onClick={closeSidebar} floated="right" icon="x" />
-                <Header floated="left" size='large'>
-                    {
-                        !!nick ? (
-                            <>Witaj, {nick}!</>
-                        ) : (
-                            <>
-                                Witaj nieznajomy!
-                            </>
-                        )
-                    }
+                <Header floated="left" size="large">
+                    {displayNick}
                 </Header>
             </Segment>
-            {renderMessage()}
-            <Segment basic>
-                <Tab panes={panes} />
+            <Segment clearing basic textAlign="center">
+                <div className="user-photo">
+                    <UserStatusIndicator asAvatar={true} status={status}>
+                        <Image src={avatarImage || avatarPlaceholder} size="small" avatar />
+                    </UserStatusIndicator>
+                </div>
+                <h3>{displayNick}</h3>
             </Segment>
-            <UpdateNickModal {...props} formState={formState} setFormState={data => setFormState(data)} saveProfile={saveProfile} renderMessage={renderMessage} />
-        </>
-    )
-}
-
-const UpdateNickModal = props => {
-    const {profile, formState: {nick}, setFormState, saveProfile, renderMessage} = props;
-    const [open, setOpen] = useState(false);
-
-    useEffect(() => {
-        if(!isEmpty(profile)) {
-            const {displayNick} = profile;
-            setOpen(!displayNick);
-        }
-    }, [profile]);
-
-    return(
-        <Modal
-            onClose={() => setOpen(false)}
-            onOpen={() => setOpen(true)}
-            open={open}
-            closeOnDimmerClick={false}
-            closeOnEscape={false}
-            closeOnDocumentClick={false}
-            closeOnPortalMouseLeave={false}
-            closeOnTriggerBlur={false}
-            closeOnTriggerMouseLeave={false}
-            closeOnTriggerClick={false}
-        >
-            <Header icon >
-                Wpisz swój nowy nick
-            </Header>
-            <Modal.Content>
-                {renderMessage()}
-                <Form>
-                    <Form.Field>
-                        <label>Nick</label>
-                        <Input placeholder="Wpisz nick" type="text" id="nick" name="nick" value={nick || ""}
-                           onChange={e => setFormState({
-                                nick: e.target.value
-                            })}
-                        />
-                    </Form.Field>
-                </Form>
-            </Modal.Content>
-            <Modal.Actions>
-                <Button color='olive' disabled={!nick} onClick={saveProfile}>
-                    <Icon name='checkmark' /> Zapisz
+            {
+                userId !== uid ? (
+                    <Segment clearing basic textAlign="center">
+                        <Button primary onClick={openUserChat}>
+                            <Icon name="chat" />
+                            {
+                                !!messageChatId ? 'Wiadomości' : 'Wyślij wiadomość'
+                            }
+                        </Button>
+                    </Segment>
+                ) : <></>
+            }
+            <Segment>
+                <Button as={Link} to={`/${USERS}`}>
+                    <Icon name="arrow left" />
+                    Wróć
                 </Button>
-            </Modal.Actions>
-        </Modal>
-    )
-}
+            </Segment>
+        </div>
+    );
+};
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators(actionCreators, dispatch);
 };
 
+const mapStateToProps = state => {
+    return state;
+};
+
 const enhance = compose(
-    firebaseConnect(),
-    connect(({firebase: { auth, profile }}) => ({auth, profile}), mapDispatchToProps)
+    firebaseConnect((props) => {
+        return ([
+            {
+                path: `users/${props.match.params.userId}`,
+                storeAs: "user"
+            }
+        ])
+
+    }),
+    connect(({ firebase,  firebase: { auth, profile } }) => ({
+        user: firebase.data.user,
+        auth: auth,
+        profile: profile
+    })),
+    connect(mapStateToProps, mapDispatchToProps)
 );
 
-export default enhance(withGoogleReCaptcha(User));
+export default enhance(withRouter(withFirebase(User)));

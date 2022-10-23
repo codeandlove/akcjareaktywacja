@@ -27,7 +27,7 @@ const UserStatusIndicator = (props) => {
                     {children}
                 </div>
             }
-            content={userOnline ? 'Jestem online': 'Jestem offline'}
+            content={userOnline ? 'online': 'offline'}
             position='bottom right'
         />
     )

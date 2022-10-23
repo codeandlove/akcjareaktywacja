@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import "./Register.scss";
 
 import {Header, Segment, Message, Form, Input, Checkbox, Button, Icon} from "semantic-ui-react";
-import {LOGIN, USER} from "../../routers";
+import {LOGIN, ACCOUNT} from "../../routers";
 import {withGoogleReCaptcha} from "react-google-recaptcha-v3";
 import {verifyCaptcha} from "../../utils";
 import {useFormState} from "../../hooks";
@@ -199,7 +199,7 @@ const Register = (props) => {
                 {renderMessage()}
                 <Segment clearing basic>
                     <p>Konto zostało utworzone.</p>
-                    <Button floated="right" onClick={() => history.push(`/${USER}`)} color="olive">
+                    <Button floated="right" onClick={() => history.push(`/${ACCOUNT}`)} color="olive">
                         <Icon name="user" />
                         Twój profil
                     </Button>

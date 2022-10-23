@@ -1,1 +1,12 @@
 @import "./../../../vars";
+
+.user-photo {
+  display: block;
+  position: relative;
+  margin: 0 auto;
+  max-width: 150px;
+
+  img {
+    margin: 0 !important;
+  }
+}

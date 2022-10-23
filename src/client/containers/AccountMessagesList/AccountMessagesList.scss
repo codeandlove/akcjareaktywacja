@@ -1,0 +1,14 @@
+@import "./../../../vars";
+
+.messages-list-wrapper{
+  .user-status-indicator {
+    float: left;
+    margin-right: 15px;
+  }
+
+  .message-link {
+    display: flex !important;
+    align-items: center;
+    padding: 10px 0 !important;
+  }
+}
