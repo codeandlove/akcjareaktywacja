@@ -7,7 +7,7 @@ import {notifyToSlackChannel} from "../../utils";
 
 export const MESSAGE_REPORTS_LIMIT = 3;
 export const REPORTED_MESSAGE_PLACEHOLDER = 'Wiadomość została uznana za obraźliwą przez innych użytkoników serwisu.';
-const SLACK_NOTIFICATION_WEBHOOK_CHANNEL = 'https://hooks.slack.com/services/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';
+const SLACK_NOTIFICATION_WEBHOOK_CHANNEL = 'https://hooks.slack.com/services/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';
 
 const ReportMessage = (props) => {
     const {firebase, client: {ip, duuid}, auth, message: {reports, message}, id, type} = props;
