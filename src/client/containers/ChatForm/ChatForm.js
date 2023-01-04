@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { firebaseConnect, isEmpty, isLoaded } from "react-redux-firebase";
@@ -23,7 +23,7 @@ import {withRouter} from "react-router";
 const MIN_TIME_OFFSET = process.env.NODE_ENV === 'production' ? 30000 : 0;
 
 const ChatForm = (props) => {
-    const {firebase, profile, auth, suggestions, scrollToBottom, type, id, notify, encryptPass} = props;
+    const {firebase, profile, auth, suggestions, scrollToBottom, type, id, notify, encryptPass, recipients} = props;
     const [formState, setFormState] = useState({
         nick: null,
         message: ''
@@ -176,6 +176,7 @@ const ChatForm = (props) => {
                 let preparedData = {
                     nick: nick,
                     message: !!encryptPass ? encryptMessage(message, encryptPass) : message,
+                    recipients: !!recipients ? recipients : null,
                     timestamp: messageTimestamp
                 };
 

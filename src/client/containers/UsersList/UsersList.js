@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {bindActionCreators, compose} from "redux";
 import * as actionCreators from "../../actions";
 import {firebaseConnect, populate} from "react-redux-firebase";
@@ -8,7 +8,6 @@ import avatarPlaceholder from "../../../assets/profile_avatar.png";
 import {Link} from "react-router-dom";
 import {USER} from "../../routers";
 import UserStatusIndicator from "../../components/UserStatusIndicator/UserStatusIndicator";
-
 import './UserList.scss';
 
 const UsersList = (props) => {

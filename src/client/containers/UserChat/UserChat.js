@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {bindActionCreators, compose} from "redux";
 import * as actionCreators from "../../actions";
 import {firebaseConnect, isEmpty, isLoaded, populate, withFirebase} from "react-redux-firebase";
@@ -12,14 +12,41 @@ import {Link} from "react-router-dom";
 import {USER} from "../../routers";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import ChatForm from "../ChatForm/ChatForm";
+import {useInView} from "../../hooks";
 
 const UserChat = (props) => {
-    const {closeSidebar, openSidebar, message, usersChat, match: {params: {messageId}}} = props;
+    const {closeSidebar, openSidebar, firebase, message, usersChat, auth: {uid}, match: {params: {messageId}}} = props;
+    const chatFormRef = useRef();
+    const chatFormInView = useInView(chatFormRef);
 
     useEffect(() => {
         openSidebar();
         analytics.logEvent('User profile opened');
     }, []);
+
+    useEffect(() => {
+        if(usersChat) {
+            Object.keys(usersChat).forEach(key => {
+                const message = usersChat[key];
+                const recipientsArray = message.recipients;
+                if(recipientsArray && recipientsArray.includes(uid)) {
+                    removeRecipient(key);
+                }
+            })
+        }
+    }, [chatFormInView])
+
+    const removeRecipient = (key) => {
+        const messageRef = firebase.database().ref(`messages/${messageId}/chat/${key}/recipients`);
+        messageRef.once('value').then(snapshot => {
+            if(snapshot.exists()) {
+                const val = snapshot.val();
+                messageRef.set([
+                    ...val.filter(id => id !== uid)
+                ])
+            }
+        })
+    }
 
     if(!message) {
         return (
@@ -29,7 +56,9 @@ const UserChat = (props) => {
         )
     }
 
-    const {me, user, user: {uid}} = message;
+    const {me, user} = message;
+    const userData = user.uid === uid ? me : user;
+
     const suggestions = [
         {
             id: 0,
@@ -81,7 +110,7 @@ const UserChat = (props) => {
                 </Grid>
             </Segment>
             <Segment>
-                <Button as={Link} to={`/${USER}/${uid}`}>
+                <Button as={Link} to={`/${USER}/${userData.uid}`}>
                     <Icon name="arrow left" />
                     Wróć
                 </Button>
@@ -109,7 +138,16 @@ const UserChat = (props) => {
                 ) : <></>
             }
             <Segment clearing basic>
-                <ChatForm suggestions={suggestions} type="messages" id={messageId} notify={false} encryptPass={messageId} />
+                <div ref={chatFormRef}>
+                    <ChatForm
+                        suggestions={suggestions}
+                        type="messages"
+                        id={messageId}
+                        notify={false}
+                        encryptPass={messageId}
+                        recipients={[userData.uid]}
+                    />
+                </div>
             </Segment>
         </div>
     );

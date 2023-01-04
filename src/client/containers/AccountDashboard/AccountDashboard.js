@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Button, Divider, Header, Icon, Message, Segment} from "semantic-ui-react";
+import {Button, Divider, Header, Icon, Image, Message, Segment, Tab} from "semantic-ui-react";
 import {analytics} from "../../../firebase/analytics";
 import {bindActionCreators, compose} from "redux";
 import * as actionCreators from "../../actions";
@@ -8,8 +8,10 @@ import {connect} from "react-redux";
 import {withRouter} from "react-router";
 import AccountMessagesList from "../AccountMessagesList/AccountMessagesList";
 import {USERS} from "../../routers";
+import {render} from "@testing-library/react";
+import avatarPlaceholder from "../../../assets/profile_avatar.png";
 
-const AccountMessagesDashboard = (props) => {
+const AccountDashboard = (props) => {
     const {closeSidebar, openSidebar, profile: {messages}, history} = props;
 
     useEffect(() => {
@@ -17,23 +19,49 @@ const AccountMessagesDashboard = (props) => {
         analytics.logEvent('User opened own messages dashboard');
     }, []);
 
+    const dashboardMessages = () => {
+        return (
+            <Tab.Pane clearing>
+                <Segment clearing basic>
+                    <AccountMessagesList messages={messages} />
+                    <Divider/>
+                    <Button color="olive" floated="right" onClick={() => history.push(`/${USERS}`)}>
+                        Użytkownicy <Icon name="arrow right" />
+                    </Button>
+                </Segment>
+            </Tab.Pane>
+        );
+    }
+
+    const dashboardBlockList = () => {
+        return (
+            <Tab.Pane clearing>
+                <Segment clearing basic>
+                    test
+                </Segment>
+            </Tab.Pane>
+        )
+    }
+
+
+    const panes = [
+        { menuItem: 'Wiadomości', render: dashboardMessages },
+        { menuItem: 'Zablokowani', render: dashboardBlockList }
+    ];
+
     return (
-        <div>
+        <>
             <Segment clearing basic>
                 <Button basic onClick={closeSidebar} floated="right" icon="x" />
                 <Header floated="left" size="large">
                     Wiadomości
                 </Header>
             </Segment>
-            <Segment clearing basic>
-                <AccountMessagesList messages={messages} />
-                <Divider/>
-                <Button color="olive" floated="right" onClick={() => history.push(`/${USERS}`)}>
-                    Użytkownicy <Icon name="arrow right" />
-                </Button>
+            <Segment basic>
+                <Tab panes={panes} />
             </Segment>
-        </div>
-    );
+        </>
+    )
 };
 
 const mapDispatchToProps = (dispatch) => {
@@ -53,4 +81,4 @@ const enhance = compose(
     connect(mapStateToProps, mapDispatchToProps)
 );
 
-export default enhance(withRouter(withFirebase(AccountMessagesDashboard)));
+export default enhance(withRouter(withFirebase(AccountDashboard)));

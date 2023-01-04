@@ -58,7 +58,7 @@ const toFloatNumber = (str, val) => {
 
 const App = (props) => {
     const {setClientData, history, firebase, client, openMenu, closeMenu, closePage, menuIsOpen, pageIsOpen, sidebarIsOpen, sidebarIsExpanded,
-        addEvent, removeEvent, events, recent, chat, auth, profile, cookies} = props;
+        addEvent, removeEvent, events, recent, chat, auth, auth: {uid}, profile, cookies} = props;
 
     const [isMobile, setIsMobile] = useState(false);
 
@@ -250,7 +250,7 @@ const App = (props) => {
                                     >
                                         <Dropdown trigger={dropdownTrigger} >
                                             <Dropdown.Menu>
-                                                <Dropdown.Item text="Twój profil"
+                                                <Dropdown.Item text="Profil"
                                                    as={Link}
                                                    to={`/${ACCOUNT}`}
                                                    onClick={closeMenu}
@@ -260,6 +260,7 @@ const App = (props) => {
                                                    to={`/${ACCOUNT_MESSAGES}`}
                                                    onClick={closeMenu}
                                                 />
+                                                <Dropdown.Divider />
                                                 <Dropdown.Item text="Wyloguj"
                                                    as={Link}
                                                    to="/"

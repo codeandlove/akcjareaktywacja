@@ -27,6 +27,6 @@ const DotCounter = (props) => {
             {countMsg}
         </Label>
     ) : <></>;
-};
+}
 
 export default DotCounter;

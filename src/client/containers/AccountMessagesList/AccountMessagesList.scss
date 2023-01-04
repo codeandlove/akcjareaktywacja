@@ -7,8 +7,14 @@
   }
 
   .message-link {
+    position: relative;
     display: flex !important;
     align-items: center;
     padding: 10px 0 !important;
+  }
+
+  .unread-label {
+    top: 1em !important;
+    right: 1em !important;
   }
 }

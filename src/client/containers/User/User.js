@@ -14,8 +14,9 @@ import './User.scss';
 import moment from "moment";
 
 const User = (props) => {
-    const {closeSidebar, openSidebar, firebase, history, user, profile, match: {params: {userId}}, auth: {uid}} = props;
+    const {closeSidebar, openSidebar, firebase, history, user, profile, match: {params: {userId}}, auth: {uid}, blockList} = props;
     const [messageChatId, setMessageChatId] = useState(null);
+    const [isUserBlocked, setIsUserBlocked] = useState(true);
 
     useEffect(() => {
         openSidebar();
@@ -29,7 +30,12 @@ const User = (props) => {
                 setMessageChatId(messageKey);
             }
         }
-    }, [user, profile])
+    }, [user, profile]);
+
+    useEffect(() => {
+        console.log(blockList.indexOf(userId));
+        setIsUserBlocked(blockList.indexOf(userId) > -1);
+    }, [blockList])
 
     if(!user) {
         return (
@@ -53,6 +59,27 @@ const User = (props) => {
         }
 
         history.push(`/${MESSAGE}/${messageChatId}`);
+    }
+
+    const toggleBlockUser = () => {
+        const blockListRef = firebase.database().ref(`block_list/${uid}`);
+
+        blockListRef.once('value').then(snapshot => {
+            let val = [];
+
+            if(snapshot.exists()) {
+                val = snapshot.val();
+
+                if(val.includes(userId)) {
+                    const index = val.indexOf(userId);
+                    blockListRef.set([...val.slice(0, index), ...val.slice(index + 1)]);
+                    return;
+                }
+            }
+
+            blockListRef.set([...val, userId]);
+        });
+
     }
 
     const CreateNewChat = () => {
@@ -114,6 +141,12 @@ const User = (props) => {
             {
                 userId !== uid ? (
                     <Segment clearing basic textAlign="center">
+                        <Button onClick={toggleBlockUser}>
+                            <Icon name="x" />
+                            {
+                                isUserBlocked ? 'Odblokuj' : 'Zablokuj'
+                            }
+                        </Button>
                         <Button primary onClick={openUserChat}>
                             <Icon name="chat" />
                             {
@@ -147,6 +180,10 @@ const enhance = compose(
             {
                 path: `users/${props.match.params.userId}`,
                 storeAs: "user"
+            },
+            {
+                path: 'block_list',
+                storeAs: 'blockList'
             }
         ])
 
@@ -154,7 +191,8 @@ const enhance = compose(
     connect(({ firebase,  firebase: { auth, profile } }) => ({
         user: firebase.data.user,
         auth: auth,
-        profile: profile
+        profile: profile,
+        blockList: !isEmpty(auth) ? firebase.data.blockList ? firebase.data.blockList[auth.uid] : [] : []
     })),
     connect(mapStateToProps, mapDispatchToProps)
 );

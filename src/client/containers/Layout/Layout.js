@@ -37,7 +37,7 @@ import Users from "../Users/Users";
 import Unauthorized from "../Unauthorized/Unauthorized";
 import User from "../User/User";
 import UserChat from "../UserChat/UserChat";
-import AccountMessagesDashboard from "../AccountMessagesDashboard/AccountMessagesDashboard";
+import AccountDashboard from "../AccountDashboard/AccountDashboard";
 
 const Layout = (props) => {
     const {auth, sidebarIsOpen, sidebarIsExpanded, pageIsOpen } = props;
@@ -86,7 +86,7 @@ const Layout = (props) => {
                 <Route path={`/${USERS}`} render={() => isAuthorized(<Users />, `${UNAUTHORIZED}`)} />
                 <Route path={`/${USER}/:userId`} render={(props) => isAuthorized(<User {...props}/>, `${UNAUTHORIZED}`)} />
                 <Route path={`/${MESSAGE}/:messageId`} render={(props) => isAuthorized(<UserChat {...props}/>, `${UNAUTHORIZED}`)} />
-                <Route path={`/${ACCOUNT_MESSAGES}`} render={(props) => isAuthorized(<AccountMessagesDashboard {...props}/>, `${UNAUTHORIZED}`)} />
+                <Route path={`/${ACCOUNT_MESSAGES}`} render={(props) => isAuthorized(<AccountDashboard {...props}/>, `${UNAUTHORIZED}`)} />
                 <Route path={`/${UNAUTHORIZED}`} render={() => <Unauthorized />} />
                 <Route path={`/${LOGIN}`} render={() => <Login /> } />
                 <Route path={`/${REGISTER}`} render={() => <Register /> } />

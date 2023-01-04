@@ -1,5 +1,5 @@
 import React from 'react';
-import {Dimmer, Image, List, Loader, Message} from "semantic-ui-react";
+import {Dimmer, Image, Label, List, Loader, Message} from "semantic-ui-react";
 import UserStatusIndicator from "../../components/UserStatusIndicator/UserStatusIndicator";
 import avatarPlaceholder from "../../../assets/profile_avatar.png";
 import {Link} from "react-router-dom";
@@ -54,17 +54,29 @@ const AccountMessagesList = (props) => {
                         const userData = user.uid === uid ? me : user;
                         const {displayNick} = userData;
                         const lastMessage = chat[Object.keys(chat).pop()];
+                        const unread = Object.keys(chat).map(key => chat[key]).filter(message => {
+                            return !!message.recipients && message.recipients.includes(uid);
+                        });
+
+                        const unreadAmount = !!unread && unread.length;
                         const {message, timestamp} = lastMessage;
 
                         return (
                             <List.Item className="message-link" key={`message-${index}`} as={Link} to={`/${MESSAGE}/${key}`}>
                                 {renderUserDetails(userData)}
-                                <List.Content>
+                                <List.Content className="message-link-content">
                                     <List.Header>
                                         {displayNick}<br />
                                         <small>{timestampToHumanTime(timestamp)}</small>
                                     </List.Header>
                                     <List.Description>
+                                        {
+                                            unreadAmount ? (
+                                                <Label className="unread-label" color="green" size="mini" floating circular>
+                                                    {unreadAmount}
+                                                </Label>
+                                            ) : <></>
+                                        }
                                         {decryptMessage(message, key)}
                                     </List.Description>
                                 </List.Content>
