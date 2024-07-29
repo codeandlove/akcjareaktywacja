@@ -1,4 +1,4 @@
-export const SLACK_NEW_VISITOR_HOOK = 'https://hooks.slack.com/services/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';
+export const SLACK_NEW_VISITOR_HOOK = '';
 
 export const CATEGORIES = [
     {
